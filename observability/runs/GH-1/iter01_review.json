@@ -1,0 +1,10 @@
+{
+  "stage": "review",
+  "outcome": "success",
+  "summary": "All 7 acceptance criteria verified against code and tests (13 passed in test stage). Opportunity model, pure URL normalizer, and stdlib-sqlite3 store with ON CONFLICT dedup are correct; no injection/secrets; no user-facing surface (visual N/A). Minor non-blocking notes: last_seen-refresh test uses >= and the conn is never closed. Clean first solve of the model+store class \u2014 candidate for a skills/ entry.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 10348,
+  "exit_code": 0,
+  "stderr_head": ""
+}

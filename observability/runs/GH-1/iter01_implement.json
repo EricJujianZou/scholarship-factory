@@ -1,0 +1,10 @@
+{
+  "stage": "implement",
+  "outcome": "success",
+  "summary": "Bootstrapped uv-managed scholarship_factory package (Provenance enum, Opportunity model, normalize_apply_url, OpportunityStore with ON CONFLICT dedup); all 13 tests pass; tree committed clean.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 8808,
+  "exit_code": 0,
+  "stderr_head": ""
+}

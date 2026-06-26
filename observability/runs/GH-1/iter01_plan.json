@@ -1,0 +1,10 @@
+{
+  "stage": "plan",
+  "outcome": "success",
+  "summary": "Plan to bootstrap uv/pydantic-v2 scholarship_factory package: Provenance enum + Opportunity model, pure URL normalizer, stdlib sqlite3 store with ON CONFLICT dedup on normalized_apply_url, and three test files.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 10546,
+  "exit_code": 0,
+  "stderr_head": ""
+}
