@@ -1,10 +1,10 @@
 {
   "stage": "document",
-  "outcome": null,
-  "summary": null,
-  "parse_error": "no status block found in stage output",
+  "outcome": "success",
+  "summary": "docs/changes/GH-1.md already committed and accurate (no source changes since); committed remaining observability/state bookkeeping to satisfy clean-tree.",
+  "parse_error": null,
   "timed_out": false,
-  "tokens_used": 4225,
+  "tokens_used": 769,
   "exit_code": 0,
   "stderr_head": ""
 }
