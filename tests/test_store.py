@@ -2,8 +2,8 @@ from scholarship_factory import Opportunity, OpportunityStore
 
 
 def make_opp(apply_url="https://example.com/apply", **kwargs):
+    kwargs.setdefault("title", "Test Scholarship")
     return Opportunity(
-        title="Test Scholarship",
         apply_url=apply_url,
         source_url=apply_url,
         **kwargs,
