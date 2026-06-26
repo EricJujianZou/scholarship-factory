@@ -1,0 +1,1 @@
+Working tree is now clean (commit `ec9d3d7`). The document stage's output stands as before — `docs/changes/GH-1.md` is committed and the gate's checklist is satisfied.

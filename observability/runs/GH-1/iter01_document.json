@@ -1,0 +1,10 @@
+{
+  "stage": "document",
+  "outcome": null,
+  "summary": null,
+  "parse_error": "no status block found in stage output",
+  "timed_out": false,
+  "tokens_used": 4225,
+  "exit_code": 0,
+  "stderr_head": ""
+}
