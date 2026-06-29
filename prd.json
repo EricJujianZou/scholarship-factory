@@ -36,6 +36,40 @@
       "skill_match": null,
       "passes": true,
       "status": "done"
+    },
+    {
+      "id": "GH-6",
+      "type": "feat",
+      "priority": 5,
+      "title": "Extract \u2014 JSON-LD path: parse opportunity-bearing schema deterministically",
+      "description": "The deterministic structured-data path. Distilled from `REPO_CONTENT.md` -> *Settled design \u2014 Session 2 (Extract)*; full draft in `docs/s2-extract-tickets.md`.\n\n**Blocked on #4 (Ticket A \u2014 source-span fields). Independent of Ticket B.** Add the `adw` label once A is merged.\n\nParse `<script type=\"application/ld+json\">` for **opportunity-bearing** schema and map to `Opportunity` \u2014 no LLM, no tokens. Composes with the LLM path: a JSON-LD page yields clean dates + cost while the LLM still supplies fields the markup omits (the lablab fixture: `Event` gives dates + free entry cost; the prize is only in prose).\n\n## Locked decisions (honor; see REPO_CONTENT.md)\n- Only treat **opportunity-bearing** `@type`s as facts (`Event`, `JobPosting`, `Offer`); **ignore** site chrome (`WebSite`, `Organization`, `BreadcrumbList`, `CollectionPage`). \"Has JSON-LD\" != \"has your fields\" \u2014 gate on `@type`.\n- **Field mapping needs judgment, not a 1:1 copy**: an `Event`'s `startDate`/`endDate` are event dates, NOT the application deadline; `Offer.price`/`priceCurrency` is the **entry cost**, not the prize. Map conservatively; leave a field `null` rather than mis-assign.\n- Facts from markup are `provenance=\"quoted\"`, with the JSON-LD value as the source span. JSON-LD is a *hint* (often incomplete/stale) \u2014 same no-fabrication gate; missing field -> `null`/`none`.\n\n## Scope\n1. Extract and JSON-parse all `application/ld+json` blocks from raw HTML.\n2. Select opportunity-bearing objects by `@type`; map fields to `Opportunity` (title, source/apply url, cost from `Offer`, etc.) with quoted provenance + source spans; leave unmapped/absent fields `null`.\n3. Return 0..N records (zero when only chrome schema is present).",
+      "acceptance_criteria": [
+        "`tests/fixtures/lablab_executorch.html`: the `Event` block yields one record: `title=\"ExecuTorch Hackathon\"`, `cost` mapped from `Offer` (free/`$0`) with `provenance=\"quoted\"` + source span; `startDate`/`endDate` are NOT written into `deadline`; the prize is NOT invented (absent -> `null`, supplied by the LLM path).",
+        "A page whose only JSON-LD is chrome (e.g. the oppsforyouth listing's site schema) yields **zero** opportunities from this path.",
+        "Missing/`null` schema fields map to `null` with `provenance=\"none\"` \u2014 never guessed.",
+        "Tests run offline against saved fixtures; `uv run pytest -q` green."
+      ],
+      "skill_match": null,
+      "passes": false,
+      "status": "open"
+    },
+    {
+      "id": "GH-5",
+      "type": "feat",
+      "priority": 5,
+      "title": "Extract \u2014 LLM contract: one fetched page -> 0..N honest Opportunities",
+      "description": "The Extract spine. Distilled from `REPO_CONTENT.md` -> *Settled design \u2014 Session 2 (Extract)*; full draft in `docs/s2-extract-tickets.md`.\n\n**Blocked on #4 (Ticket A \u2014 source-span fields).** Build/merge A first; this builds on a default branch that has A's fields. Add the `adw` label once A is merged.\n\nGiven the **already-fetched raw content of one source** (raw HTML + its `source_url`), produce **zero-or-more** `Opportunity` records whose facts are honest. The LLM lives inside this box; no-fabrication + provenance are enforced here or nowhere. Fetching, link-traversal, and real dedup are out (S3/S4/S5).\n\n## Locked decisions (honor; see REPO_CONTENT.md)\n- **0..N**: a detail page -> one record; a listing -> many **thin** items (title + url + whatever's on the listing). Output distinguishes \"one detail\" from \"a list\" via metadata.\n- **Whole-record honesty**: never invent a whole opportunity; never merge two real ones.\n- **Pipeline**: deterministic pre-clean (strip tags/boilerplate, but **preserve** fact-bearing structure \u2014 `<time>`, JSON-LD) -> LLM for judgment (is-this-an-opportunity, segment, classify, provenance).\n- **Quoted-only**: each fact stored as verbatim text with `provenance in {quoted, none}` and its **source span** (Ticket A field); `derived` is NOT emitted here (S6's job). Emit `source_observed_date` when the page states one.\n- **Runtime LLM = Claude API** via the official Anthropic SDK (`anthropic`), model `claude-opus-4-8` (or `claude-sonnet-4-6`); structured output for the record shape.\n\n## Scope\n1. Pre-clean: raw HTML -> reduced text, preserving `<time>`/JSON-LD/fact-bearing nodes.\n2. LLM extraction (Anthropic SDK, structured output) -> 0..N records + per-fact provenance + source spans, with the no-fabrication / whole-record-honesty contract in the prompt.\n3. A typed result distinguishing a single detail record from a list of thin items.",
+      "acceptance_criteria": [
+        "`tests/fixtures/uwaterloo_grants.html` (listing, facts inline) -> expected opportunities; each present fact carries `provenance=\"quoted\"` + a source span that is a literal substring of the page; the multi-deadline case (\"June 1st, and October 1st\") is captured, not collapsed.",
+        "`tests/fixtures/oppsforyouth_grants_listing.html` -> **N thin items** (title + url; deadline `null`/`none` because not on the listing), flagged as a *list*, with no fabricated deadlines.",
+        "`tests/fixtures/oppsforyouth_detail.html` -> **one** record flagged as a *detail* (WE-EMPOWER II Grant; `reward` captures `Up to EUR 7,500`).",
+        "A fact absent from the page is `null` with `provenance=\"none\"` and a `null` source span \u2014 never invented; no opportunity absent from the page is emitted.",
+        "**Deterministic + offline tests**: the Anthropic SDK call is stubbed/recorded (saved response per fixture); tests assert the parse -> `Opportunity` mapping, provenance, source spans, and 0..N segmentation with no network.",
+        "`uv run pytest -q` green."
+      ],
+      "skill_match": null,
+      "passes": false,
+      "status": "in_progress"
     }
   ]
 }
