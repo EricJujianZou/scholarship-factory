@@ -1,0 +1,10 @@
+{
+  "stage": "test",
+  "outcome": "success",
+  "summary": "16 tests passed; all 5 acceptance criteria verified against code and tests. Committed outstanding state.json and observability logs to satisfy the clean-tree gate.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 2436,
+  "exit_code": 0,
+  "stderr_head": ""
+}
