@@ -1,0 +1,10 @@
+{
+  "stage": "test",
+  "outcome": "success",
+  "summary": "Ran full suite (21 passed) and verified all 6 acceptance criteria against actual test assertions and extract.py logic; committed run artifacts (564afe0).",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 2624,
+  "exit_code": 0,
+  "stderr_head": ""
+}
