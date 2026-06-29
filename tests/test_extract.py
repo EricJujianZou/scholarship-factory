@@ -24,7 +24,9 @@ class _Message:
 
 class StubClient:
     def __init__(self, recorded_name: str):
-        self._input = json.loads((RECORDED / f"{recorded_name}.json").read_text())
+        self._input = json.loads(
+            (RECORDED / f"{recorded_name}.json").read_text(encoding="utf-8")
+        )
         self.messages = self
 
     def create(self, **kwargs):
