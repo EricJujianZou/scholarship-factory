@@ -1,0 +1,10 @@
+{
+  "stage": "plan",
+  "outcome": "success",
+  "summary": "Plan to add nullable per-fact source-span fields (deadline_source/reward_source/cost_source) + source_observed_date to Opportunity with a model_validator enforcing evidence for non-none provenance, extend the store's _COLUMNS and schema, and cover with model + store round-trip tests.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 13666,
+  "exit_code": 0,
+  "stderr_head": ""
+}

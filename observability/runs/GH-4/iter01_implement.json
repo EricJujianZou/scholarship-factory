@@ -1,0 +1,10 @@
+{
+  "stage": "implement",
+  "outcome": "success",
+  "summary": "Implemented source-span fields + validator, store schema updates, and tests; committed remaining state.json and observability logs to satisfy the clean-tree gate.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 4595,
+  "exit_code": 0,
+  "stderr_head": ""
+}

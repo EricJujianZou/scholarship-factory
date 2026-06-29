@@ -35,3 +35,27 @@ def test_invalid_provenance_raises():
             source_url="https://example.com/apply",
             deadline_provenance="confident",
         )
+
+
+def test_quoted_deadline_with_source_is_valid():
+    opp = Opportunity(
+        title="Test Scholarship",
+        apply_url="https://example.com/apply",
+        source_url="https://example.com/apply",
+        deadline="2026-07-01",
+        deadline_provenance="quoted",
+        deadline_source="Applications close July 1, 2026",
+    )
+    assert opp.deadline_source == "Applications close July 1, 2026"
+
+
+def test_quoted_deadline_without_source_raises():
+    with pytest.raises(ValidationError):
+        Opportunity(
+            title="Test Scholarship",
+            apply_url="https://example.com/apply",
+            source_url="https://example.com/apply",
+            deadline="2026-07-01",
+            deadline_provenance="quoted",
+            deadline_source=None,
+        )
