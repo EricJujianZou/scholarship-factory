@@ -1,9 +1,9 @@
 {
-  "ticket_id": "GH-1",
-  "stage": "document",
+  "ticket_id": "GH-4",
+  "stage": "implement",
   "iteration": 1,
-  "branch": "adw/GH-1",
+  "branch": "adw/GH-4",
   "last_failure": null,
-  "budget_used_tokens": 37766,
+  "budget_used_tokens": 13666,
   "cooldown_until": null
 }
