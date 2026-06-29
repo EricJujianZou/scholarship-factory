@@ -1,0 +1,10 @@
+{
+  "stage": "plan",
+  "outcome": "success",
+  "summary": "Plan for GH-5 LLM extract spine: stdlib pre-clean, injectable Anthropic tool-use call, LLM\u2192Opportunity mapping with substring-verified quoted provenance, typed detail/list result, and offline recorded-response tests.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 29124,
+  "exit_code": 0,
+  "stderr_head": ""
+}
