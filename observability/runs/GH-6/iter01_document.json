@@ -1,0 +1,10 @@
+{
+  "stage": "document",
+  "outcome": "success",
+  "summary": "docs/changes/GH-6.md committed; remaining run artifacts and state.json committed in a follow-up commit. Working tree clean.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 3676,
+  "exit_code": 0,
+  "stderr_head": ""
+}

@@ -1,4 +1,5 @@
 from .extract import ExtractionResult, PageKind, extract
+from .jsonld import extract_jsonld
 from .models import Opportunity, Provenance
 from .store import OpportunityStore
 from .urls import normalize_apply_url
@@ -9,6 +10,7 @@ __all__ = [
     "OpportunityStore",
     "normalize_apply_url",
     "extract",
+    "extract_jsonld",
     "ExtractionResult",
     "PageKind",
 ]

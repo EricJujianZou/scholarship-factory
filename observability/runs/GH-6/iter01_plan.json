@@ -1,0 +1,10 @@
+{
+  "stage": "plan",
+  "outcome": "success",
+  "summary": "Plan for GH-6: deterministic JSON-LD extract path (new scholarship_factory/jsonld.py + export + tests), stdlib-only, gating on opportunity-bearing @types, mapping cost from Offer with quoted provenance while leaving deadline/reward null.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 32217,
+  "exit_code": 0,
+  "stderr_head": ""
+}

@@ -1,0 +1,10 @@
+{
+  "stage": "review",
+  "outcome": "success",
+  "summary": "All four acceptance criteria verified against the actual fixture JSON-LD: lablab Event yields exactly one record (nested Offer not double-counted) with quoted '0 USD' cost and null deadline/reward; both chrome-only oppsforyouth fixtures yield zero; missing fields stay null/none, enforced by the model's source-required validator. Stdlib-only, offline tests, clean conservative mapper. Clean first solve of a 'deterministic structured-data extract' class \u2014 candidate for a skills/ entry.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 16537,
+  "exit_code": 0,
+  "stderr_head": ""
+}

@@ -1,0 +1,10 @@
+{
+  "stage": "test",
+  "outcome": "success",
+  "summary": "24 passed (3 new JSON-LD tests); all acceptance criteria verified directly against fixtures. Committed run artifacts.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 3810,
+  "exit_code": 0,
+  "stderr_head": ""
+}

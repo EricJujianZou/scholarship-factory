@@ -1,0 +1,10 @@
+{
+  "stage": "implement",
+  "outcome": "success",
+  "summary": "Added stdlib-only scholarship_factory/jsonld.py (extract_jsonld), exported it from __init__.py, added tests/test_jsonld.py (24 tests pass), and committed run artifacts/state.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 7393,
+  "exit_code": 0,
+  "stderr_head": ""
+}
