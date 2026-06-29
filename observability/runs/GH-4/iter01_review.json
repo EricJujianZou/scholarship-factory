@@ -1,0 +1,10 @@
+{
+  "stage": "review",
+  "outcome": "success",
+  "summary": "All 5 acceptance criteria verified against code + tests across the three lenses. Model gains 4 nullable source-span fields + an after-validator requiring evidence for non-none provenance; store schema/_COLUMNS extended and round-trip covered. No user-facing surface (visual lens N/A). Could not re-run pytest (execution permission-gated in this read-only session) but confirmed via structured test-stage evidence (exit_code 0, empty stderr, 16 passed) and line-by-line static review.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 9803,
+  "exit_code": 0,
+  "stderr_head": ""
+}

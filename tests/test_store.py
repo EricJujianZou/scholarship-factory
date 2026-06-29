@@ -65,3 +65,28 @@ def test_last_seen_refresh_on_reinsert(tmp_path):
     assert first.id == second.id
     assert first.first_seen == second.first_seen
     assert second.last_seen >= first.last_seen
+
+
+def test_source_span_fields_round_trip(tmp_path):
+    store = OpportunityStore(str(tmp_path / "test.db"))
+    opp = make_opp(
+        deadline="2026-07-01",
+        deadline_provenance="quoted",
+        deadline_source="Applications close July 1, 2026",
+        cost="$50",
+        cost_provenance="quoted",
+        cost_source="A $50 application fee applies",
+        source_observed_date="2026-06-01",
+    )
+    inserted = store.insert(opp)
+
+    fetched = store.get(inserted.id)
+    assert fetched.deadline_source == "Applications close July 1, 2026"
+    assert fetched.cost_source == "A $50 application fee applies"
+    assert fetched.source_observed_date == "2026-06-01"
+    assert fetched.reward_source is None
+
+    fetched.cost_source = "Updated cost source"
+    updated = store.update(fetched)
+    assert updated.cost_source == "Updated cost source"
+    assert store.get(inserted.id).cost_source == "Updated cost source"
