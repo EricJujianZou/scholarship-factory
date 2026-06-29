@@ -1,0 +1,10 @@
+{
+  "stage": "review",
+  "outcome": "success",
+  "summary": "Extract spine is correct and honest: stdlib pre-clean preserves fact-bearing text, extract() enforces quoted-only provenance by substring-verifying every source span (demoting unverifiable facts to none), and the typed detail/list result with 0..N segmentation is fully exercised by 21 offline recorded-response tests. All 6 ACs verified with evidence; anthropic is lazy-imported and gated behind the 'llm' extra so default tests stay offline. No user-facing surface (visual lens N/A). Candidate for a 'recorded-LLM-extraction' skill in skills/.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 15798,
+  "exit_code": 0,
+  "stderr_head": ""
+}

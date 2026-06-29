@@ -1,0 +1,10 @@
+{
+  "stage": "implement",
+  "outcome": "success",
+  "summary": "Implemented the Extract spine: stdlib clean.py pre-clean, extract.py with injectable Anthropic tool-use client, substring-verified quoted provenance mapping, typed detail/list result, and 3 offline recorded-response fixtures with 21 passing tests.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 19996,
+  "exit_code": 0,
+  "stderr_head": ""
+}

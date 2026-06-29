@@ -1,0 +1,50 @@
+{
+  "kind": "list",
+  "items": [
+    {
+      "title": "Graham Seed Fund",
+      "apply_url": "https://grants.uwaterloo.ca/index.php/gsf",
+      "deadline": null,
+      "deadline_source": null,
+      "reward": null,
+      "reward_source": null,
+      "cost": null,
+      "cost_source": null,
+      "source_observed_date": null,
+      "organization": "University of Waterloo",
+      "requirements": null,
+      "type": null,
+      "description": "The Graham Seed Fund (GSF) supports research at the University of Waterloo that addresses critical health care challenges through interdisciplinary collaboration with clinicians and health providers."
+    },
+    {
+      "title": "Joint CityUHK–UW Seed Fund",
+      "apply_url": "https://grants.uwaterloo.ca/index.php/chkwsf",
+      "deadline": null,
+      "deadline_source": null,
+      "reward": null,
+      "reward_source": null,
+      "cost": null,
+      "cost_source": null,
+      "source_observed_date": null,
+      "organization": "University of Waterloo",
+      "requirements": null,
+      "type": null,
+      "description": "The Seed Fund aims to foster collaborative research between City University of Hong Kong (CityUHK) and the University of Waterloo (UW)."
+    },
+    {
+      "title": "LITE Seed Grant",
+      "apply_url": "https://grants.uwaterloo.ca/index.php/lite-seed",
+      "deadline": "June 1st, and October 1st",
+      "deadline_source": "Application Deadline: (2 annually): June 1st, and October 1st",
+      "reward": "Up to $7,500",
+      "reward_source": "Amount: Up to $7,500",
+      "cost": null,
+      "cost_source": null,
+      "source_observed_date": null,
+      "organization": "University of Waterloo",
+      "requirements": null,
+      "type": null,
+      "description": "LITE Seed Grants can help you investigate small-scale teaching and learning research projects and attend activities to develop your instructional skills."
+    }
+  ]
+}
