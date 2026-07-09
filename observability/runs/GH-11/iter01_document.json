@@ -1,0 +1,10 @@
+{
+  "stage": "document",
+  "outcome": "success",
+  "summary": "Wrote and committed docs/changes/GH-11.md; committed remaining state/observability artifacts to satisfy the clean-tree check.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 6778,
+  "exit_code": 0,
+  "stderr_head": ""
+}
