@@ -1,4 +1,4 @@
-Committed the run artifacts and state; working tree is now clean.
+Working tree is clean and the commit is local.
 
 ```json
 {
@@ -6,9 +6,9 @@ Committed the run artifacts and state; working tree is now clean.
   "ticket_id": "GH-11",
   "outcome": "success",
   "exit_signal": false,
-  "summary": "docs/changes/GH-11.md already existed and was verified accurate; committed pending run-artifact/state updates to satisfy the clean-tree check.",
+  "summary": "docs/changes/GH-11.md was already accurate; committed the modified run artifacts to satisfy the clean-tree requirement.",
   "failure_reason": null,
-  "files_changed": 0,
+  "files_changed": 5,
   "suggested_tools": [],
   "system_repair_suggested": false
 }

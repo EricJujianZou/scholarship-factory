@@ -1,10 +1,10 @@
 {
   "stage": "document",
   "outcome": "success",
-  "summary": "docs/changes/GH-11.md already existed and was verified accurate; committed pending run-artifact/state updates to satisfy the clean-tree check.",
+  "summary": "docs/changes/GH-11.md was already accurate; committed the modified run artifacts to satisfy the clean-tree requirement.",
   "parse_error": null,
   "timed_out": false,
-  "tokens_used": 6027,
+  "tokens_used": 5104,
   "exit_code": 0,
   "stderr_head": ""
 }
