@@ -1,0 +1,10 @@
+{
+  "stage": "document",
+  "outcome": "success",
+  "summary": "Committed docs/changes/GH-12.md plus the remaining run artifacts and state.json that the stop checklist flagged.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 6421,
+  "exit_code": 0,
+  "stderr_head": ""
+}
