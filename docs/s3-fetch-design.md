@@ -68,21 +68,31 @@ building the adapters ticket.
 
 ## Ticket program (the ~10-ticket map)
 
-**Filed tonight — independent, branch from current `main` (build overnight,
-one/hour):**
+**DONE — all six merged to `main` (2026-07-09):**
 
-- **GH-11** — `FetchResult` contract (fetch foundation; unblocks the fetch chain).
-- **GH-12** — Parse layer: typed deadline **dates** (deterministic S6; independent).
-- **GH-13** — Parse layer: typed reward/cost **money** (deterministic S6; independent).
-- **GH-14** — Applicant **profile** model + store (S6 foundation; independent).
-  UX call made: *minimal profile + tags* (region / education_level / field / tags
-  / bio). Revisitable.
-- **GH-15** — Seed-list model + TOML loader (S3 groundwork; adapters consume it).
-- **GH-16** — Store-inspection dev CLI (read-only over the existing store).
+- **GH-11** — `FetchResult` contract (`fetch.py`). *Fetch foundation.*
+- **GH-12** — Parse layer: typed deadline **dates** (`parse_dates.py`).
+- **GH-13** — Parse layer: typed reward/cost **money** (`parse_money.py`).
+- **GH-14** — Applicant **profile** model + store (`profile.py`). UX call:
+  *minimal profile + tags* (region / education_level / field / tags / bio).
+- **GH-15** — Seed-list model + TOML loader (`seeds.py`; adapters consume it).
+- **GH-16** — Store-inspection dev CLI (`cli.py`, `sf` script).
+
+GH-11/12 built by the harness overnight; GH-13–16 built **manually** after the
+harness stalled (it re-ran completed-but-unmerged tickets instead of advancing —
+root-caused + filed as engine `system-repair` **agentic-sdlc #92** (advance
+without merge) and **#93** (don't commit per-run `state.json` / prd-shard merge
+conflicts)). The `\ADW\ADW-scholarship-factory` task is **disabled** pending
+those fixes — re-enabling before #92 lands will just churn again.
 
 *Considered and declined (owner held the pipeline-first line):* FastAPI read
 endpoints + a dashboard UI over the existing schema — both front-run the locked
 "no visible product until S7" decision, so deferred.
+
+**Next when design resumes:** the fetch chain proper — static fetcher (httpx +
+UA + retry) → per-host politeness → source adapters → cache — all cut from the
+now-merged `FetchResult` contract. Pick up the Socratic loop at the open problem
+above.
 
 **Queued — file only after their parent merges (dependency = merge cadence;
 do NOT file early or the hourly build builds them against a stale `main`):**
