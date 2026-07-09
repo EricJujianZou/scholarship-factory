@@ -1,5 +1,6 @@
 from datetime import date, datetime, time
 
+import dateparser
 import dateparser.search
 
 from .models import Opportunity, Provenance
