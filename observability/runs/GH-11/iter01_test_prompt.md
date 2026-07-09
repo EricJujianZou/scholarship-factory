@@ -167,8 +167,11 @@ Use the project's own toolchain — infer it from its manifest/README
 ## Prior stage outputs this run
 
 Read the ones relevant to your stage (the latest plan output is your work order):
+- C:/Users/zouju/Coding Projects/scholarship-factory/observability/runs/GH-11/iter01_document_output.md
 - C:/Users/zouju/Coding Projects/scholarship-factory/observability/runs/GH-11/iter01_implement_output.md
 - C:/Users/zouju/Coding Projects/scholarship-factory/observability/runs/GH-11/iter01_plan_output.md
+- C:/Users/zouju/Coding Projects/scholarship-factory/observability/runs/GH-11/iter01_review_output.md
+- C:/Users/zouju/Coding Projects/scholarship-factory/observability/runs/GH-11/iter01_test_output.md
 
 ## File manifest (from the plan)
 
@@ -176,12 +179,12 @@ Open only these, do not survey the codebase; if the manifest is wrong or insuffi
 
 Edit:
 - scholarship_factory/fetch.py
-- scholarship_factory/__init__.py:1
+- scholarship_factory/__init__.py:2
 - tests/test_fetch.py
 
 Read:
 - scholarship_factory/models.py:1
-- scholarship_factory/extract.py:125
-- scholarship_factory/store.py:78
+- scholarship_factory/extract.py
+- scholarship_factory/store.py
 - tests/test_models.py
 
