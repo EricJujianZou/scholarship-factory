@@ -1,4 +1,5 @@
 from .extract import ExtractionResult, PageKind, extract
+from .fetch import FetchResult
 from .jsonld import extract_jsonld
 from .models import Opportunity, Provenance
 from .store import OpportunityStore
@@ -13,4 +14,5 @@ __all__ = [
     "extract_jsonld",
     "ExtractionResult",
     "PageKind",
+    "FetchResult",
 ]

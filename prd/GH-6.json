@@ -1,0 +1,16 @@
+{
+  "id": "GH-6",
+  "type": "feat",
+  "priority": 5,
+  "title": "Extract \u2014 JSON-LD path: parse opportunity-bearing schema deterministically",
+  "description": "The deterministic structured-data path. Distilled from `REPO_CONTENT.md` -> *Settled design \u2014 Session 2 (Extract)*; full draft in `docs/s2-extract-tickets.md`.\n\n**Blocked on #4 (Ticket A \u2014 source-span fields). Independent of Ticket B.** Add the `adw` label once A is merged.\n\nParse `<script type=\"application/ld+json\">` for **opportunity-bearing** schema and map to `Opportunity` \u2014 no LLM, no tokens. Composes with the LLM path: a JSON-LD page yields clean dates + cost while the LLM still supplies fields the markup omits (the lablab fixture: `Event` gives dates + free entry cost; the prize is only in prose).\n\n## Locked decisions (honor; see REPO_CONTENT.md)\n- Only treat **opportunity-bearing** `@type`s as facts (`Event`, `JobPosting`, `Offer`); **ignore** site chrome (`WebSite`, `Organization`, `BreadcrumbList`, `CollectionPage`). \"Has JSON-LD\" != \"has your fields\" \u2014 gate on `@type`.\n- **Field mapping needs judgment, not a 1:1 copy**: an `Event`'s `startDate`/`endDate` are event dates, NOT the application deadline; `Offer.price`/`priceCurrency` is the **entry cost**, not the prize. Map conservatively; leave a field `null` rather than mis-assign.\n- Facts from markup are `provenance=\"quoted\"`, with the JSON-LD value as the source span. JSON-LD is a *hint* (often incomplete/stale) \u2014 same no-fabrication gate; missing field -> `null`/`none`.\n\n## Scope\n1. Extract and JSON-parse all `application/ld+json` blocks from raw HTML.\n2. Select opportunity-bearing objects by `@type`; map fields to `Opportunity` (title, source/apply url, cost from `Offer`, etc.) with quoted provenance + source spans; leave unmapped/absent fields `null`.\n3. Return 0..N records (zero when only chrome schema is present).",
+  "acceptance_criteria": [
+    "`tests/fixtures/lablab_executorch.html`: the `Event` block yields one record: `title=\"ExecuTorch Hackathon\"`, `cost` mapped from `Offer` (free/`$0`) with `provenance=\"quoted\"` + source span; `startDate`/`endDate` are NOT written into `deadline`; the prize is NOT invented (absent -> `null`, supplied by the LLM path).",
+    "A page whose only JSON-LD is chrome (e.g. the oppsforyouth listing's site schema) yields **zero** opportunities from this path.",
+    "Missing/`null` schema fields map to `null` with `provenance=\"none\"` \u2014 never guessed.",
+    "Tests run offline against saved fixtures; `uv run pytest -q` green."
+  ],
+  "skill_match": null,
+  "passes": true,
+  "status": "done"
+}

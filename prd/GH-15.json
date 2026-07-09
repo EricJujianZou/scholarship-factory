@@ -1,0 +1,16 @@
+{
+  "id": "GH-15",
+  "type": "feat",
+  "priority": 5,
+  "title": "Seed-list model + TOML loader (S3 fetch groundwork)",
+  "description": "Session 3 (Fetch) groundwork: the **seed-list model + config loader**. This ticket builds the `Seed` data model and a loader **only** \u2014 **no fetching, no adapters, no network**. Source adapters (a later ticket, after the fetch contract merges) consume `Seed`s and expand them into concrete fetch targets; they are out of scope here.\n\n## Context\n\nThe owner provides a **seed list of sources** (`REPO_CONTENT.md` -> user journey: \"the owner provides a seed list of sources and an applicant profile\"). Session 3 turns that list into fetch targets. This ticket is the typed representation of a seed + a loader from a config file \u2014 the input end of the fetch pipeline, independent of the fetcher itself.\n\n## Locked decisions (honor; see `REPO_CONTENT.md`)\n\n- Seed source types named in the product: **Instagram / X accounts, subreddits, Devpost, scholarship platforms** (plain URLs). The **IG/X auth-walled types are deferred** to their own later session, **but the model must still represent them** (a `type` enum covering all of them) \u2014 only the *adapters* (later) decide which types they actually fetch. Represent all; fetch a subset.\n- **Single-user; no auth.** Keep the model minimal \u2014 no per-seed credentials/schedule in v1.\n\n## Scope\n\n1. A `Seed` pydantic v2 model:\n   - `type` \u2014 enum covering `url`, `reddit`, `devpost`, `instagram`, `x` (extendable); unknown type rejected.\n   - `value` \u2014 the handle / subreddit / URL for that type.\n   - `enabled: bool = True`, and an optional `label`/`note` (nullable).\n2. A loader that reads a seed list from a **TOML** config file (stdlib `tomllib`, Python 3.11+ \u2014 no new dep) into `list[Seed]`, validating each entry (malformed entry -> clear error; empty file -> empty list).\n3. **No fetching, no adapter logic, no network.**",
+  "acceptance_criteria": [
+    "`Seed` exists with `type` (from the defined enum incl. the auth-walled types), `value`, `enabled` (default `True`), optional `label`; constructing a valid seed works and an unknown `type` is rejected.",
+    "The loader parses a sample TOML config into `list[Seed]`; a malformed entry raises a clear error; an empty config yields an empty list.",
+    "Unit tests cover: model construction (valid + invalid type), loader round-trip from a **temporary** config file, and the empty + malformed cases. No network.",
+    "`uv run pytest -q` green."
+  ],
+  "skill_match": null,
+  "passes": false,
+  "status": "open"
+}

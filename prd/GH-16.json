@@ -1,0 +1,16 @@
+{
+  "id": "GH-16",
+  "type": "feat",
+  "priority": 5,
+  "title": "Store-inspection dev CLI (list/show opportunities)",
+  "description": "A small **read-only dev CLI to inspect the opportunity store**. Because the roadmap is pipeline-first (no UI until ~Session 7), there is currently no way to *see* what's in the store; this CLI lets the owner sanity-check the pipeline. **Read-only over the existing store (GH-1/GH-4) \u2014 no new schema, no mutation, no network.**\n\n## Context\n\nThe `Opportunity` model + SQLite store already exist (GH-1/GH-4) with `list` and `get-by-id`. This ticket adds a thin CLI over them so the owner can list and inspect stored opportunities \u2014 including provenance + source spans \u2014 before any dashboard exists.\n\n## Locked decisions (honor; see `REPO_CONTENT.md`)\n\n- Reads the **existing** store; do **not** add or change the schema. Single-user.\n- **Configurable db path** (mirror the store's existing pattern); tests use a **temporary** db, never a committed db file.\n- No fabrication concerns here (read-only), but the CLI must show provenance/source-span fields honestly so the owner can audit them.\n\n## Scope\n\n1. A CLI (console entry point `sf = \"scholarship_factory.cli:main\"` in `pyproject.toml`; `python -m scholarship_factory` also acceptable) with:\n   - `list` \u2014 list stored opportunities (id, title, deadline, status, owner); optional `--status` filter.\n   - `show <id>` \u2014 print one opportunity's full fields **including** the provenance enums and source spans.\n2. Uses the existing store's `list` / `get`. db path configurable (flag or env var), consistent with the store.\n3. **No mutation, no network, no new model.**",
+  "acceptance_criteria": [
+    "`list` prints stored opportunities and supports an optional `--status` filter; an empty store prints an empty result gracefully (exit 0).",
+    "`show <id>` prints the full record **including** provenance fields + source spans; an unknown id prints a clear \"not found\" message and exits non-zero.",
+    "db path is configurable; tests seed a **temporary** db via the store and invoke the CLI in-process (no network, no real db file).",
+    "Unit tests cover `list` (incl. filter + empty) and `show` (found + not-found). `uv run pytest -q` green."
+  ],
+  "skill_match": null,
+  "passes": false,
+  "status": "open"
+}

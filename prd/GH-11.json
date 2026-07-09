@@ -1,0 +1,18 @@
+{
+  "id": "GH-11",
+  "type": "feat",
+  "priority": 5,
+  "title": "Fetch \u2014 FetchResult contract: the typed Fetch\u2192Extract seam",
+  "description": "The typed hand-off object between **Fetch (Session 3)** and **Extract (Session 2)**. Foundation slice: this ticket defines the `FetchResult` contract **only** \u2014 no fetching, no adapters, no network. It is the S3 analogue of GH-1/GH-4: a shared data shape the rest of the fetch chain (static fetcher, politeness, adapters, cache) depends on, so it merges first and the next wave branches from it.\n\n## Context\n\nExtract (S2) already consumes \"the already-fetched raw content of one source (raw HTML + its `source_url`)\". Session 3 produces exactly that. `FetchResult` is the seam: Fetch fills it, Extract reads it. Fetching logic and source adapters are **separate, later tickets** \u2014 do not build them here.\n\n## Locked decisions (honor; see `REPO_CONTENT.md`)\n\n- **`source_url` (where facts were read) is distinct from `apply_url` (where you apply).** Fetch produces `source_url`. Keep the **final URL after redirects** distinct from the **requested URL** \u2014 they diverge when a short-link or redirect lands elsewhere; Extract's `source_url` is the *final* one.\n- **Never fabricate.** A failed fetch is represented **honestly** (status + error), never as empty-but-successful content. Downstream must be able to tell \"fetched, page was empty\" from \"fetch failed\".\n- **`fetched_at` is \"when we fetched\", not \"when the source was authored\"** \u2014 keep it distinct from `source_observed_date` (GH-4). It is the fallback anchor the S6 parse layer uses for relative dates.\n\n## Scope\n\n1. A typed `FetchResult` (pydantic v2, matching the style in `scholarship_factory/models.py`) with:\n   - `requested_url` \u2014 the URL we asked for.\n   - `final_url` \u2014 after redirects; equals `requested_url` when there was none. **This is Extract's `source_url`.**\n   - `status_code: int | None` \u2014 `None` when the request never completed (DNS/connection error/timeout).\n   - `content_type: str | None` \u2014 from the response header (distinguishes HTML vs JSON bodies).\n   - `body: str | None` \u2014 decoded response text; `None` on failure.\n   - `fetched_at` \u2014 timestamp set on creation.\n   - `error: str | None` \u2014 short exception summary when the request failed; `None` on success.\n   - `ok: bool` \u2014 derived: `True` iff `status_code` is 2xx **and** `body` is present.\n2. Construction / validation for the type and its `ok` derivation. **No `httpx` call, no network in this ticket** \u2014 the fetcher that *produces* a `FetchResult` is a later ticket.",
+  "acceptance_criteria": [
+    "`FetchResult` exists (pydantic v2) with `requested_url`, `final_url`, `status_code` (nullable), `content_type` (nullable), `body` (nullable), `fetched_at`, `error` (nullable), and a derived `ok`.",
+    "A success result (2xx status + body present) has `ok=True`; a failure (status `None`, or 4xx/5xx, or no body) has `ok=False` and may carry an `error` string. Constructing a failure with `body=None` is valid.",
+    "`final_url` equals `requested_url` when no redirect occurred; the two are allowed to differ.",
+    "`fetched_at` is populated on construction.",
+    "Unit tests cover: a success result, a 404/403 result, a connection-failure result (`status_code=None` + `error`), and the `ok` derivation. **No network.**",
+    "`uv run pytest -q` green."
+  ],
+  "skill_match": null,
+  "passes": true,
+  "status": "done"
+}
