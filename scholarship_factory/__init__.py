@@ -3,6 +3,7 @@ from .fetch import FetchResult
 from .jsonld import extract_jsonld
 from .models import Opportunity, Provenance
 from .parse_dates import parse_deadline_dates, typed_deadlines
+from .parse_money import MoneyBound, MoneyValue, parse_money, typed_cost, typed_reward
 from .store import OpportunityStore
 from .urls import normalize_apply_url
 
@@ -18,4 +19,9 @@ __all__ = [
     "parse_deadline_dates",
     "typed_deadlines",
     "FetchResult",
+    "parse_money",
+    "MoneyValue",
+    "MoneyBound",
+    "typed_reward",
+    "typed_cost",
 ]
