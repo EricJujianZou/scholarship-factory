@@ -4,7 +4,7 @@
   "summary": "Plan to add a derived-`ok` FetchResult pydantic v2 model in a new fetch.py, export it, and unit-test success/404/403/connection-failure/ok-derivation with no network. Implementation already present on-branch and matches this plan exactly (fetch.py, __init__.py:2, tests/test_fetch.py, 8 tests).",
   "parse_error": null,
   "timed_out": false,
-  "tokens_used": 11499,
+  "tokens_used": 9598,
   "exit_code": 0,
   "stderr_head": ""
 }

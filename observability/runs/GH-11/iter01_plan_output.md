@@ -1,8 +1,8 @@
-The implementation on-branch exactly matches the ticket's locked decisions. This is a plan-stage re-entry; I produce the plan reflecting the current shape in `scholarship_factory/fetch.py`.
+The on-branch implementation matches the ticket's locked decisions exactly. This is a plan-stage re-entry; I produce the plan reflecting the current shape in `scholarship_factory/fetch.py`, `__init__.py`, and `tests/test_fetch.py`.
 
 ## Context
 
-The seam belongs with the other pydantic v2 models. `scholarship_factory/models.py:3,14` sets house style: `from pydantic import BaseModel, Field`, `str | None = None` for nullables, `Field(default_factory=...)` for auto-populated fields (`id`, `models.py:14`). Extract consumes a `source_url` — that value is exactly this ticket's `final_url` (the post-redirect URL). Timestamps elsewhere use tz-aware UTC; for an in-model field, `datetime.now(timezone.utc)` via `default_factory` is idiomatic. `scholarship_factory/__init__.py:1-18` is the public surface — every model is re-exported and named in `__all__`. Tests mirror `tests/test_models.py`: construct, assert fields. No network anywhere in this ticket.
+The seam belongs with the other pydantic v2 models. `scholarship_factory/models.py:3,14` sets house style: `from pydantic import BaseModel, Field`, `str | None = None` for nullables, `Field(default_factory=...)` for auto-populated fields (`id`, `models.py:14`). Extract consumes a `source_url` — that value is exactly this ticket's `final_url` (the post-redirect URL). For an in-model timestamp, `datetime.now(timezone.utc)` via `default_factory` is the idiomatic tz-aware choice. `scholarship_factory/__init__.py:1-18` is the public surface — every model is re-exported and named in `__all__`. Tests mirror `tests/test_models.py`: construct, assert fields. No network anywhere in this ticket.
 
 ## Approach
 
@@ -26,7 +26,7 @@ Put `FetchResult` in a dedicated `scholarship_factory/fetch.py` (parallel to `mo
 
 ## Risks
 
-1. **`computed_field` decorator order** — `@computed_field` must sit above `@property` and the property must be annotated `-> bool`, or `ok` won't register. If it errors, check decorator order (`fetch.py:15-17`).
+1. **`computed_field` decorator order** — `@computed_field` must sit above `@property` and the property must be annotated `-> bool`, or `ok` won't register (`fetch.py:15-17`). If it errors, check decorator order.
 2. **`fetched_at` assertion flake** — assert `isinstance(result.fetched_at, datetime)`, never equality against a captured time.
 3. **`body=""` vs `body=None`** — `ok` uses `body is not None`, so an empty-but-successful page (`body=""`) stays `ok=True`; do not switch to `bool(body)`, which would misreport an empty page as a failed fetch and violate the locked no-fabrication decision.
 
