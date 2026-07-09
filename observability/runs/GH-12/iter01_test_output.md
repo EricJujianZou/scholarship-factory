@@ -1,4 +1,4 @@
-Working tree is clean now. Test stage result stands as reported: full suite green (31 passed), all acceptance criteria verified.
+Committed the pending run-artifact/state changes so the working tree is clean.
 
 ```json
 {
@@ -6,7 +6,7 @@ Working tree is clean now. Test stage result stands as reported: full suite gree
   "ticket_id": "GH-12",
   "outcome": "success",
   "exit_signal": false,
-  "summary": "Full suite green (31 passed); all 5 acceptance criteria individually verified against parse_dates.py behavior and tests/test_parse_dates.py.",
+  "summary": "Full suite: 31 passed. All 5 acceptance criteria verified individually via tests/test_parse_dates.py (multi-deadline, anchor-relative, absolute-date, unresolvable/None+provenance cases) — all pass.",
   "failure_reason": null,
   "files_changed": 0,
   "suggested_tools": [],

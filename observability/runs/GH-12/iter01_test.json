@@ -1,10 +1,10 @@
 {
   "stage": "test",
   "outcome": "success",
-  "summary": "Full suite green (31 passed); all 5 acceptance criteria individually verified against parse_dates.py behavior and tests/test_parse_dates.py.",
+  "summary": "Full suite: 31 passed. All 5 acceptance criteria verified individually via tests/test_parse_dates.py (multi-deadline, anchor-relative, absolute-date, unresolvable/None+provenance cases) \u2014 all pass.",
   "parse_error": null,
   "timed_out": false,
-  "tokens_used": 6196,
+  "tokens_used": 6519,
   "exit_code": 0,
   "stderr_head": ""
 }
