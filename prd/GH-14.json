@@ -1,0 +1,17 @@
+{
+  "id": "GH-14",
+  "type": "feat",
+  "priority": 5,
+  "title": "Applicant profile model + SQLite store (S6 ranking foundation)",
+  "description": "The **applicant-profile model + store** \u2014 the Session 6 foundation that ranking/filtering matches opportunities against. Independent of Fetch and of the parse layer. This ticket builds the **model + store only** \u2014 **no ranking, no matching, no LLM, no opportunity coupling** (that's a later ticket depending on this + the parse layer). Same shape/precedent as GH-1.\n\n## Design decision for this ticket (v1 shape \u2014 locked for now, revisitable)\n\n**Minimal profile + tags.** A small structured core covering the common eligibility gates (location, level, field) plus a list of tags and a free-text bio for future LLM fit-ranking. **Do not over-model demographics** (no citizenship/age/GPA/financial-need matrix in v1) \u2014 keep it conservative and easy to extend.\n\n## Locked decisions (honor; see `REPO_CONTENT.md`)\n\n- **Single-user seam:** every row carries `owner`, always `\"me\"`. **No auth/isolation.**\n- **SQLite store**, stdlib `sqlite3`, mirror GH-1's store patterns (configurable db path; tests use a **temporary** db, never a committed db file).\n- The applicant profile is the one place applicant data lives; it is distinct from the opportunity store. Keep it minimal.\n\n## Profile fields (v1)\n\nField | Notes |\n---|---|\n`id` | stable primary key |\n`owner` | defaults `\"me\"` |\n`region` | nullable \u2014 location eligibility gate |\n`education_level` | nullable \u2014 e.g. `\"undergraduate\"`, `\"high school\"` |\n`field_of_study` | nullable |\n`tags` | `list[str]`, defaults empty \u2014 interest / eligibility tags (store serializes list <-> text) |\n`bio` | nullable free text \u2014 the blob a future LLM ranker reads for fit |\n`created_at`, `updated_at` | timestamps set on write |\n\n## Scope\n\n1. An `ApplicantProfile` pydantic v2 model with the fields above.\n2. A SQLite store: insert / get-by-id / update (single-user typically has one row; keep `list` for symmetry). `tags` round-trips through serialization. Configurable db path; temp db in tests.\n3. No ranking, no matching, no opportunity coupling.",
+  "acceptance_criteria": [
+    "`ApplicantProfile` exists with the fields above; `owner` defaults `\"me\"`; `tags` defaults to `[]`; a profile with every optional field null (except `owner`) constructs validly.",
+    "Store insert/get/update round-trips all fields including `tags` (the list survives serialization); db path is configurable; tests use a temporary db.",
+    "`created_at`/`updated_at` populated on write; `update` refreshes `updated_at`.",
+    "Unit tests cover construction, store round-trip incl. `tags`, and update. No network, temp db only.",
+    "`uv run pytest -q` green."
+  ],
+  "skill_match": null,
+  "passes": false,
+  "status": "open"
+}

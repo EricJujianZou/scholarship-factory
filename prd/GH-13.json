@@ -1,0 +1,18 @@
+{
+  "id": "GH-13",
+  "type": "feat",
+  "priority": 5,
+  "title": "Parse layer - typed reward/cost money over the stored string fields (deterministic S6)",
+  "description": "The **deterministic money parse layer** for Session 6. Independent of Fetch and of the date-parse ticket (separate module, separate fields). This ticket builds the **money** half only. **No LLM, no network, no ranking.**\n\n## Context\n\nGH-1's carried-forward note: `reward` and `cost` are stored as **verbatim strings** (`\"Up to EUR 7,500\"`, `\"Free\"`, `\"$5,000/yr for 4 years\"`), not typed amounts. Ranking (\"sort by most money\") needs a deterministic layer turning that quoted text into a normalized amount + currency. Extract is **quoted-only**; the arithmetic transform (\"$5k/yr x 4\" -> total) is deferred to **this** deterministic S6 layer (a library, not a second LLM call).\n\n## Locked decisions (honor; see `REPO_CONTENT.md` -> carried-forward notes + Session 2 quoted-only/derive split)\n\n- **Computed values are provenance `derived`; unresolvable -> `None`** (deterministic boundary self-enforces no-fabrication). Never guess an amount.\n- **Preserve bound semantics.** `\"Up to EUR 7,500\"` is an **upper bound**, not an exact value \u2014 don't silently drop the \"up to\". `\"Free\"`/`\"$0\"` -> `0`.\n- Period arithmetic (`\"/yr for 4 years\"`) is done here **only when the string states it** \u2014 never invented.\n\n## Scope\n\n1. A module `scholarship_factory/parse_money.py` with a pure function: given a stored reward/cost string, return a normalized result \u2014 amount (numeric), currency (ISO-ish code where stated), and a bound flag (`exact` / `upper` / `lower`) \u2014 or `None` when unparseable.\n2. Handle: plain amounts (`\"$5,000\"`), currency words/symbols (`\"EUR 7,500\"`, `\"$0\"`, `\"Free\"`), ranges/bounds (`\"up to\"`, `\"from\"`), and explicit period math (`\"$5,000/yr for 4 years\"` -> total 20,000 with the components preserved).\n3. No store mutation, no ranking in this ticket.",
+  "acceptance_criteria": [
+    "`\"Up to EUR 7,500\"` -> `7500` EUR flagged **upper bound** (the \"up to\" is not dropped).",
+    "`\"Free\"` and `\"$0\"` -> `0`.",
+    "`\"$5,000/yr for 4 years\"` -> total `20000` (per-period and count preserved in the result).",
+    "An unparseable or absent string -> `None`; every computed value is provenance `derived`, every unresolvable one `none` \u2014 never guessed.",
+    "Deterministic + offline: no network, no LLM. Unit tests cover each case above incl. the `None` case.",
+    "`uv run pytest -q` green."
+  ],
+  "skill_match": null,
+  "passes": false,
+  "status": "open"
+}
