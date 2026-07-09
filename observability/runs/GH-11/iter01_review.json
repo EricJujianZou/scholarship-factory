@@ -1,0 +1,10 @@
+{
+  "stage": "review",
+  "outcome": "success",
+  "summary": "FetchResult contract satisfies all 6 acceptance criteria: 8 typed fields + derived ok, correct None-guard on status_code, body-is-not-None honors empty-vs-failed, full non-network test coverage. No user-facing surface. Could not re-run pytest (permission-denied this session); relied on test stage evidence of 32 passed plus code read. Clean first solve of a pydantic-contract class \u2014 candidate for a fetch-contract skill.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 9209,
+  "exit_code": 0,
+  "stderr_head": ""
+}
