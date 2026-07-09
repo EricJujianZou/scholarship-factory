@@ -1,0 +1,10 @@
+{
+  "stage": "review",
+  "outcome": "success",
+  "summary": "Deterministic S6 date-parse layer: parse_deadline_dates(text, anchor) over dateparser.search_dates + typed_deadlines(opp) provenance helper. All 5 ACs verified against named tests; anchor-relative resolution, multi-deadline uncollapsed, unresolvable->None/derived provenance all correct. Pure/offline, no store mutation. Solved cleanly for the first time \u2014 candidate for a 'deterministic-parse-layer' skill.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 9869,
+  "exit_code": 0,
+  "stderr_head": ""
+}
