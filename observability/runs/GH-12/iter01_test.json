@@ -1,10 +1,10 @@
 {
   "stage": "test",
   "outcome": "success",
-  "summary": "Import sanity ok; full suite 31 passed; all 5 acceptance criteria individually verified against named tests in tests/test_parse_dates.py. Committed run artifacts and state.",
+  "summary": "Full suite 31 passed (7 in test_parse_dates.py); all 5 acceptance criteria verified with quoted evidence. Committed run artifacts.",
   "parse_error": null,
   "timed_out": false,
-  "tokens_used": 6039,
+  "tokens_used": 5944,
   "exit_code": 0,
   "stderr_head": ""
 }

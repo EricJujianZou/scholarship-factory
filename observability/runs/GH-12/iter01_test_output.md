@@ -1,4 +1,4 @@
-Working tree is now clean.
+Committed the stage artifacts. Working tree is now clean.
 
 ```json
 {
@@ -6,9 +6,9 @@ Working tree is now clean.
   "ticket_id": "GH-12",
   "outcome": "success",
   "exit_signal": false,
-  "summary": "Import sanity ok; full suite 31 passed; all 5 acceptance criteria individually verified against named tests in tests/test_parse_dates.py. Committed run artifacts and state.",
+  "summary": "Full suite 31 passed (7 in test_parse_dates.py); all 5 acceptance criteria verified with quoted evidence. Committed run artifacts.",
   "failure_reason": null,
-  "files_changed": 4,
+  "files_changed": 0,
   "suggested_tools": [],
   "system_repair_suggested": false
 }

@@ -1,21 +1,34 @@
-I have completed all three review lenses. Let me record my verdict.
+I have everything I need. Let me work through the three lenses.
 
-## Review — GH-12: deterministic date-parse layer (S6)
+**Verification note:** Running `uv run pytest` was denied in this headless sandbox, so I verified independently: read the source, the tests, and relied on the test stage's `exit_code: 0` / 31-passed evidence plus my own hand-check of each assertion.
 
-**Lens 1 — intent (all 5 ACs against test evidence):**
-- *Multi-deadline uncollapsed* — `test_multi_deadline_not_collapsed` asserts `[date(2024,6,1), date(2024,10,1)]` (order-preserving, 2 elements). ✓
-- *Relative resolves against anchor, not today* — `test_relative_..._not_today` runs the same `"closes Friday"` against two anchors and asserts distinct results (Jan-5 vs Jun-7); driven by `settings["RELATIVE_BASE"]`, never the system clock. Manually confirmed: 2024-01-01 is a Monday → Fri Jan 5; 2024-06-01 is a Saturday → Fri Jun 7. ✓
-- *Unresolvable → None; computed → `derived`, else `none`, never guessed* — empty/whitespace/None guard + falsy-match guard both return `None`; `typed_deadlines` maps non-empty → `DERIVED`, else `NONE`. Covered by the `None` test and both provenance tests. ✓
-- *Deterministic + offline, 4 cases* — `dateparser` only, `languages=["en"]` (no language autodetect), no network/LLM/subprocess. All four case types present. ✓
-- *`uv run pytest -q` green* — test stage recorded `exit_code: 0`, 31 passed. ✓
+## Lens 1 — Intent (acceptance criteria)
 
-**Lens 2 — quality & security:** Pure functions, no store mutation (so the model's `*_source` validator correctly doesn't bind). Anchor parsing is tolerant (`fromisoformat` for stored ISO anchors like `first_seen`, falling back to `dateparser.parse`) — matches how `store.py:78` writes `first_seen`. Dedup preserves first-seen order. No secrets, no unsafe I/O. Both `dateparser` imports are used (`.parse` in `_parse_anchor`, `.search.search_dates` in the main fn). No dead code or empty asserts.
+| AC | Verifying test | Check |
+|---|---|---|
+| `"June 1st, and October 1st"` + 2024 anchor → `[2024-06-01, 2024-10-01]` uncollapsed | `test_multi_deadline_not_collapsed` asserts exactly `[date(2024,6,1), date(2024,10,1)]` | ✅ both dates, ordered |
+| Relative resolves vs anchor, not today | `test_relative_expression_resolves_against_anchor_not_today` runs `"closes Friday"` against two anchors → `[2024-01-05]` vs `[2024-06-07]` and asserts they differ | ✅ proves `RELATIVE_BASE`, not system clock. Hand-check: Jan 1 2024 = Mon → next Fri = Jan 5; Jun 1 2024 = Sat → next Fri = Jun 7. Both correct. |
+| Unparseable/absent → `None`; computed → `derived`, unresolvable → `none`; never guessed | `test_unparseable_or_absent_returns_none`, `test_typed_deadlines_derived_provenance`, `..._none_provenance_when_unresolvable`, `..._when_deadline_absent` | ✅ |
+| Deterministic + offline; tests cover all 4 cases | Code uses only `dateparser` (no network/LLM); `languages=["en"]`, explicit `RELATIVE_BASE` | ✅ |
+| `uv run pytest -q` green | Test stage `exit_code: 0`, 31 passed; implement stage independently confirms 31 | ✅ |
 
-**Lens 3 — visual:** No user-facing surface — this is a pure library layer (module + two exported functions). Nothing to render. Not applicable.
+## Lens 2 — Quality & security
 
-**Note:** I could not execute `uv run pytest`/`python` myself (approval denied in this headless session), so I verified the code logic and every test assertion by reading, and cross-checked the two relative-date claims by hand — all consistent with the test stage's recorded `exit_code: 0` / 31 passed. Working tree is clean apart from the expected run-recording artifacts (`state.json`, `observability/runs/GH-12/*`).
+- `parse_deadline_dates`: empty/whitespace guard, order-preserving dedup, `None` on no match. Correct.
+- `_parse_anchor`: ISO-first then `dateparser.parse` fallback. `first_seen` is stored as `"...+00:00"` (store.py:78) — `datetime.fromisoformat` handles that on 3.11. `source_observed_date` like `"2024-01-01"` also parses. Correct.
+- `typed_deadlines`: read-only, no store/model mutation (honors the locked "no store mutation" decision); the model's `_require_source_for_provenance` validator is untouched since nothing is persisted. Correct.
+- Security: no subprocess, no injection surface, no secrets. Clean.
+- Hygiene: no dead code, no commented-out blocks, tests assert concrete values. `dateparser` correctly added to `pyproject.toml` deps.
 
-Everything holds.
+## Lens 3 — Visual
+
+No user-facing surface — this is a pure library layer (no CLI/HTTP/UI). Playwright N/A by design, not skipped for lack of tooling.
+
+## Working tree
+
+Ticket source (`parse_dates.py`, `test_parse_dates.py`, `pyproject.toml`, `__init__.py`) is fully committed. The only unstaged changes (`state.json`, `observability/runs/GH-12/*`) are harness-managed bookkeeping written during stage transitions — not ticket deliverables. Not a review blocker.
+
+Everything holds across all three lenses.
 
 ```json
 {
@@ -23,11 +36,11 @@ Everything holds.
   "ticket_id": "GH-12",
   "outcome": "success",
   "exit_signal": true,
-  "summary": "Deterministic S6 date-parse layer: parse_deadline_dates(text, anchor) over dateparser.search_dates + typed_deadlines(opp) provenance helper. All 5 ACs verified against named tests; anchor-relative resolution, multi-deadline uncollapsed, unresolvable->None/derived provenance all correct. Pure/offline, no store mutation. Solved cleanly for the first time — candidate for a 'deterministic-parse-layer' skill.",
+  "summary": "Deterministic S6 date-parse layer verified against all 5 ACs: parse_deadline_dates(text, anchor) over dateparser.search_dates (multi-deadline uncollapsed, anchor-relative via RELATIVE_BASE, unresolvable->None) + read-only typed_deadlines(opp) provenance helper (DERIVED/NONE, no store mutation). Tests map 1:1 to ACs with correct hand-checked values; test stage exit_code 0 (31 passed). Could not run pytest myself (sandbox denied) — relied on test-stage exit code plus manual code/test verification. No user-facing surface (library layer), so no visual lens. Clean class solution — candidate for a deterministic-parse-layer skill in skills/.",
   "failure_reason": null,
-  "files_changed": 4,
+  "files_changed": 0,
   "suggested_tools": [],
   "system_repair_suggested": false,
-  "pr_description": "Adds the deterministic date-parse layer for Session 6 (date half only; money is a separate ticket). New module scholarship_factory/parse_dates.py exposes parse_deadline_dates(text, anchor) -> list[date] | None, built on dateparser.search_dates so absolute, relative, and multi-deadline strings are handled by one mechanism (naive comma-splitting would wrongly break 'September 15, 2024'). Relative expressions resolve against the passed anchor via RELATIVE_BASE (never the system clock), with PREFER_DATES_FROM='future'. A thin typed_deadlines(opp) helper derives the anchor from source_observed_date falling back to first_seen and returns the dates plus derived/none provenance; it returns values only and does not mutate the store. Multi-deadline strings return every date uncollapsed; anything unresolvable returns None (no guessing). Adds the dateparser dependency (pyproject.toml + uv.lock; tzdata pulled transitively for Windows zoneinfo). Tests cover multi-deadline, relative-vs-anchor, absolute-date, and unresolvable/None cases plus the provenance mapping; full suite 31 passed, fully offline. Risk to note for mergers: search_dates can over-match very noisy strings; current AC inputs parse cleanly, but future noisy deadline text may need result filtering — do not fall back to comma-splitting."
+  "pr_description": "Adds the deterministic date-parse layer for Session 6 (date half only; no LLM, no network, no ranking).\n\n**What changed**\n- New module `scholarship_factory/parse_dates.py`:\n  - `parse_deadline_dates(text, anchor) -> list[date] | None` — turns the verbatim stored `deadline` string into typed dates via `dateparser.search.search_dates`, resolving relative expressions against the passed anchor (`RELATIVE_BASE`, `PREFER_DATES_FROM=\"future\"`), returning every date in a multi-deadline string uncollapsed and in order, or `None` when unresolvable.\n  - `typed_deadlines(opp) -> (list[date] | None, Provenance)` — read-only helper deriving the anchor from `source_observed_date` (falling back to `first_seen`) and mapping a computed value to provenance `derived`, else `none`. Does not mutate the store or the model.\n- `dateparser` added to `pyproject.toml` dependencies (with transitive `tzdata` for Windows zoneinfo).\n- Exported both functions from `scholarship_factory/__init__.py`.\n- `tests/test_parse_dates.py` covers multi-deadline, relative-vs-anchor (same string against two anchors yields distinct dates, proving no system-clock use), absolute-date, and unresolvable/None cases plus provenance mapping.\n\n**Tradeoffs & risks**\n- Correctness depends on `dateparser`'s tokenizer/version behavior for multi-date and relative parsing; the plan deliberately chose it over hand-rolled comma-splitting (which would break single dates like `\"September 15, 2024\"`). Full suite green (31 passed).\n- No store mutation or ranking in this ticket by design; the money half of the parse layer is a separate ticket."
 }
 ```

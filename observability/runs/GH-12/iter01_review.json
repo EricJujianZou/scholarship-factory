@@ -1,10 +1,10 @@
 {
   "stage": "review",
   "outcome": "success",
-  "summary": "Deterministic S6 date-parse layer: parse_deadline_dates(text, anchor) over dateparser.search_dates + typed_deadlines(opp) provenance helper. All 5 ACs verified against named tests; anchor-relative resolution, multi-deadline uncollapsed, unresolvable->None/derived provenance all correct. Pure/offline, no store mutation. Solved cleanly for the first time \u2014 candidate for a 'deterministic-parse-layer' skill.",
+  "summary": "Deterministic S6 date-parse layer verified against all 5 ACs: parse_deadline_dates(text, anchor) over dateparser.search_dates (multi-deadline uncollapsed, anchor-relative via RELATIVE_BASE, unresolvable->None) + read-only typed_deadlines(opp) provenance helper (DERIVED/NONE, no store mutation). Tests map 1:1 to ACs with correct hand-checked values; test stage exit_code 0 (31 passed). Could not run pytest myself (sandbox denied) \u2014 relied on test-stage exit code plus manual code/test verification. No user-facing surface (library layer), so no visual lens. Clean class solution \u2014 candidate for a deterministic-parse-layer skill in skills/.",
   "parse_error": null,
   "timed_out": false,
-  "tokens_used": 9869,
+  "tokens_used": 10922,
   "exit_code": 0,
   "stderr_head": ""
 }
