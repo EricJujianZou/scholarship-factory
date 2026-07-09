@@ -1,10 +1,10 @@
 {
   "stage": "test",
   "outcome": "success",
-  "summary": "Full suite green: 32 passed. All 6 acceptance criteria verified against tests/test_fetch.py and fetch.py. Run artifacts committed.",
+  "summary": "Full suite: 32 passed (8 in test_fetch.py). All 6 acceptance criteria verified against actual FetchResult implementation.",
   "parse_error": null,
   "timed_out": false,
-  "tokens_used": 6793,
+  "tokens_used": 5381,
   "exit_code": 0,
   "stderr_head": ""
 }

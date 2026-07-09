@@ -1,4 +1,4 @@
-Committed. Working tree is now clean.
+Committed the run artifacts and state (486c29b). Working tree is now clean.
 
 ```json
 {
@@ -6,7 +6,7 @@ Committed. Working tree is now clean.
   "ticket_id": "GH-11",
   "outcome": "success",
   "exit_signal": false,
-  "summary": "Full suite green: 32 passed. All 6 acceptance criteria verified against tests/test_fetch.py and fetch.py. Run artifacts committed.",
+  "summary": "Full suite: 32 passed (8 in test_fetch.py). All 6 acceptance criteria verified against actual FetchResult implementation.",
   "failure_reason": null,
   "files_changed": 0,
   "suggested_tools": [],
