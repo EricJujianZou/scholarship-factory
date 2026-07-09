@@ -1,10 +1,10 @@
 {
   "stage": "plan",
   "outcome": "success",
-  "summary": "Deterministic S6 date-parse layer: pure parse_deadline_dates(text, anchor) over dateparser.search_dates + read-only typed_deadlines(opp) provenance helper; anchor-relative resolution, multi-deadline uncollapsed, unresolvable->None/derived. Implementation already present and green on-branch (7 tests) from a prior completed run; this is a plan-stage re-trigger, so the plan is grounded in the actual on-branch state for implement/test to verify.",
+  "summary": "Deterministic S6 date-parse layer: pure parse_deadline_dates(text, anchor) over dateparser.search_dates + read-only typed_deadlines(opp) provenance helper; anchor-relative resolution, multi-deadline uncollapsed, unresolvable->None/derived. Implementation already present and verified on-branch (test_parse_dates.py, exports, dateparser dep) from a prior completed run; this is a plan-stage re-trigger, so the plan is grounded in the actual on-branch state for implement/test to verify.",
   "parse_error": null,
   "timed_out": false,
-  "tokens_used": 13217,
+  "tokens_used": 7284,
   "exit_code": 0,
   "stderr_head": ""
 }
