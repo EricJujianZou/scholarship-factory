@@ -1,10 +1,10 @@
 {
   "stage": "review",
   "outcome": "success",
-  "summary": "FetchResult contract meets all 6 acceptance criteria: pydantic v2 model with 8 fields + derived `ok`, honest failure representation (body=None valid, empty-string body stays ok), final_url distinct from requested_url, fetched_at auto-populated. 8 unit tests, no network. All three review lenses pass; no user-facing surface. Clean first solve of the 'shared typed seam' class \u2014 candidate for a skills/ entry.",
+  "summary": "FetchResult contract meets all 6 acceptance criteria: pydantic v2 model, 8 fields + derived `ok` (True iff 2xx and body present), honest failure (body=None valid, empty-string body stays ok), final_url distinct from requested_url and confirmed to feed extract()'s source_url, tz-aware fetched_at auto-populated. 8 unit tests, no network. All three lenses pass; no user-facing surface. Clean first solve of the 'shared typed seam' class \u2014 candidate for a skills/ entry.",
   "parse_error": null,
   "timed_out": false,
-  "tokens_used": 9043,
+  "tokens_used": 7842,
   "exit_code": 0,
   "stderr_head": ""
 }
