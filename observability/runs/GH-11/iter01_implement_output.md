@@ -1,4 +1,4 @@
-Working tree is clean. The `FetchResult` implementation (`scholarship_factory/fetch.py`), its export (`__init__.py`), and its tests (`tests/test_fetch.py`) already existed on this branch from a prior implementation pass, and match the plan exactly — all 8 acceptance criteria are covered and the full suite (32 tests) passes. No code changes were needed this iteration; only the plan-stage rerun's observability artifacts required committing.
+Committed. Working tree is now clean.
 
 ```json
 {
@@ -6,9 +6,9 @@ Working tree is clean. The `FetchResult` implementation (`scholarship_factory/fe
   "ticket_id": "GH-11",
   "outcome": "success",
   "exit_signal": false,
-  "summary": "FetchResult implementation, export, and tests already present on branch and match the plan exactly; verified full suite green (32 passed), no code changes needed.",
+  "summary": "FetchResult already implemented in scholarship_factory/fetch.py and exported/tested per plan; verified all acceptance criteria met, full suite green (32 passed). Committed run-artifact changes to clean the tree.",
   "failure_reason": null,
-  "files_changed": 5,
+  "files_changed": 3,
   "suggested_tools": [],
   "system_repair_suggested": false
 }
