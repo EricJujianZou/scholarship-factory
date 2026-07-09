@@ -185,3 +185,12 @@ complete — an omitted file costs a re-exploration, not a stuck stage.
   }
 }
 ```
+
+## Prior stage outputs this run
+
+Read the ones relevant to your stage (the latest plan output is your work order):
+- C:/Users/zouju/Coding Projects/scholarship-factory/observability/runs/GH-12/iter01_document_output.md
+- C:/Users/zouju/Coding Projects/scholarship-factory/observability/runs/GH-12/iter01_implement_output.md
+- C:/Users/zouju/Coding Projects/scholarship-factory/observability/runs/GH-12/iter01_plan_output.md
+- C:/Users/zouju/Coding Projects/scholarship-factory/observability/runs/GH-12/iter01_review_output.md
+- C:/Users/zouju/Coding Projects/scholarship-factory/observability/runs/GH-12/iter01_test_output.md

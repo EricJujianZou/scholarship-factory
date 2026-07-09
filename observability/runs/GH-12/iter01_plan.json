@@ -1,10 +1,10 @@
 {
   "stage": "plan",
   "outcome": "success",
-  "summary": "Deterministic date-parse layer: pure parse_deadline_dates(text, anchor) on dateparser.search_dates + a typed_deadlines(opp) provenance helper; anchor-relative, multi-deadline uncollapsed, unresolvable->None. Requires adding the dateparser dependency.",
+  "summary": "Deterministic S6 date-parse layer: pure parse_deadline_dates(text, anchor) over dateparser.search_dates + typed_deadlines(opp) provenance helper; anchor-relative resolution, multi-deadline uncollapsed, unresolvable->None/derived. Requires adding the dateparser dependency. Note: implementation already present on-branch from a prior completed run; this is a plan-stage re-trigger.",
   "parse_error": null,
   "timed_out": false,
-  "tokens_used": 12316,
+  "tokens_used": 10663,
   "exit_code": 0,
   "stderr_head": ""
 }
