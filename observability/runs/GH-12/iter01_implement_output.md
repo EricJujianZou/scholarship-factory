@@ -1,4 +1,4 @@
-Working tree is clean and the full test suite passes (31/31).
+Working tree is now clean.
 
 ```json
 {
@@ -6,9 +6,9 @@ Working tree is clean and the full test suite passes (31/31).
   "ticket_id": "GH-12",
   "outcome": "success",
   "exit_signal": false,
-  "summary": "Prior implementation of parse_dates.py (parse_deadline_dates + typed_deadlines) already satisfies all acceptance criteria; verified via full test suite (31 passed), no code changes required.",
+  "summary": "Implementation already present on-branch (parse_dates.py, __init__.py exports, dateparser dep, tests) and verified green — full suite passes (31 passed). No code changes needed; committed observability/state artifacts.",
   "failure_reason": null,
-  "files_changed": 0,
+  "files_changed": 3,
   "suggested_tools": [],
   "system_repair_suggested": false
 }

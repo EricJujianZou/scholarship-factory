@@ -1,10 +1,10 @@
 {
   "stage": "implement",
   "outcome": "success",
-  "summary": "Prior implementation of parse_dates.py (parse_deadline_dates + typed_deadlines) already satisfies all acceptance criteria; verified via full test suite (31 passed), no code changes required.",
+  "summary": "Implementation already present on-branch (parse_dates.py, __init__.py exports, dateparser dep, tests) and verified green \u2014 full suite passes (31 passed). No code changes needed; committed observability/state artifacts.",
   "parse_error": null,
   "timed_out": false,
-  "tokens_used": 6005,
+  "tokens_used": 5131,
   "exit_code": 0,
   "stderr_head": ""
 }
