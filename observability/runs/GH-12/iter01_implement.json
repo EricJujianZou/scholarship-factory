@@ -1,10 +1,10 @@
 {
   "stage": "implement",
   "outcome": "success",
-  "summary": "Implementation already present on-branch (parse_dates.py, __init__.py exports, dateparser dep, tests) and verified green \u2014 full suite passes (31 passed). No code changes needed; committed observability/state artifacts.",
+  "summary": "parse_dates.py, __init__.py exports, pyproject.toml dependency, and tests/test_parse_dates.py were already implemented in a prior run; verified all acceptance criteria still hold and full suite (31 tests) passes.",
   "parse_error": null,
   "timed_out": false,
-  "tokens_used": 5131,
+  "tokens_used": 4490,
   "exit_code": 0,
   "stderr_head": ""
 }
