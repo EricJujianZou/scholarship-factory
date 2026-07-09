@@ -1,33 +1,25 @@
-I have everything I need. Let me walk the review.
+Execution of `uv run` is blocked in this read-only review session, so I'll rely on the test stage's evidence plus direct code reading (the sanctioned fallback). I've read the actual `fetch.py` code, not just the prose. Here's my three-lens review.
 
 ## Review — GH-11: FetchResult contract
 
-### Lens 1 — Intent (acceptance criteria, one by one)
+**Diff reviewed:** `scholarship_factory/fetch.py` (new), `scholarship_factory/__init__.py:2,17`, `tests/test_fetch.py` (new). Product code is committed; the only uncommitted files are harness bookkeeping (`observability/runs/GH-11/iter01_test*`, `state.json`) — expected mid-run, not product dirt.
 
-| # | Criterion | Evidence | Verdict |
-|---|---|---|---|
-| 1 | `FetchResult` (pydantic v2) with all 8 fields + derived `ok` | `fetch.py:6-22` — `requested_url`, `final_url`, `status_code:int\|None`, `content_type:str\|None`, `body:str\|None`, `fetched_at:datetime`, `error:str\|None`, `@computed_field ok`. Exported `__init__.py:2,17` | ✅ |
-| 2 | 2xx+body → `ok=True`; None/4xx-5xx/no-body → `ok=False`, may carry `error`; `body=None` valid | `ok = status_code is not None and 200<=status_code<300 and body is not None` (`fetch.py:18-22`). Tests: success, 404, 403, connection-failure (`None`+`error`), 2xx-no-body | ✅ |
-| 3 | `final_url` may equal or differ from `requested_url` | two independent `str` fields; `test_final_url_defaults_to_requested_url` / `test_final_url_can_differ_after_redirect` | ✅ |
-| 4 | `fetched_at` populated on construction | `Field(default_factory=lambda: datetime.now(timezone.utc))`; `test_fetched_at_is_populated` | ✅ |
-| 5 | Tests cover success / 404-403 / connection-failure / `ok` derivation; no network | 8 tests in `test_fetch.py`; no `httpx`/socket import in either file | ✅ |
-| 6 | `uv run pytest -q` green | Test-stage evidence: **32 passed** (`iter01_test_output.md`). Re-run required approval unavailable headlessly; the recorded evidence is concrete and matches my code read | ✅ |
+### Lens 1 — intent (each criterion vs. evidence)
 
-Locked decisions honored: `final_url` is Extract's `source_url` (distinct from `requested_url`); failure is represented honestly (`status_code`/`error`, never empty-but-ok); `body=""` stays `ok=True` — an empty page is not a failed fetch — which the `body is not None` check (not `bool(body)`) correctly preserves.
+1. **`FetchResult` exists w/ all fields + derived `ok`** ✓ — `fetch.py:6-22`: `requested_url: str`, `final_url: str`, `status_code: int | None`, `content_type: str | None`, `body: str | None`, `fetched_at: datetime` (default_factory), `error: str | None`, and `ok` as a `@computed_field` property. Pydantic v2, matches `models.py` house style.
+2. **`ok` derivation + honest failures** ✓ — `ok = status_code is not None and 200 <= status_code < 300 and body is not None`. Correct: 2xx+body→True; `None`/4xx/5xx/no-body→False. `body=None` failure constructs fine (no validator forbids it). Tests `test_success`, `test_404`, `test_403`, `test_connection_failure`, `test_2xx_with_no_body` cover it.
+3. **`final_url` == / ≠ `requested_url`** ✓ — two independent `str` fields; `test_final_url_defaults_to_requested_url` and `test_final_url_can_differ_after_redirect` cover both. Matches the locked source_url-is-final-URL decision, and `extract()` consumes exactly this `final_url` as its `source_url` (`extract.py:125`).
+4. **`fetched_at` populated on construction** ✓ — `Field(default_factory=lambda: datetime.now(timezone.utc))`, tz-aware; `test_fetched_at_is_populated`.
+5. **Tests cover the required cases, no network** ✓ — 8 tests, no `httpx`/network imports in either file.
+6. **`uv run pytest -q` green** ✓ (via test-stage evidence) — test stage reports 32 passed; I could not re-run here (execution denied), but the enumerated per-criterion evidence is specific, not vague, and the code reads correct.
 
-### Lens 2 — Quality & security
-- `ok` derivation is correct: `200 <= status_code < 300` is the exact 2xx range (no off-by-one), `None` guarded before the comparison, empty-string body handled per the no-fabrication rule.
-- No security surface: pure pydantic data model, no subprocess/file/network, no secrets.
-- No dead code; every test asserts meaningfully.
-- Minor (non-blocking): `final_url` is required with no default. The ticket prose ("equals requested_url when there was none") could read as implying a default, but making it caller-set and explicit is a sound choice and criterion 3 only requires equal-or-differ, which holds.
+### Lens 2 — quality & security
+Correct `ok` logic, no off-by-one (range `200–299`). Deliberately uses `body is not None` (not `bool(body)`) so an empty-but-successful page `body=""` stays `ok=True` — honors the no-fabrication decision. No secrets, subprocess, file, or network handling — pure data model. No dead code; tests assert real behavior.
 
-### Lens 3 — Visual
-No user-facing surface — `FetchResult` is a pure data contract. Nothing to render; Playwright N/A.
+### Lens 3 — visual
+No user-facing surface (a typed model). Nothing to render; Playwright N/A.
 
-### Tree state
-Code diff (`fetch.py`, `__init__.py`, `tests/test_fetch.py`) is clean. The unstaged changes are all harness-managed run artifacts (`iter01_review_prompt.md`, `iter01_test*.{json,md}`, `state.json`) — workflow bookkeeping, not ticket content.
-
-All six criteria verified with evidence; no must-fix issue across the three lenses.
+**Verdict: success.** Every criterion verified with evidence, no must-fix issues, product branch clean.
 
 ```json
 {
@@ -35,11 +27,11 @@ All six criteria verified with evidence; no must-fix issue across the three lens
   "ticket_id": "GH-11",
   "outcome": "success",
   "exit_signal": true,
-  "summary": "All 6 acceptance criteria verified against fetch.py/test_fetch.py: FetchResult pydantic v2 model with correct derived `ok` (2xx + body, None-guarded, empty-body honest), redirect-distinct final_url, tz-aware fetched_at, 8 no-network tests. Test stage recorded 32 passed. No user-facing surface (Playwright N/A). Clean seam for Extract's source_url. Candidate skill class: 'typed hand-off contract model' (cf. GH-1/GH-4).",
+  "summary": "FetchResult contract holds against all 6 criteria. Read fetch.py directly: pydantic v2 model with the 8 required fields and a computed `ok` (2xx AND body-present), honest failure representation (body=None valid), final_url distinct from requested_url. 8 no-network tests map to each criterion; test stage reports 32 passed (could not re-run pytest here — execution denied in review session — verified by code reading + test-stage evidence). No user-facing surface. Non-product working-tree changes are harness artifacts only.",
   "failure_reason": null,
-  "files_changed": 3,
+  "files_changed": 0,
   "suggested_tools": [],
   "system_repair_suggested": false,
-  "pr_description": "Adds `FetchResult` (pydantic v2, `scholarship_factory/fetch.py`) — the typed Fetch→Extract seam. This is a contract-only foundation slice: no fetching, adapters, or network. Fields: `requested_url`, `final_url` (post-redirect; this is Extract's `source_url`), nullable `status_code`/`content_type`/`body`/`error`, auto-populated tz-aware `fetched_at`, and a derived `ok` computed field (`True` iff status is 2xx and a body is present). Failures are represented honestly (status/error, never empty-but-successful), and an empty-but-successful page (`body=\"\"`) stays `ok=True`. Exported from the package root. Covered by 8 unit tests (success, 404, 403, connection-failure, redirect, fetched_at, 2xx-no-body); full suite 32 passed, no network. Risk: low — pure data model with no runtime side effects; the fetcher that produces a FetchResult is a separate later ticket."
+  "pr_description": "Adds the `FetchResult` pydantic v2 contract — the typed hand-off object between Fetch (S3) and Extract (S2). This is a foundation slice: the shared data shape only, with no fetching, adapters, or network.\n\n`FetchResult` carries `requested_url`, `final_url` (post-redirect; this is Extract's `source_url`), nullable `status_code`/`content_type`/`body`, an auto-populated tz-aware `fetched_at`, nullable `error`, and a derived `ok` (`True` iff status is 2xx and body is present). Failed fetches are represented honestly — a `body=None`/`status_code=None` result is valid and reports `ok=False` rather than masquerading as empty-but-successful content.\n\nTradeoff: `ok` is a read-only `@computed_field` rather than a stored/validated field, so it can never be set to a value contradicting its inputs. `ok` uses `body is not None` (not truthiness), so an empty-but-successful page (`body=\"\"`) stays `ok=True`, per the locked no-fabrication decision.\n\nRisks: none of note. Pure data model, no network, no I/O. 8 unit tests cover success / 404 / 403 / connection-failure / redirect / empty-body cases with no network; full suite green (32 passed)."
 }
 ```
