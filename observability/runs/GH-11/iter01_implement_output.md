@@ -1,4 +1,4 @@
-Working tree is now clean and committed.
+Committed the run artifacts; working tree is now clean.
 
 ```json
 {
@@ -6,7 +6,7 @@ Working tree is now clean and committed.
   "ticket_id": "GH-11",
   "outcome": "success",
   "exit_signal": false,
-  "summary": "FetchResult already implemented in scholarship_factory/fetch.py per spec, exported from __init__.py, covered by tests/test_fetch.py. Full suite green (32 passed). Committed run artifacts.",
+  "summary": "FetchResult already implemented per contract; full suite green (32 passed). Committed run artifacts to clean the tree.",
   "failure_reason": null,
   "files_changed": 0,
   "suggested_tools": [],

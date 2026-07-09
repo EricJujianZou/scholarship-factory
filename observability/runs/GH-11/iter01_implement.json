@@ -1,10 +1,10 @@
 {
   "stage": "implement",
   "outcome": "success",
-  "summary": "FetchResult already implemented in scholarship_factory/fetch.py per spec, exported from __init__.py, covered by tests/test_fetch.py. Full suite green (32 passed). Committed run artifacts.",
+  "summary": "FetchResult already implemented per contract; full suite green (32 passed). Committed run artifacts to clean the tree.",
   "parse_error": null,
   "timed_out": false,
-  "tokens_used": 5014,
+  "tokens_used": 4905,
   "exit_code": 0,
   "stderr_head": ""
 }
