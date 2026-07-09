@@ -1,0 +1,17 @@
+{
+  "id": "GH-12",
+  "type": "feat",
+  "priority": 5,
+  "title": "Parse layer - typed deadline dates over the stored string field (deterministic S6)",
+  "description": "The **deterministic date parse layer** for Session 6. Independent of Fetch \u2014 operates on the `Opportunity` fields that already exist (GH-1/GH-4). This ticket builds the **date** half only; the money half is a separate ticket. **No LLM, no network, no ranking.**\n\n## Context\n\nGH-1's carried-forward note: `deadline` is stored as a **verbatim string**, not a typed date. Ranking and refresh need a deterministic layer that turns the stored quoted text into an absolute date. Extract is **quoted-only by design**; the risky transform (\"closes Friday\" + anchor -> a real date) is deferred to **this** deterministic S6 layer (a library, `dateparser`/`dateutil` \u2014 **not** a second LLM call).\n\n## Locked decisions (honor; see `REPO_CONTENT.md` -> carried-forward notes + Session 2 quoted-only/derive split)\n\n- **The parse layer sets provenance `derived`** when it computes a value from quoted text. **Unresolvable -> `None`** (the deterministic boundary self-enforces no-fabrication). Never guess a date.\n- **Relative values resolve against the stored anchor** (`source_observed_date` from GH-4, falling back to `first_seen`) \u2014 **not** against \"today\". The source page is gone by S6; only the stored source span + anchor remain.\n- **Multi-deadline strings are not collapsed.** GH-5 captures e.g. `\"June 1st, and October 1st\"` verbatim; this layer returns **both** dates, not one.\n\n## Scope\n\n1. A module `scholarship_factory/parse_dates.py` with a pure function: given a stored deadline string + an anchor `date`, return an absolute `date` (or a list of dates for multi-deadline strings), or `None` when unresolvable.\n2. Use `dateparser` (handles relative + absolute; `tzdata` is already a declared dep for Windows). Resolve relative expressions against the passed anchor, not the system clock.\n3. Optionally expose a helper taking an `Opportunity` and returning the typed deadline(s) + the `derived`/`none` provenance. **No store mutation, no ranking** in this ticket.",
+  "acceptance_criteria": [
+    "`\"June 1st, and October 1st\"` + a 2024 anchor -> `[2024-06-01, 2024-10-01]` (both, not collapsed).",
+    "A relative expression (e.g. `\"closes Friday\"`) + an anchor date resolves to the correct absolute date **relative to the anchor**, not to the current day.",
+    "An unparseable or absent string -> `None`; a computed value is provenance `derived`, an unresolvable one is `none` \u2014 never guessed.",
+    "Deterministic + offline: no network, no LLM. Unit tests cover the multi-deadline case, a relative-vs-anchor case, an absolute-date case, and the `None`/unresolvable case.",
+    "`uv run pytest -q` green."
+  ],
+  "skill_match": null,
+  "passes": false,
+  "status": "open"
+}
