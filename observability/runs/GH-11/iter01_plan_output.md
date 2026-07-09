@@ -1,8 +1,8 @@
-The implementation, export, and tests already exist on-branch and match the ticket's locked decisions. This is a re-entry into the plan stage; I produce the plan following `stage_specs/plan_feat.md` exactly, reflecting the current shape in `scholarship_factory/fetch.py`.
+The implementation on-branch exactly matches the ticket's locked decisions. This is a plan-stage re-entry; I produce the plan reflecting the current shape in `scholarship_factory/fetch.py`.
 
 ## Context
 
-The seam belongs with the other pydantic v2 models. `scholarship_factory/models.py:1-14` sets house style: `from pydantic import BaseModel, Field`, `str | None = None` for nullables, `Field(default_factory=...)` for auto-populated fields (`id`, `models.py:14`). Extract consumes a `source_url` (`scholarship_factory/extract.py:125`) — that value is exactly this ticket's `final_url` (post-redirect URL). Timestamps elsewhere use tz-aware UTC (`store.py`); for an in-model field, `datetime.now(timezone.utc)` via `default_factory` is idiomatic. `scholarship_factory/__init__.py:1-18` is the public surface — every model is re-exported and named in `__all__`. Tests mirror `tests/test_models.py`: construct, assert fields. No network anywhere in this ticket.
+The seam belongs with the other pydantic v2 models. `scholarship_factory/models.py:3,14` sets house style: `from pydantic import BaseModel, Field`, `str | None = None` for nullables, `Field(default_factory=...)` for auto-populated fields (`id`, `models.py:14`). Extract consumes a `source_url` — that value is exactly this ticket's `final_url` (the post-redirect URL). Timestamps elsewhere use tz-aware UTC; for an in-model field, `datetime.now(timezone.utc)` via `default_factory` is idiomatic. `scholarship_factory/__init__.py:1-18` is the public surface — every model is re-exported and named in `__all__`. Tests mirror `tests/test_models.py`: construct, assert fields. No network anywhere in this ticket.
 
 ## Approach
 
@@ -10,23 +10,23 @@ Put `FetchResult` in a dedicated `scholarship_factory/fetch.py` (parallel to `mo
 
 ## Steps
 
-1. Create `scholarship_factory/fetch.py` — `FetchResult(BaseModel)` with `requested_url: str`, `final_url: str`, `status_code: int | None = None`, `content_type: str | None = None`, `body: str | None = None`, `fetched_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))`, `error: str | None = None`, and a `@computed_field @property def ok(self) -> bool` computing `status_code is not None and 200 <= status_code < 300 and body is not None`. Done when `FetchResult(requested_url="x", final_url="x")` constructs and `.ok is False`.
+1. Create `scholarship_factory/fetch.py` — `FetchResult(BaseModel)` with `requested_url: str`, `final_url: str`, `status_code: int | None = None`, `content_type: str | None = None`, `body: str | None = None`, `fetched_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))`, `error: str | None = None`, and a `@computed_field @property def ok(self) -> bool` computing `status_code is not None and 200 <= status_code < 300 and body is not None`. Done when `FetchResult(requested_url="x", final_url="x").ok is False`.
 2. Edit `scholarship_factory/__init__.py` — add `from .fetch import FetchResult` and `"FetchResult"` to `__all__`. Done when `from scholarship_factory import FetchResult` succeeds.
 3. Create `tests/test_fetch.py` mirroring `tests/test_models.py`: (a) success 2xx+body → `ok is True`; (b) 404 and 403 → `ok is False`; (c) connection failure (`status_code=None, body=None, error=...`) constructs and `ok is False`; (d) `final_url` defaults equal to and can differ from `requested_url`; (e) `fetched_at` is a `datetime`; (f) 2xx with `body=None` → `ok is False`. Done when all pass.
 4. Run `uv run pytest -q`. Done when green.
 
 ## Acceptance criteria mapping
 
-- "`FetchResult` exists (pydantic v2) with all eight fields + derived `ok`" -> steps 1, 2; verified by construction/field asserts and the import.
-- "Success (2xx + body) → `ok=True`; failure (status `None`, 4xx/5xx, or no body) → `ok=False`, may carry `error`; `body=None` failure valid" -> step 1 (`ok` computed field), step 3; verified by tests a, b, c, f.
-- "`final_url` equals `requested_url` when no redirect; may differ" -> step 1 (two independent `str` fields); verified by test d.
-- "`fetched_at` populated on construction" -> step 1 (`default_factory`); verified by test e.
-- "Unit tests cover success / 404-403 / connection-failure (`status_code=None` + `error`) / `ok` derivation; no network" -> step 3; verified by step 4, no `httpx`/network imported.
+- "`FetchResult` exists (pydantic v2) with `requested_url`, `final_url`, nullable `status_code`/`content_type`/`body`, `fetched_at`, nullable `error`, derived `ok`" -> steps 1, 2; verified by construction/field asserts (`fetch.py:6-22`) and the import (`__init__.py:2`).
+- "Success (2xx + body) → `ok=True`; failure (status `None`, 4xx/5xx, or no body) → `ok=False`, may carry `error`; `body=None` failure valid" -> step 1 (`ok` computed field), step 3; verified by tests success/404/403/connection-failure/2xx-no-body.
+- "`final_url` equals `requested_url` when no redirect; may differ" -> step 1 (two independent `str` fields); verified by tests `test_final_url_defaults_to_requested_url` / `test_final_url_can_differ_after_redirect`.
+- "`fetched_at` populated on construction" -> step 1 (`default_factory`); verified by `test_fetched_at_is_populated`.
+- "Unit tests cover success / 404-403 / connection-failure (`status_code=None` + `error`) / `ok` derivation; no network" -> step 3; verified by step 4, no `httpx`/network imported in either file.
 - "`uv run pytest -q` green" -> step 4; verified by exit 0.
 
 ## Risks
 
-1. **`computed_field` decorator order** — `@computed_field` must sit above `@property` and the property must be annotated `-> bool`, or `ok` won't register. If it errors, check decorator order.
+1. **`computed_field` decorator order** — `@computed_field` must sit above `@property` and the property must be annotated `-> bool`, or `ok` won't register. If it errors, check decorator order (`fetch.py:15-17`).
 2. **`fetched_at` assertion flake** — assert `isinstance(result.fetched_at, datetime)`, never equality against a captured time.
 3. **`body=""` vs `body=None`** — `ok` uses `body is not None`, so an empty-but-successful page (`body=""`) stays `ok=True`; do not switch to `bool(body)`, which would misreport an empty page as a failed fetch and violate the locked no-fabrication decision.
 
@@ -40,11 +40,11 @@ Carried in the status block below.
   "ticket_id": "GH-11",
   "outcome": "success",
   "exit_signal": false,
-  "summary": "Plan to add a derived-`ok` FetchResult pydantic v2 model in a new fetch.py, export it, and unit-test success/404/403/connection-failure/ok-derivation with no network. Implementation already present on-branch and matches this plan exactly.",
+  "summary": "Plan to add a derived-`ok` FetchResult pydantic v2 model in a new fetch.py, export it, and unit-test success/404/403/connection-failure/ok-derivation with no network. Implementation already present on-branch and matches this plan exactly (fetch.py, __init__.py:2, tests/test_fetch.py, 8 tests).",
   "failure_reason": null,
   "files_changed": 0,
   "suggested_tools": [],
   "system_repair_suggested": false,
-  "file_manifest": {"edit": ["scholarship_factory/fetch.py", "scholarship_factory/__init__.py:2", "tests/test_fetch.py"], "read": ["scholarship_factory/models.py:1", "scholarship_factory/extract.py:125", "scholarship_factory/store.py", "tests/test_models.py"]}
+  "file_manifest": {"edit": ["scholarship_factory/fetch.py", "scholarship_factory/__init__.py:2", "tests/test_fetch.py"], "read": ["scholarship_factory/models.py:1", "scholarship_factory/extract.py", "tests/test_models.py"]}
 }
 ```

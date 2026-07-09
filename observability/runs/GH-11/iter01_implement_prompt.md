@@ -197,8 +197,7 @@ Edit:
 
 Read:
 - scholarship_factory/models.py:1
-- scholarship_factory/extract.py:125
-- scholarship_factory/store.py
+- scholarship_factory/extract.py
 - tests/test_models.py
 
 
