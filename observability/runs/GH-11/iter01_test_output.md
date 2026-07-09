@@ -1,4 +1,4 @@
-Committed. Working tree is clean now.
+Committed. Test stage complete — full suite passed (32 passed), all acceptance criteria verified.
 
 ```json
 {
@@ -6,7 +6,7 @@ Committed. Working tree is clean now.
   "ticket_id": "GH-11",
   "outcome": "success",
   "exit_signal": false,
-  "summary": "Ran build sanity, full suite (32 passed), and targeted FetchResult tests (8 passed). All 6 acceptance criteria verified against actual behavior. Committed run artifacts.",
+  "summary": "Ran full suite (uv run pytest -q): 32 passed. All 6 acceptance criteria verified against scholarship_factory/fetch.py and tests/test_fetch.py; no network calls, ok derivation and redirect handling confirmed. Run artifacts committed.",
   "failure_reason": null,
   "files_changed": 4,
   "suggested_tools": [],

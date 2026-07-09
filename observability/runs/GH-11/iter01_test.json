@@ -1,10 +1,10 @@
 {
   "stage": "test",
   "outcome": "success",
-  "summary": "Ran build sanity, full suite (32 passed), and targeted FetchResult tests (8 passed). All 6 acceptance criteria verified against actual behavior. Committed run artifacts.",
+  "summary": "Ran full suite (uv run pytest -q): 32 passed. All 6 acceptance criteria verified against scholarship_factory/fetch.py and tests/test_fetch.py; no network calls, ok derivation and redirect handling confirmed. Run artifacts committed.",
   "parse_error": null,
   "timed_out": false,
-  "tokens_used": 5662,
+  "tokens_used": 5283,
   "exit_code": 0,
   "stderr_head": ""
 }

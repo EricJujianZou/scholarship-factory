@@ -1,10 +1,10 @@
 {
   "stage": "review",
   "outcome": "success",
-  "summary": "FetchResult contract meets all 6 acceptance criteria: pydantic v2 model, 8 fields + derived `ok` (True iff status 2xx and body present), honest failure (body=None valid, empty-string body stays ok=True per the no-fabrication decision), final_url distinct from requested_url and confirmed to feed extract()'s source_url, tz-aware fetched_at auto-populated. 8 unit tests, no network. Could not re-run pytest (sandbox denied uv/pytest, as in the test stage); verified by reading against concrete test evidence (32 passed). No user-facing surface. Clean first solve of the 'shared typed seam' class \u2014 candidate for a skills/ entry.",
+  "summary": "All 6 acceptance criteria verified against fetch.py/test_fetch.py: FetchResult pydantic v2 model with correct derived `ok` (2xx + body, None-guarded, empty-body honest), redirect-distinct final_url, tz-aware fetched_at, 8 no-network tests. Test stage recorded 32 passed. No user-facing surface (Playwright N/A). Clean seam for Extract's source_url. Candidate skill class: 'typed hand-off contract model' (cf. GH-1/GH-4).",
   "parse_error": null,
   "timed_out": false,
-  "tokens_used": 9271,
+  "tokens_used": 9017,
   "exit_code": 0,
   "stderr_head": ""
 }
