@@ -1,10 +1,10 @@
 {
   "stage": "document",
   "outcome": "success",
-  "summary": "docs/changes/GH-11.md was already accurate; committed the modified run artifacts to satisfy the clean-tree requirement.",
+  "summary": "docs/changes/GH-11.md already accurate against the current diff (fetch.py, __init__.py, test_fetch.py); committed the modified review/test run artifacts to satisfy the clean-tree requirement.",
   "parse_error": null,
   "timed_out": false,
-  "tokens_used": 5104,
+  "tokens_used": 5890,
   "exit_code": 0,
   "stderr_head": ""
 }
