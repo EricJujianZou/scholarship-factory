@@ -1,10 +1,10 @@
 {
   "stage": "test",
   "outcome": "success",
-  "summary": "Full suite 31 passed (7 in test_parse_dates.py); all 5 acceptance criteria verified with quoted evidence. Committed run artifacts.",
+  "summary": "Full suite green (31 passed); all 5 acceptance criteria individually verified against parse_dates.py behavior and tests/test_parse_dates.py.",
   "parse_error": null,
   "timed_out": false,
-  "tokens_used": 5944,
+  "tokens_used": 6196,
   "exit_code": 0,
   "stderr_head": ""
 }
