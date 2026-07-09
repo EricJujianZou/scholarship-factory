@@ -1,0 +1,10 @@
+{
+  "stage": "plan",
+  "outcome": "success",
+  "summary": "Deterministic date-parse layer: pure parse_deadline_dates(text, anchor) on dateparser.search_dates + a typed_deadlines(opp) provenance helper; anchor-relative, multi-deadline uncollapsed, unresolvable->None. Requires adding the dateparser dependency.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 12316,
+  "exit_code": 0,
+  "stderr_head": ""
+}
