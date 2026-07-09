@@ -1,0 +1,10 @@
+{
+  "stage": "implement",
+  "outcome": "success",
+  "summary": "Added dateparser dependency, parse_dates.py (parse_deadline_dates + typed_deadlines), and tests; anchor-relative multi-deadline parsing verified against all AC cases. Committed run artifacts and state.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 9683,
+  "exit_code": 0,
+  "stderr_head": ""
+}
