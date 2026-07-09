@@ -1,12 +1,12 @@
-The implementation, exports, and tests already exist on this branch and match the ticket's locked decisions exactly. This is a re-entry into the plan stage; I'll produce the plan following `stage_specs/plan_feat.md` exactly.
+The implementation, export, and tests already exist on-branch and match the ticket's locked decisions. This is a re-entry into the plan stage; I produce the plan following `stage_specs/plan_feat.md` exactly, reflecting the current shape in `scholarship_factory/fetch.py`.
 
 ## Context
 
-The seam belongs with the other pydantic v2 models. `scholarship_factory/models.py:1-14` sets house style: `from pydantic import BaseModel, Field`, `str | None = None` for nullables, `Field(default_factory=...)` for auto-populated fields (`id`, `models.py:14`). Extract consumes a `source_url` (`scholarship_factory/extract.py`) — that value is exactly this ticket's `final_url` (post-redirect URL). Timestamps elsewhere use tz-aware UTC (`store.py`); for an in-model field, `datetime.now(timezone.utc)` via `default_factory` is idiomatic. `scholarship_factory/__init__.py:1-18` is the public surface — every model is re-exported and named in `__all__`. Tests mirror `tests/test_models.py`: construct, assert fields. No network anywhere in this ticket.
+The seam belongs with the other pydantic v2 models. `scholarship_factory/models.py:1-14` sets house style: `from pydantic import BaseModel, Field`, `str | None = None` for nullables, `Field(default_factory=...)` for auto-populated fields (`id`, `models.py:14`). Extract consumes a `source_url` (`scholarship_factory/extract.py:125`) — that value is exactly this ticket's `final_url` (post-redirect URL). Timestamps elsewhere use tz-aware UTC (`store.py`); for an in-model field, `datetime.now(timezone.utc)` via `default_factory` is idiomatic. `scholarship_factory/__init__.py:1-18` is the public surface — every model is re-exported and named in `__all__`. Tests mirror `tests/test_models.py`: construct, assert fields. No network anywhere in this ticket.
 
 ## Approach
 
-Put `FetchResult` in a dedicated `scholarship_factory/fetch.py` (parallel to `models.py`/`extract.py`), reserving the future fetcher's home without polluting the Opportunity-centric `models.py`. The eight declared fields are plain typed fields; `fetched_at` uses `Field(default_factory=lambda: datetime.now(timezone.utc))` so it self-populates. `ok` is a read-only derived value implemented as a pydantic v2 `@computed_field` property returning `status_code is not None and 200 <= status_code < 300 and body is not None` — keeping `ok` un-settable and always consistent with its inputs. Rejected alternative: a stored `ok` field set via `model_validator(mode="after")` (the `models.py:42` style) — it works but lets a caller pass a contradictory `ok=` and needs guarding, so the computed property is strictly simpler for a purely derived flag.
+Put `FetchResult` in a dedicated `scholarship_factory/fetch.py` (parallel to `models.py`/`extract.py`), reserving the future fetcher's home without polluting the Opportunity-centric `models.py`. The eight declared fields are plain typed fields; `fetched_at` uses `Field(default_factory=lambda: datetime.now(timezone.utc))` so it self-populates tz-aware. `ok` is a read-only derived value implemented as a pydantic v2 `@computed_field` property returning `status_code is not None and 200 <= status_code < 300 and body is not None` — keeping `ok` un-settable and always consistent with its inputs. Rejected alternative: a stored `ok` field set via `model_validator(mode="after")` (the `models.py:42` style) — it works but lets a caller pass a contradictory `ok=` and needs guarding, so the computed property is strictly simpler for a purely derived flag.
 
 ## Steps
 
@@ -40,11 +40,11 @@ Carried in the status block below.
   "ticket_id": "GH-11",
   "outcome": "success",
   "exit_signal": false,
-  "summary": "Plan to add a derived-`ok` FetchResult pydantic v2 model in a new fetch.py, export it, and unit-test success/404/403/connection-failure/ok-derivation with no network. Implementation already present on-branch and matches this plan.",
+  "summary": "Plan to add a derived-`ok` FetchResult pydantic v2 model in a new fetch.py, export it, and unit-test success/404/403/connection-failure/ok-derivation with no network. Implementation already present on-branch and matches this plan exactly.",
   "failure_reason": null,
   "files_changed": 0,
   "suggested_tools": [],
   "system_repair_suggested": false,
-  "file_manifest": {"edit": ["scholarship_factory/fetch.py", "scholarship_factory/__init__.py:2", "tests/test_fetch.py"], "read": ["scholarship_factory/models.py:1", "scholarship_factory/extract.py", "scholarship_factory/store.py", "tests/test_models.py"]}
+  "file_manifest": {"edit": ["scholarship_factory/fetch.py", "scholarship_factory/__init__.py:2", "tests/test_fetch.py"], "read": ["scholarship_factory/models.py:1", "scholarship_factory/extract.py:125", "scholarship_factory/store.py", "tests/test_models.py"]}
 }
 ```
