@@ -1,27 +1,27 @@
-All three lenses check out. Let me record my findings.
+Both `uv`/`pytest` invocations are denied by the sandbox — the same tooling limitation the test and prior review stages hit. I'll verify by reading the code against the evidence, which is trivially checkable for a pure data model.
+
+My independent review follows.
 
 ## Review — GH-11: FetchResult contract
 
-**Manifest sufficiency.** Accurate. The only product-code changes are `fetch.py` (new), `__init__.py` (export), and `tests/test_fetch.py` (new). Remaining working-tree modifications (`observability/…`, `state.json`) are harness bookkeeping, not part of this ticket's diff.
+**Manifest sufficiency.** Accurate and sufficient. The only product-code changes are `scholarship_factory/fetch.py` (new), `scholarship_factory/__init__.py` (export), and `tests/test_fetch.py` (new). The remaining working-tree changes (`observability/…`, `state.json`) are harness bookkeeping, outside this ticket's diff.
 
-### Lens 1 — intent (acceptance criteria, walked)
+### Lens 1 — intent (acceptance criteria, walked one by one)
 
-1. **Type exists, pydantic v2, all 8 fields + derived `ok`** ✓ — `fetch.py:6-22`: `requested_url`, `final_url`, `status_code: int|None`, `content_type: str|None`, `body: str|None`, `fetched_at`, `error: str|None`, and `ok` as a `@computed_field @property`. Exported at `__init__.py:2` and in `__all__`. `pydantic>=2` in the manifest, so `computed_field` is available.
-2. **`ok` derivation + honest failure** ✓ — `status_code is not None and 200 <= status_code < 300 and body is not None`. The deliberate `body is not None` (not `bool(body)`) keeps an empty-but-successful page (`body=""`) as `ok=True`, honoring the locked no-fabrication decision. Covered by the success, 404, 403, and `2xx_with_no_body` tests; the connection-failure test constructs with `body=None` and asserts it is valid.
-3. **`final_url` may equal or differ from `requested_url`** ✓ — two independent `str` fields; both tests present.
-4. **`fetched_at` populated on construction** ✓ — `Field(default_factory=lambda: datetime.now(timezone.utc))`, tz-aware, matching `store.py` convention; `test_fetched_at_is_populated`.
-5. **Tests cover success / 404-403 / connection-failure / `ok` derivation, no network** ✓ — 8 tests; no `httpx`/network import in either `fetch.py` or `test_fetch.py`.
-6. **`uv run pytest -q` green** ✓ (via evidence) — I could not re-run: the sandbox denied every `pytest`/`uv` invocation, same as the test and prior review stages. Test-stage evidence is concrete (32 passed, 8 in `test_fetch.py`), and the code is trivially verifiable by reading.
-
-**Seam confirmed:** `extract.extract(raw_html, source_url, …)` (`extract.py:125`) consumes exactly `source_url`, which `FetchResult.final_url` is defined to feed. The typed hand-off lines up.
+1. **Type exists (pydantic v2), 8 fields + derived `ok`** ✓ — `fetch.py:6-22`: `requested_url`, `final_url`, `status_code: int | None`, `content_type: str | None`, `body: str | None`, `fetched_at`, `error: str | None`, plus `ok` as `@computed_field @property`. Re-exported at `__init__.py:2` and in `__all__:17`.
+2. **`ok` derivation + honest failure** ✓ — `status_code is not None and 200 <= status_code < 300 and body is not None` (`fetch.py:18-22`). The deliberate `body is not None` (not `bool(body)`) keeps an empty-but-successful page (`body=""`) as `ok=True`, honoring the locked no-fabrication decision. Covered by `test_success…`, `test_404…`, `test_403…`, `test_2xx_with_no_body…`; the connection-failure test constructs with `status_code=None, body=None` and asserts validity + `ok is False`.
+3. **`final_url` may equal or differ from `requested_url`** ✓ — two independent `str` fields; `test_final_url_defaults_to_requested_url` and `test_final_url_can_differ_after_redirect` both present. Seam confirmed: `extract.extract(raw_html, source_url, …)` (`extract.py:125`) consumes exactly the value `final_url` is defined to feed.
+4. **`fetched_at` populated on construction** ✓ — `Field(default_factory=lambda: datetime.now(timezone.utc))` (`fetch.py:12`), tz-aware, matching the `store.py`/`models.py:14` convention; `test_fetched_at_is_populated`.
+5. **Tests cover success / 404-403 / connection-failure / `ok` derivation, no network** ✓ — 8 tests; no `httpx` or network import in either file.
+6. **`uv run pytest -q` green** ✓ (via evidence) — I could not re-run; the sandbox denied every `uv`/`pytest` invocation (same limitation the test and prior review stages recorded). Test-stage evidence is concrete (32 passed, 8 in `test_fetch.py`), and a pure computed-field data model is fully verifiable by reading.
 
 ### Lens 2 — quality & security
-Correctness is sound across every `ok` branch (None status, 4xx/5xx, empty body, empty-string body); decorator order correct. No network, subprocess, file, or secret handling — a pure data model. No dead code; every test asserts meaningfully; matches `models.py` house style.
+Correct across every `ok` branch (`None` status, 4xx/5xx, `body=None`, `body=""`); `@computed_field` above `@property` with `-> bool` annotation is the correct decorator order. No network, subprocess, file, or secret handling — a pure data contract. No dead code; every test asserts meaningfully; style matches `models.py`.
 
 ### Lens 3 — visual
-No user-facing surface — a pure typed data contract. Playwright not applicable; nothing to render.
+No user-facing surface — a typed data seam with nothing to render. Playwright not applicable; visual verification correctly skipped for lack of a UI, not lack of tooling.
 
-**Verdict:** all three lenses pass, every criterion verified against evidence, product diff clean and committed. This is a clean first solve of the "shared typed seam" class (cf. GH-1/GH-4) — a candidate for a `skills/` entry.
+**Verdict:** all three lenses pass, every criterion verified against evidence, product diff clean and committed. Clean first solve of the "shared typed seam" class (cf. GH-1/GH-4) — a candidate for a `skills/` entry.
 
 ```json
 {
@@ -29,7 +29,7 @@ No user-facing surface — a pure typed data contract. Playwright not applicable
   "ticket_id": "GH-11",
   "outcome": "success",
   "exit_signal": true,
-  "summary": "FetchResult contract meets all 6 acceptance criteria: pydantic v2 model, 8 fields + derived `ok` (True iff 2xx and body present), honest failure (body=None valid, empty-string body stays ok), final_url distinct from requested_url and confirmed to feed extract()'s source_url, tz-aware fetched_at auto-populated. 8 unit tests, no network. All three lenses pass; no user-facing surface. Clean first solve of the 'shared typed seam' class — candidate for a skills/ entry.",
+  "summary": "FetchResult contract meets all 6 acceptance criteria: pydantic v2 model, 8 fields + derived `ok` (True iff status 2xx and body present), honest failure (body=None valid, empty-string body stays ok=True per the no-fabrication decision), final_url distinct from requested_url and confirmed to feed extract()'s source_url, tz-aware fetched_at auto-populated. 8 unit tests, no network. Could not re-run pytest (sandbox denied uv/pytest, as in the test stage); verified by reading against concrete test evidence (32 passed). No user-facing surface. Clean first solve of the 'shared typed seam' class — candidate for a skills/ entry.",
   "failure_reason": null,
   "files_changed": 3,
   "suggested_tools": ["playwright"],
