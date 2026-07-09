@@ -1,0 +1,10 @@
+{
+  "stage": "review",
+  "outcome": "success",
+  "summary": "Deterministic S6 date-parse layer verified across all three lenses: pure parse_deadline_dates(text, anchor) over dateparser.search_dates + read-only typed_deadlines(opp) provenance helper. All 5 acceptance criteria backed by concrete tests (multi-deadline uncollapsed, relative-vs-anchor proven via two-anchor divergence, absolute date, unresolvable->None/derived provenance); 31 tests pass. No user-facing surface, so visual lens is N/A. Code clean, offline, no fabrication. Clean-first solve of the deterministic-parse-layer class \u2014 candidate for a skills/ entry.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 9971,
+  "exit_code": 0,
+  "stderr_head": ""
+}

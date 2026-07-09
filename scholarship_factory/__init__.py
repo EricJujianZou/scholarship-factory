@@ -2,6 +2,7 @@ from .extract import ExtractionResult, PageKind, extract
 from .fetch import FetchResult
 from .jsonld import extract_jsonld
 from .models import Opportunity, Provenance
+from .parse_dates import parse_deadline_dates, typed_deadlines
 from .store import OpportunityStore
 from .urls import normalize_apply_url
 
@@ -14,5 +15,7 @@ __all__ = [
     "extract_jsonld",
     "ExtractionResult",
     "PageKind",
+    "parse_deadline_dates",
+    "typed_deadlines",
     "FetchResult",
 ]

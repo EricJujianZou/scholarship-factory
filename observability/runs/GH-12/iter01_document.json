@@ -1,0 +1,10 @@
+{
+  "stage": "document",
+  "outcome": "success",
+  "summary": "docs/changes/GH-12.md was already correct and committed from a prior run; committed the pending run-artifact/state files to satisfy the clean-tree checklist.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 4809,
+  "exit_code": 0,
+  "stderr_head": ""
+}
