@@ -5,6 +5,7 @@ requires-python = ">=3.11"
 dependencies = [
     "fastapi",
     "pydantic>=2",
+    "dateparser",
 ]
 
 [project.optional-dependencies]
