@@ -1,0 +1,10 @@
+{
+  "stage": "review",
+  "outcome": "success",
+  "summary": "All 6 acceptance criteria verified against fetch.py/test_fetch.py: FetchResult pydantic v2 model with correct derived `ok` (2xx + body, None-guarded, empty-body honest), redirect-distinct final_url, tz-aware fetched_at, 8 no-network tests. Test stage recorded 32 passed. No user-facing surface (Playwright N/A). Clean seam for Extract's source_url. Candidate skill class: 'typed hand-off contract model' (cf. GH-1/GH-4).",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 9017,
+  "exit_code": 0,
+  "stderr_head": ""
+}

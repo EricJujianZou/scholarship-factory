@@ -12,6 +12,7 @@ context lives in the linked docs below, read only when its task comes up.
 |---|---|
 | Understanding the product (direction, UX, requirements, decisions) | `REPO_CONTENT.md` |
 | Wondering how this repo gets built (tickets, branches, hooks, the engine) | `HARNESS.md` |
+| Working with GitHub (issues, PRs) or other env gotchas | `notes_for_claude.md` |
 | In a **system-design / pair-design session** with the owner | `mentor.md` *(temporary; deleted when design settles)* |
 | Needing engine internals | the sibling `agentic-sdlc` repo — see `HARNESS.md` → *Reaching the engine* |
 
