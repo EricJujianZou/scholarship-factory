@@ -1,4 +1,4 @@
-Working tree is now clean.
+Tree is clean now.
 
 ```json
 {
@@ -6,9 +6,9 @@ Working tree is now clean.
   "ticket_id": "GH-12",
   "outcome": "success",
   "exit_signal": false,
-  "summary": "Committed docs/changes/GH-12.md plus the remaining run artifacts and state.json that the stop checklist flagged.",
+  "summary": "docs/changes/GH-12.md already existed and was accurate; committed the stage's observability run artifacts and state.json to satisfy the clean-tree requirement.",
   "failure_reason": null,
-  "files_changed": 1,
+  "files_changed": 7,
   "suggested_tools": [],
   "system_repair_suggested": false
 }

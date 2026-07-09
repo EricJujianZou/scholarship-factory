@@ -1,10 +1,10 @@
 {
   "stage": "document",
   "outcome": "success",
-  "summary": "Committed docs/changes/GH-12.md plus the remaining run artifacts and state.json that the stop checklist flagged.",
+  "summary": "docs/changes/GH-12.md already existed and was accurate; committed the stage's observability run artifacts and state.json to satisfy the clean-tree requirement.",
   "parse_error": null,
   "timed_out": false,
-  "tokens_used": 6421,
+  "tokens_used": 5022,
   "exit_code": 0,
   "stderr_head": ""
 }
