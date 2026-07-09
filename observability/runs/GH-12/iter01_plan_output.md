@@ -1,34 +1,34 @@
-The implementation already exists on-branch and matches a prior successful plan. This plan-stage re-trigger just needs the work-order produced. Here is the grounded plan.
+The implementation is fully present on-branch and matches the prior successful plan (`parse_dates.py`, tests, `__init__.py` exports, and `dateparser` already in deps). This is a plan-stage re-trigger, so I'll produce the grounded work order reflecting the actual on-branch state.
 
 ## Context
 
-New module `scholarship_factory/parse_dates.py` (currently the only date-parsing code). It reads `Opportunity` from `models.py`: `deadline: str | None`, anchors `source_observed_date: str | None` and `first_seen: str | None` (stored by `store.py` as ISO-8601 strings), and the `Provenance` enum `QUOTED|DERIVED|NONE`. The model's `_require_source_for_provenance` validator binds only when a *stored* `*_provenance` field is set with a `None` source — this ticket's helper returns values and never mutates the model, so that constraint does not apply. Contrary to the ticket aside, `dateparser`/`tzdata` are absent from `pyproject.toml`/`uv.lock`, so a dependency add is required. Locked decisions to honor: resolve relatives against the stored anchor (never "today"), unresolvable → `None`, computed → provenance `derived`, multi-deadline strings returned uncollapsed.
+The feature lives in `scholarship_factory/parse_dates.py` (the only date-parsing code). It reads from `models.py`: `Opportunity.deadline: str | None` (verbatim stored string, GH-1), the anchors `source_observed_date: str | None` (GH-4) and `first_seen: str | None`, and the `Provenance` enum (`QUOTED|DERIVED|NONE`). `store.py` writes `first_seen` as an ISO-8601 string with `+00:00` offset. The model's `_require_source_for_provenance` validator (`models.py:42`) binds only on *stored* `*_provenance` fields with a `None` source — this ticket's helper returns values and never persists, so it does not apply. Locked decisions honored: relatives resolve against the stored anchor (never "today"), unresolvable → `None`, computed → `derived`, multi-deadline strings uncollapsed. `dateparser` is now present in `pyproject.toml` (with transitive `tzdata` for Windows).
 
 ## Approach
 
-A pure function `parse_deadline_dates(text, anchor) -> list[date] | None` built on `dateparser.search.search_dates`, which handles absolute, relative, and multi-date strings in one mechanism — critical because naive comma-splitting would wrongly break a single date like `"September 15, 2024"`, while `search_dates` returns one match there and two for `"June 1st, and October 1st"` in appearance order. Relatives resolve via `settings["RELATIVE_BASE"] = datetime.combine(anchor, time.min)` with `PREFER_DATES_FROM="future"` (a deadline is future relative to its anchor) and `languages=["en"]` for deterministic offline behavior. A thin `typed_deadlines(opp) -> tuple[list[date] | None, Provenance]` derives the anchor (`source_observed_date` → `first_seen`, via a tolerant `_parse_anchor` that tries `datetime.fromisoformat` then `dateparser.parse`) and maps a non-empty result to `DERIVED`, else `NONE`. Rejected alternative: `python-dateutil` + hand-rolled comma splitting — it has no relative-anchor resolution and no safe multi-date tokenizer, pushing that risk onto us.
+A pure function `parse_deadline_dates(text, anchor) -> list[date] | None` built on `dateparser.search.search_dates`, which handles absolute, relative, and multi-date strings in one mechanism — critical because naive comma-splitting would wrongly break a single date like `"September 15, 2024"`, while `search_dates` returns one match there and two for `"June 1st, and October 1st"` in appearance order. Relatives resolve via `settings["RELATIVE_BASE"] = datetime.combine(anchor, time.min)` with `PREFER_DATES_FROM="future"` (a deadline is future relative to its anchor), `RETURN_AS_TIMEZONE_AWARE=False`, and `languages=["en"]` for deterministic offline behavior. A thin read-only `typed_deadlines(opp) -> tuple[list[date] | None, Provenance]` derives the anchor (`source_observed_date` → `first_seen`, via a tolerant `_parse_anchor` that tries `datetime.fromisoformat` then `dateparser.parse`) and maps a non-empty result to `DERIVED`, else `NONE`. Rejected alternative: `python-dateutil` + hand-rolled comma splitting — no relative-anchor resolution and no safe multi-date tokenizer, pushing that risk onto us.
 
 ## Steps
 
-1. Add `dateparser` to `[project].dependencies` in `pyproject.toml` and `uv sync` — done when `uv run python -c "import dateparser"` succeeds and `uv.lock` carries `dateparser` (+ transitive `tzdata`).
-2. Create `scholarship_factory/parse_dates.py` with `parse_deadline_dates(text: str | None, anchor: date) -> list[date] | None`: guard empty/whitespace `text` → `None`; call `search_dates(text, languages=["en"], settings={"RELATIVE_BASE": datetime.combine(anchor, time.min), "PREFER_DATES_FROM": "future", "RETURN_AS_TIMEZONE_AWARE": False})`; falsy result → `None`; else collect `dt.date()` per match, dedup preserving first-seen order, return list or `None` if empty — done when the four AC inputs return expected values.
-3. In the same module add `_parse_anchor(raw) -> date | None` (try `fromisoformat`, fall back to `dateparser.parse`) and `typed_deadlines(opp) -> tuple[list[date] | None, Provenance]`: `(None, Provenance.NONE)` when `opp.deadline` blank or no anchor derivable; else `(dates, DERIVED)` if `parse_deadline_dates` non-empty, else `(None, NONE)` — done when a stubbed `Opportunity` with a relative deadline + anchor yields `DERIVED`.
-4. Export `parse_deadline_dates` and `typed_deadlines` from `scholarship_factory/__init__.py` (imports + `__all__`) — done when `from scholarship_factory import parse_deadline_dates, typed_deadlines` works.
-5. Create `tests/test_parse_dates.py` covering the multi-deadline case, a relative-vs-anchor case (same string against two anchors → distinct results, proving it never uses the system clock), an absolute-date case, an unparseable → `None` case, and the `typed_deadlines` provenance mapping — done when `uv run pytest -q` is green.
+1. Confirm `dateparser` is in `[project].dependencies` in `pyproject.toml` and `uv.lock` — done when `uv run python -c "import dateparser"` succeeds. *(Already present on-branch.)*
+2. `scholarship_factory/parse_dates.py` — `parse_deadline_dates(text, anchor)`: guard empty/whitespace `text` → `None`; call `search_dates(text, languages=["en"], settings={RELATIVE_BASE, PREFER_DATES_FROM:"future", RETURN_AS_TIMEZONE_AWARE:False})`; falsy → `None`; else collect `dt.date()` per match, dedup preserving first-seen order, return list or `None` if empty — done when the four AC inputs return expected values. *(Present, `parse_dates.py:9`.)*
+3. Same module — `_parse_anchor(raw)` (ISO-first, `dateparser.parse` fallback) and `typed_deadlines(opp)`: `(None, NONE)` when `deadline` blank or no anchor derivable; else `(dates, DERIVED)` if non-empty, else `(None, NONE)` — done when a stubbed `Opportunity` with a relative deadline + anchor yields `DERIVED`. *(Present, `parse_dates.py:33`, `:44`.)*
+4. Export `parse_deadline_dates` and `typed_deadlines` from `scholarship_factory/__init__.py` — done when `from scholarship_factory import parse_deadline_dates, typed_deadlines` works. *(Present, `__init__.py:4,17-18`.)*
+5. `tests/test_parse_dates.py` covering multi-deadline, relative-vs-anchor (same string vs two anchors → distinct dates, proving no system-clock use), absolute-date, unparseable→`None`, and the three `typed_deadlines` provenance cases — done when `uv run pytest -q` is green. *(Present, 7 tests, `test_parse_dates.py`.)*
 
 ## Acceptance criteria mapping
 
-- `"June 1st, and October 1st"` + 2024 anchor -> `[2024-06-01, 2024-10-01]` (uncollapsed) -> steps 2, 5; verified by the multi-deadline test asserting a 2-element ordered list.
-- Relative expression resolves against anchor, not today -> steps 2, 5; verified by the relative-vs-anchor test using `RELATIVE_BASE` and asserting the anchor-derived date.
-- Unparseable/absent -> `None`; computed -> `derived`, unresolvable -> `none`, never guessed -> steps 2, 3, 5; verified by the `None` test and the `typed_deadlines` provenance test.
+- `"June 1st, and October 1st"` + 2024 anchor -> `[2024-06-01, 2024-10-01]` (uncollapsed) -> steps 2, 5; verified by `test_multi_deadline_not_collapsed` asserting the 2-element ordered list.
+- Relative expression resolves against anchor, not today -> steps 2, 5; verified by `test_relative_expression_resolves_against_anchor_not_today` (two anchors → `[2024-01-05]` vs `[2024-06-07]`).
+- Unparseable/absent -> `None`; computed -> `derived`, unresolvable -> `none`, never guessed -> steps 2, 3, 5; verified by `test_unparseable_or_absent_returns_none` + the three `test_typed_deadlines_*` provenance tests.
 - Deterministic + offline, tests cover all four cases -> steps 2, 5; verified by tests passing with no network/LLM (`languages=["en"]`, `search_dates` only).
 - `uv run pytest -q` green -> steps 1, 5; verified by running it.
 
 ## Risks
 
-- `search_dates` can over-/under-match noisy strings (stray numeric tokens). If a test surfaces a spurious match, keep `languages=["en"]` and, if still needed, filter results whose matched substring lacks a month/weekday token — do **not** fall back to comma-splitting, which breaks `"September 15, 2024"`.
-- `PREFER_DATES_FROM="future"` with a yearless month (`"June 1st"`) resolves to the anchor's year only if the anchor precedes that month; anchor test fixtures early in the year (e.g. `date(2024,1,1)`) so June and October both land in 2024.
-- On Windows `dateparser` needs `tzdata` for zoneinfo; if `uv sync` doesn't pull it transitively, add `tzdata` explicitly and re-sync.
+- `search_dates` can over-/under-match noisy strings (stray numeric tokens). If a test surfaces a spurious match, keep `languages=["en"]` and, if needed, filter results whose matched substring lacks a month/weekday token — do **not** fall back to comma-splitting, which breaks `"September 15, 2024"`.
+- `PREFER_DATES_FROM="future"` with a yearless month (`"June 1st"`) resolves to the anchor's year only if the anchor precedes that month; fixtures anchor early in the year (`date(2024,1,1)`) so June and October both land in 2024.
+- On Windows `dateparser` needs `tzdata` for zoneinfo; if a fresh `uv sync` doesn't pull it transitively, add `tzdata` explicitly and re-sync.
 
 ## File manifest
 
@@ -40,7 +40,7 @@ Edit: `pyproject.toml`, `scholarship_factory/parse_dates.py`, `scholarship_facto
   "ticket_id": "GH-12",
   "outcome": "success",
   "exit_signal": false,
-  "summary": "Deterministic S6 date-parse layer: pure parse_deadline_dates(text, anchor) over dateparser.search_dates + typed_deadlines(opp) provenance helper; anchor-relative resolution, multi-deadline uncollapsed, unresolvable->None/derived. Requires adding the dateparser dependency. Note: implementation already present on-branch from a prior completed run; this is a plan-stage re-trigger.",
+  "summary": "Deterministic S6 date-parse layer: pure parse_deadline_dates(text, anchor) over dateparser.search_dates + read-only typed_deadlines(opp) provenance helper; anchor-relative resolution, multi-deadline uncollapsed, unresolvable->None/derived. Implementation already present and green on-branch (7 tests) from a prior completed run; this is a plan-stage re-trigger, so the plan is grounded in the actual on-branch state for implement/test to verify.",
   "failure_reason": null,
   "files_changed": 0,
   "suggested_tools": [],
