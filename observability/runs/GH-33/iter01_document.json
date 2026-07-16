@@ -1,0 +1,10 @@
+{
+  "stage": "document",
+  "outcome": "success",
+  "summary": "docs/changes/GH-33.md committed; remaining state.json and observability run artifacts committed to satisfy the clean-tree check.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 3876,
+  "exit_code": 0,
+  "stderr_head": ""
+}
