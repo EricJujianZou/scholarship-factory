@@ -1,0 +1,10 @@
+{
+  "stage": "test",
+  "outcome": "success",
+  "summary": "131 passed. Review's must-fix (vacuous last_seen assertion) confirmed corrected in tests/test_identity.py \u2014 all 5 acceptance criteria now have real evidence, including AC2's last_seen-refresh clause.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 1687,
+  "exit_code": 0,
+  "stderr_head": ""
+}
