@@ -1,0 +1,10 @@
+{
+  "stage": "test",
+  "outcome": "success",
+  "summary": "Full suite green: 131 passed. All 5 acceptance criteria verified against dedicated tests in tests/test_identity.py plus store regression tests.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 3557,
+  "exit_code": 0,
+  "stderr_head": ""
+}
