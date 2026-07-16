@@ -240,3 +240,39 @@ def test_target_outcome_exposes_traversal_cap_reached(tmp_path):
     outcome = next(o for o in report.outcomes if o.url == "https://example.com/listing")
     assert outcome.traversal is not None
     assert outcome.traversal.cap_reached is True
+
+
+def test_listing_item_without_link_does_not_store_thin_record(tmp_path):
+    store = OpportunityStore(str(tmp_path / "t.db"))
+    seeds = [Seed(type=SeedType.URL, value="https://example.com/listing")]
+    fetch_fn = FakeFetch(
+        {
+            "https://example.com/listing": ok_result("https://example.com/listing"),
+            "https://example.com/detail": ok_result("https://example.com/detail"),
+        }
+    )
+    linkless_item = make_opp("https://example.com/listing", title="Linkless")
+    thin_item = make_opp("https://example.com/detail", title="Thin")
+    detail_opp = make_opp(
+        "https://example.com/detail",
+        title="Detail",
+        deadline="2026-05-01",
+        deadline_source="Deadline: 2026-05-01",
+        deadline_provenance="quoted",
+    )
+    extract_fn = RecordingExtract(
+        {
+            "https://example.com/listing": [linkless_item, thin_item],
+            "https://example.com/detail": [detail_opp],
+        },
+        kind_by_url={"https://example.com/listing": PageKind.LIST},
+    )
+    jsonld_fn = RecordingJsonld({})
+
+    run_sourcing(
+        seeds, store, fetch_fn=fetch_fn, extract_fn=extract_fn, jsonld_fn=jsonld_fn
+    )
+
+    stored = store.list()
+    assert len(stored) == 1
+    assert stored[0].deadline == "2026-05-01"
