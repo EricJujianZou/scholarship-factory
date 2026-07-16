@@ -13,6 +13,6 @@
     "No network anywhere; `uv run pytest -q` green."
   ],
   "skill_match": null,
-  "passes": false,
-  "status": "in_progress"
+  "passes": true,
+  "status": "done"
 }
