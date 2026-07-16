@@ -1,5 +1,5 @@
 from .extract import ExtractionResult, PageKind, extract
-from .fetch import FetchResult
+from .fetch import FetchResult, fetch_url
 from .jsonld import extract_jsonld
 from .models import Opportunity, Provenance
 from .parse_dates import parse_deadline_dates, typed_deadlines
