@@ -1,0 +1,18 @@
+{
+  "id": "GH-34",
+  "type": "feat",
+  "priority": 6,
+  "title": "Pipeline - sourcing run: seeds -> adapters -> fetch -> extract -> store",
+  "description": "The composition ticket: the first end-to-end **sourcing run**. Everything it composes is MERGED: seeds (`seeds.py`), adapters (`adapters.py`: `targets_for_seeds`), static fetcher (`fetch.py`: `fetch_url`), extract (`extract.py`: `extract`, LLM path; `jsonld.py` structured path), store (`store.py`), CLI (`cli.py`, `sf` script). This ticket wires them into one function + CLI command; **no new judgment logic**.\n\n## Locked decisions (honor)\n\n- Flow per target: fetch -> if `ok`, run **both** extract paths (JSON-LD structured + LLM) on the body -> upsert every resulting `Opportunity` into the store (the store's normalized-`apply_url` dedup handles re-sights; a dedupe hit refreshes `last_seen`).\n- **Honest accounting, no silent drops:** the run returns a summary (targets attempted, fetch failures with their `FetchResult.error`/status, opportunities stored, skipped seeds from the adapter plan). A fetch failure never aborts the whole run.\n- The LLM extractor is **injectable** (same pattern as extract's existing tests: the Anthropic call is stubbed in tests; live calls only happen when a real run provides a client). Tests are fully offline.\n- Composition uses plain `fetch_url` by default but accepts any fetch callable with the same contract - so the politeness/cache layers (separate tickets) drop in without changes here.\n- `source_url` = the fetched target URL for records the extractors produce from it (extract already handles this; do not overwrite its choices).\n\n## Scope\n\n1. `scholarship_factory/pipeline.py`: `run_sourcing(seeds, store, *, fetch_fn=fetch_url, extract_fn=..., jsonld_fn=...) -> SourcingReport` (counts + per-target outcomes).\n2. CLI: a `source` subcommand on the existing `sf` CLI (`cli.py`): `sf source --seeds seeds.toml --db opportunities.db` printing the report summary. Follow the existing CLI's conventions.\n3. No traversal (S4), no ranking, no refresh here.",
+  "acceptance_criteria": [
+    "With a fake fetch fn (fixture HTML) and stubbed extractors: a seed list of one url seed + one instagram seed yields a report showing 1 target attempted, the instagram seed skipped-unsupported, and the extracted opportunities present in the store.",
+    "A target whose fetch fails (e.g. 403) appears in the report with its status/error; other targets still process; nothing raises.",
+    "Re-running the same run against the same store does not duplicate rows (store dedup); `last_seen` refreshes.",
+    "Both extract paths run: a fixture with JSON-LD + prose yields the union (existing lablab fixture behavior) - assert via stubs that both are invoked.",
+    "CLI `sf source` with a seeds file + temp db prints the summary and exits 0 (test via the CLI's existing test pattern).",
+    "All tests offline (no network, no real LLM); `uv run pytest -q` green."
+  ],
+  "skill_match": null,
+  "passes": false,
+  "status": "open"
+}

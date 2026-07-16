@@ -1,0 +1,17 @@
+{
+  "id": "GH-33",
+  "type": "feat",
+  "priority": 5,
+  "title": "Fetch - response cache: skip refetch within a freshness window",
+  "description": "Session 3 (Fetch) chain. Depends on the static fetcher (GH-26, `fetch_url` / `FetchResult`) - MERGED. Caching/idempotency across repeat runs (locked S3 default): cache raw responses so reruns mid-batch are cheap and safe.\n\n## Locked decisions (honor)\n\n- Cache **successful** (`ok`) `FetchResult`s keyed by URL; within a freshness window (default 1 day, configurable) a repeat request returns the cached result instead of refetching. Failures are NOT cached (a transient 500 shouldn't poison a day).\n- Persistent across process runs -> **SQLite**, matching the repo's storage pattern (`store.py` / `profile.py` style: stdlib `sqlite3`, configurable db path, temp db in tests). Same file as the opportunity store is fine but its own table.\n- The cached result is marked so callers can tell (e.g. a `from_cache` flag on the returned object or wrapper) - honesty about provenance extends to fetches.\n- **Field-level refresh (\"did the deadline change?\") stays Session 8's job** - this is only about not re-downloading bytes mid-run/day.\n\n## Scope\n\n1. A `FetchCache` (SQLite table: url, fetched_at, status_code, content_type, body, final_url) with get/put and a freshness-window lookup.\n2. A cached-fetch composition: check cache -> hit within window returns cached `FetchResult` (flagged); miss/stale -> real fetch (injectable fetch fn) -> store if `ok` -> return.\n3. No eviction policy beyond staleness; no cache for non-ok results.",
+  "acceptance_criteria": [
+    "First fetch of a URL calls the underlying fetcher and stores the result; second fetch within the window returns the cached body WITHOUT calling the underlying fetcher (asserted via injected fake), flagged as cached.",
+    "A result older than the window triggers a real refetch and the cache row is refreshed.",
+    "A failed fetch (`ok` False) is returned honestly but NOT written to the cache; the next call fetches again.",
+    "Cache persists across `FetchCache` instances pointed at the same db file (tmp file in tests).",
+    "All tests offline, temp db only; `uv run pytest -q` green."
+  ],
+  "skill_match": null,
+  "passes": false,
+  "status": "open"
+}

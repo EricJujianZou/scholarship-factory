@@ -1,0 +1,17 @@
+{
+  "id": "GH-32",
+  "type": "feat",
+  "priority": 4,
+  "title": "Fetch - per-host politeness: rate limit + robots.txt",
+  "description": "Session 3 (Fetch) chain. Depends on the static fetcher (GH-26, `scholarship_factory/fetch.py`: `fetch_url`, `FetchResult`) - MERGED. Adds the good-citizen layer: one rate limiter **per host** + respect for `robots.txt`. Cheap insurance against IP bans (locked default from the S3 design).\n\n## Locked decisions (honor)\n\n- **Per-host min-interval rate limiting** (default ~2s between requests to the same host, configurable). Different hosts do not block each other.\n- **Respect robots.txt**: before fetching a URL, consult the host's robots.txt (fetched once per host per run, cached in memory; use stdlib `urllib.robotparser` semantics for our User-Agent falling back to `*`). A disallowed URL is **not fetched** and yields an honest `FetchResult` (`ok` False, `error` naming robots as the reason) - never an exception.\n- robots.txt itself unreachable/malformed -> **fail open** (treat as allowed); politeness is insurance, not a gate that can wedge the whole run.\n- No global queue/scheduler - this wraps single fetches; v1 runs are sequential.\n\n## Scope\n\n1. A `PoliteFetcher` (or equivalent thin layer) over `fetch_url`: same signature/return, adding per-host spacing + robots check. Sleep/clock injectable for tests (no real sleeping in the suite).\n2. In-memory per-host state (last-request time, parsed robots); no persistence.\n3. Wire nothing else - callers opt in by using the polite layer (the pipeline ticket composes it).",
+  "acceptance_criteria": [
+    "Two consecutive fetches to the same host are spaced by the configured interval (asserted via injected clock/sleep - no real sleep in tests); fetches to different hosts are not delayed.",
+    "A URL disallowed by the host's robots.txt is not fetched (underlying transport never called) and returns a `FetchResult` with `ok` False and a robots-specific `error`.",
+    "robots.txt returning 404/timeout -> the fetch proceeds (fail open).",
+    "robots.txt is requested at most once per host per fetcher instance.",
+    "All tests offline (`httpx.MockTransport` / injected fakes); `uv run pytest -q` green."
+  ],
+  "skill_match": null,
+  "passes": false,
+  "status": "open"
+}

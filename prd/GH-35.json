@@ -1,0 +1,17 @@
+{
+  "id": "GH-35",
+  "type": "feat",
+  "priority": 7,
+  "title": "Traverse - follow listing links to detail pages (depth-1 discovery)",
+  "description": "Session 4 (Traverse): the link-discovery step - the reason this system is an agent, not a scraper. Depends on extract (MERGED: `extract.py` returns a typed result distinguishing a *detail* record from a *list* of thin items) and the fetcher (MERGED). Distilled from `REPO_CONTENT.md` (v1 roadmap, Session 4; listing/thin-item decisions in *Settled design - Session 2*).\n\n## Locked decisions (honor)\n\n- **v1 traversal is depth-1**: a listing page's thin items (title + url, deadline usually absent) get their detail pages fetched and extracted; detail-page output is NOT traversed further. No open-ended crawling.\n- A thin item and its detail extraction concern the SAME opportunity: after extracting the detail page, the record upserted must carry the detail page's richer facts; `source_url` is the detail page. (True cross-source identity is Session 5 - here the store's normalized `apply_url` dedup is still the merge point; do not build identity logic.)\n- **Budget-bounded:** a per-run cap on traversed pages (configurable, default ~25). When the cap stops traversal early, the report says so honestly.\n- Traversal failures (fetch error, extract yields nothing) are recorded per-link in the report, never fatal, never fabricated.\n- Fetch callable injectable (composes with politeness/cache layers); extractors injectable/stubbed in tests, same as the pipeline ticket.\n\n## Scope\n\n1. `scholarship_factory/traverse.py`: given a *list* extraction result (thin items) + a fetch fn + extract fns, fetch each item's URL, extract, and return the enriched records + a per-link outcome report. Respect the page cap.\n2. Integrate into the sourcing pipeline **if** `pipeline.py` (the composition ticket) is already on main - a listing extraction triggers traversal of its thin items. If pipeline is not present, ship traverse standalone with the same injectable contract.\n3. No recursion beyond depth 1, no new identity/dedup logic, no scheduler.",
+  "acceptance_criteria": [
+    "A stubbed listing extraction with N thin items -> traverse fetches each item URL (asserted via fake fetch fn) and upserts the detail-extracted records; a thin item whose detail page states the deadline ends up stored WITH that deadline (quoted provenance + source span, from the stubbed detail extraction).",
+    "Page cap: with cap=2 and 5 thin items, only 2 detail fetches happen and the report flags the early stop.",
+    "A detail fetch failure or empty extraction is reported for that link; remaining links still process.",
+    "No fetch of the same detail URL twice within one traverse call.",
+    "All tests offline with stubbed fetch/extract; `uv run pytest -q` green."
+  ],
+  "skill_match": null,
+  "passes": false,
+  "status": "open"
+}
