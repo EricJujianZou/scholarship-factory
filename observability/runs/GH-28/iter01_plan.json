@@ -1,0 +1,10 @@
+{
+  "stage": "plan",
+  "outcome": "success",
+  "summary": "Plan for deterministic rank() in a new scholarship_factory/rank.py: two-sided alias+constraint rule tables over region/education (unknown never excludes), verdict enum eligible|ineligible|expired with reasons, deadline-then-reward-then-title sort via existing parse_dates/parse_money layers, plus tests/test_rank.py covering every acceptance criterion.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 9598,
+  "exit_code": 0,
+  "stderr_head": ""
+}

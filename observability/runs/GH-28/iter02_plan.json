@@ -1,0 +1,10 @@
+{
+  "stage": "plan",
+  "outcome": "success",
+  "summary": "Retry plan for GH-28: fix the broken US region regex at rank.py:62 by hoisting the required noun outside a non-capturing alternation group (applied to all seven rules so the bug class is unrepresentable), and replace criteria-shaped tests with rule-shaped parametrized coverage \u2014 a true-positive and a benign-text negative per rule, including the 'using'/'us' regression test that would have caught the shipped bug.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 7241,
+  "exit_code": 0,
+  "stderr_head": ""
+}
