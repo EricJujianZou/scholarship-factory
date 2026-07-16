@@ -21,6 +21,7 @@ __all__ = [
     "parse_deadline_dates",
     "typed_deadlines",
     "FetchResult",
+    "fetch_url",
     "parse_money",
     "MoneyValue",
     "MoneyBound",
