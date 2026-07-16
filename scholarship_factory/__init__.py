@@ -43,4 +43,7 @@ __all__ = [
     "SkippedSeed",
     "targets_for",
     "targets_for_seeds",
+    "FetchCache",
+    "cached_fetch",
+    "DEFAULT_MAX_AGE",
 ]
