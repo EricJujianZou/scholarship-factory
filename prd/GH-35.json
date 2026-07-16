@@ -12,6 +12,6 @@
     "All tests offline with stubbed fetch/extract; `uv run pytest -q` green."
   ],
   "skill_match": null,
-  "passes": false,
-  "status": "open"
+  "passes": true,
+  "status": "done"
 }

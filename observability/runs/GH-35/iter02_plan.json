@@ -1,0 +1,10 @@
+{
+  "stage": "plan",
+  "outcome": "success",
+  "summary": "Retry plan for the review's self-link bug: seed traverse's `seen` set with normalize_apply_url(listing_url) so a link-less thin item (which extract.py:106 gives the listing's own URL) is skipped before any fetch, instead of refetching the listing and returning its thin items as detail records. One-line fix plus two regression tests (traverse-level and store-level); iteration 1's design, signatures, and pipeline wiring are unchanged and stay.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 4666,
+  "exit_code": 0,
+  "stderr_head": ""
+}

@@ -52,6 +52,15 @@ def _cmd_source(store: OpportunityStore, seeds_path: str) -> int:
     )
     print(f"targets attempted: {report.targets_attempted}")
     print(f"opportunities stored: {report.opportunities_stored}")
+    traversals = [o.traversal for o in report.outcomes if o.traversal]
+    if traversals:
+        links_traversed = sum(t.links_traversed for t in traversals)
+        links_discovered = sum(t.links_discovered for t in traversals)
+        print(f"traversed: {links_traversed} of {links_discovered} links")
+        for outcome in report.outcomes:
+            if outcome.traversal and outcome.traversal.cap_reached:
+                not_followed = outcome.traversal.links_discovered - outcome.traversal.links_traversed
+                print(f"  cap reached on {outcome.url} -> {not_followed} links not followed")
     print(f"skipped: {len(report.skipped)}")
     for skipped in report.skipped:
         print(f"  {skipped.seed.type.value}:{skipped.seed.value} -> {skipped.reason.value}")

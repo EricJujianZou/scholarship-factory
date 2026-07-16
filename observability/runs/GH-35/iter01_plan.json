@@ -1,0 +1,10 @@
+{
+  "stage": "plan",
+  "outcome": "success",
+  "summary": "Plan for depth-1 traversal: a pure traverse() in a new traverse.py returns detail-extracted records + a per-link report (cap, dedup, per-link failures), and run_sourcing routes LIST extractions through it while storing only the detail records. Key finding: store.insert upserts last_seen only, so thin items must never be stored or the detail's deadline can never land (AC 1).",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 11219,
+  "exit_code": 0,
+  "stderr_head": ""
+}

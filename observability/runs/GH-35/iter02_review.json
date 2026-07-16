@@ -1,0 +1,10 @@
+{
+  "stage": "review",
+  "outcome": "success",
+  "summary": "Iteration-1 blocker is genuinely fixed: traverse.py:62 seeds the dedup set with normalize_apply_url(listing_url), so a link-less thin item (which extract.py:106 gives the listing's own URL) is skipped before any fetch rather than refetching the listing and returning its thin items as detail records. Both regression tests are real - the traverse-level one omits the self-link from the FakeFetch mapping so removing the guard raises KeyError, and the pipeline-level one orders the link-less item first and asserts the stored record keeps its deadline. All 5 ACs verified; the green-suite half of AC 5 is verified by hand-tracing every changed test plus two stages independently reporting 124, NOT by execution - this read-only session has no test-running tools. Flagging that gap as system repair.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 7825,
+  "exit_code": 0,
+  "stderr_head": ""
+}

@@ -1,9 +1,9 @@
 {
-  "ticket_id": "GH-34",
+  "ticket_id": "GH-35",
   "stage": "document",
-  "iteration": 1,
-  "branch": "adw/GH-34",
+  "iteration": 2,
+  "branch": "adw/GH-35",
   "last_failure": null,
-  "budget_used_tokens": 42985,
-  "cooldown_until": null
+  "budget_used_tokens": 65966,
+  "cooldown_until": "2026-07-16T17:10:00+00:00"
 }

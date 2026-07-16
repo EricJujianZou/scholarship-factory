@@ -1,0 +1,10 @@
+{
+  "stage": "document",
+  "outcome": "success",
+  "summary": "docs/changes/GH-35.md committed (1 file), plus remaining run-artifact/state files committed to satisfy the clean-tree check. Working tree clean.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 5435,
+  "exit_code": 0,
+  "stderr_head": ""
+}

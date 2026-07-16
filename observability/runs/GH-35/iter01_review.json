@@ -1,0 +1,10 @@
+{
+  "stage": "review",
+  "outcome": "failure",
+  "summary": "Design is sound (thin items never stored, so detail facts land; depth-1 enforced structurally by ignoring kind). Two blockers: (1) a thin item with no apply_url inherits the listing URL via extract.py:106's `item.apply_url or source_url` fallback, so traverse refetches the listing, treats its thin items as detail records, and stores them - the plan's own Risk 1, silently nulling the deadline AC 1 requires; (2) the test stage recorded zero evidence despite claiming quoted evidence, and this read-only session cannot run pytest, so AC 5 is unverified.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 9764,
+  "exit_code": 0,
+  "stderr_head": ""
+}

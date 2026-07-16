@@ -1,0 +1,10 @@
+{
+  "stage": "test",
+  "outcome": "success",
+  "summary": "124 passed (uv run pytest -q). Verified all 5 acceptance criteria plus review's self-link blocker via named tests, including two new regression tests confirming the fix. Tree committed clean.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 3271,
+  "exit_code": 0,
+  "stderr_head": ""
+}
