@@ -1,0 +1,10 @@
+{
+  "stage": "plan",
+  "outcome": null,
+  "summary": null,
+  "parse_error": "no status block found in stage output",
+  "timed_out": false,
+  "tokens_used": 0,
+  "exit_code": 1,
+  "stderr_head": ""
+}
