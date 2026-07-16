@@ -46,6 +46,22 @@ def _cmd_show(store: OpportunityStore, opp_id: str) -> int:
     return 0
 
 
+def _cmd_source(store: OpportunityStore, seeds_path: str) -> int:
+    report = run_sourcing(
+        load_seeds(seeds_path), store, fetch_fn=fetch_url, extract_fn=extract
+    )
+    print(f"targets attempted: {report.targets_attempted}")
+    print(f"opportunities stored: {report.opportunities_stored}")
+    print(f"skipped: {len(report.skipped)}")
+    for skipped in report.skipped:
+        print(f"  {skipped.seed.type.value}:{skipped.seed.value} -> {skipped.reason.value}")
+    failures = [o for o in report.outcomes if not o.ok]
+    print(f"failures: {len(failures)}")
+    for outcome in failures:
+        print(f"  {outcome.url} -> status={outcome.status_code} error={outcome.error}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="sf", description=__doc__)
     common = argparse.ArgumentParser(add_help=False)
@@ -58,11 +74,15 @@ def main(argv: list[str] | None = None) -> int:
     p_list.add_argument("--status", default=None, help="only this status")
     p_show = sub.add_parser("show", parents=[common], help="show one opportunity by id")
     p_show.add_argument("id")
+    p_source = sub.add_parser("source", parents=[common], help="run a sourcing pass")
+    p_source.add_argument("--seeds", required=True, help="seeds TOML path")
 
     args = parser.parse_args(argv)
     store = OpportunityStore(args.db or _default_db_path())
     if args.command == "list":
         return _cmd_list(store, args.status)
+    if args.command == "source":
+        return _cmd_source(store, args.seeds)
     return _cmd_show(store, args.id)
 
 
