@@ -1,0 +1,10 @@
+{
+  "stage": "implement",
+  "outcome": "success",
+  "summary": "Fixed the broken US region regex in rank.py (bare \\bUS matched any 'us'-prefixed word) by hoisting the required noun outside the alternation for all seven rules; added parametrized per-rule true-positive/benign-text coverage in test_rank.py, including the regression test for the shipped bug. Full suite green (99 passed).",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 7632,
+  "exit_code": 0,
+  "stderr_head": ""
+}
