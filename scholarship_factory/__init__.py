@@ -24,6 +24,8 @@ __all__ = [
     "typed_deadlines",
     "FetchResult",
     "fetch_url",
+    "PoliteFetcher",
+    "DEFAULT_MIN_INTERVAL",
     "parse_money",
     "MoneyValue",
     "MoneyBound",
