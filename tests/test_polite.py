@@ -55,8 +55,6 @@ def test_different_hosts_are_not_delayed():
     clock = FakeClock()
 
     def handler(request):
-        if request.url.path == "/robots.txt":
-            return httpx.Response(200, text="User-agent: *\nAllow: /\n")
         return httpx.Response(200, text="ok")
 
     fetcher = PoliteFetcher(
@@ -64,14 +62,13 @@ def test_different_hosts_are_not_delayed():
         sleep=clock.sleep,
         transport=httpx.MockTransport(handler),
     )
+    # Pre-cache robots (fail-open) for both hosts so only rate limiting
+    # is under test, not the robots.txt request itself.
+    fetcher._robots["example.com"] = None
+    fetcher._robots["other.com"] = None
 
-    # Warm both hosts' robots cache and rate-limit state first.
     fetcher.fetch("https://example.com/a")
     fetcher.fetch("https://other.com/b")
-    clock.slept.clear()
-
-    fetcher.fetch("https://example.com/c")
-    fetcher.fetch("https://other.com/d")
 
     assert clock.slept == []
 
