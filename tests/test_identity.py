@@ -18,7 +18,7 @@ def test_url_dedup_still_merges_one_row(tmp_path):
 
 def test_secondary_match_merges_union_of_facts(tmp_path):
     store = OpportunityStore(str(tmp_path / "test.db"))
-    store.insert(
+    first = store.insert(
         make_opp(
             "https://host-a.example.com/apply",
             title="The  Smith-Jones Fund!",
