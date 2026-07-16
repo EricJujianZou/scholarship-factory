@@ -28,6 +28,8 @@ __all__ = [
     "typed_deadlines",
     "FetchResult",
     "fetch_url",
+    "find_duplicate",
+    "merge_into",
     "PoliteFetcher",
     "DEFAULT_MIN_INTERVAL",
     "parse_money",
