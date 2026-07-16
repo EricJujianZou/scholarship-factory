@@ -51,4 +51,9 @@ __all__ = [
     "run_sourcing",
     "SourcingReport",
     "TargetOutcome",
+    "traverse",
+    "TraverseResult",
+    "TraverseReport",
+    "LinkOutcome",
+    "TRAVERSE_PAGE_CAP",
 ]
