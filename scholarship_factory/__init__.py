@@ -11,6 +11,7 @@ from .polite import DEFAULT_MIN_INTERVAL, PoliteFetcher
 from .profile import ApplicantProfile, ProfileStore
 from .seeds import Seed, SeedType, load_seeds
 from .store import OpportunityStore
+from .traverse import TRAVERSE_PAGE_CAP, LinkOutcome, TraverseReport, TraverseResult, traverse
 from .urls import normalize_apply_url
 
 __all__ = [
