@@ -58,10 +58,10 @@ _REGION_ALIASES: dict[str, str] = {
 }
 
 _REGION_CONSTRAINTS: list[tuple[re.Pattern, str, frozenset[str]]] = [
-    (re.compile(r"\bEU residents\b|\bEuropean Union (residents|citizens)\b", re.I), "EU residents", frozenset({"eu"})),
-    (re.compile(r"\bUS|United States (residents|citizens)\b", re.I), "US residents", frozenset({"usa"})),
-    (re.compile(r"\bCanadian (residents|citizens)\b|\bCanada only\b", re.I), "Canadian residents", frozenset({"canada"})),
-    (re.compile(r"\bUK (residents|citizens)\b", re.I), "UK residents", frozenset({"uk"})),
+    (re.compile(r"\b(?:EU|European Union) (?:residents?|citizens?)\b", re.I), "EU residents", frozenset({"eu"})),
+    (re.compile(r"\b(?:US|United States) (?:residents?|citizens?)\b", re.I), "US residents", frozenset({"usa"})),
+    (re.compile(r"\b(?:Canadian (?:residents?|citizens?)|Canada only)\b", re.I), "Canadian residents", frozenset({"canada"})),
+    (re.compile(r"\b(?:UK|United Kingdom) (?:residents?|citizens?)\b", re.I), "UK residents", frozenset({"uk"})),
 ]
 
 _EDUCATION_ALIASES: dict[str, str] = {
