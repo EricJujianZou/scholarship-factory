@@ -48,7 +48,9 @@ def test_secondary_match_merges_union_of_facts(tmp_path):
     assert merged.reward == "$1000"
     assert merged.deadline == "2026-07-01"
     assert merged.deadline_source == "Applications close July 1, 2026"
-    assert merged.last_seen >= merged.first_seen
+    assert merged.id == first.id
+    assert merged.first_seen == first.first_seen
+    assert merged.last_seen > first.last_seen
 
 
 def test_same_title_different_org_does_not_merge(tmp_path):
