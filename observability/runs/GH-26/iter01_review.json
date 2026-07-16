@@ -1,0 +1,10 @@
+{
+  "stage": "review",
+  "outcome": "success",
+  "summary": "All 7 criteria verified against the tests directly (test stage output was prose-only, no per-criterion evidence, so I re-derived from tests/test_fetch.py). Retry semantics traced against tenacity's actual reraise behavior and correct on both exhaustion paths. No user-facing surface, so no visual check applicable. Could not re-run the suite (permission-gated); relied on recorded exit_code 0. Minor gap: the RetryError branch (persistent 429) is untested. Clean first solve of the 'static fetcher with bounded retry' class \u2014 candidate for a new skill in skills/.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 7659,
+  "exit_code": 0,
+  "stderr_head": ""
+}
