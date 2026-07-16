@@ -6,6 +6,8 @@ dependencies = [
     "fastapi",
     "pydantic>=2",
     "dateparser",
+    "httpx",
+    "tenacity",
 ]
 
 [project.scripts]
