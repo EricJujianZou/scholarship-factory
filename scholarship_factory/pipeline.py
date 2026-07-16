@@ -54,6 +54,7 @@ def run_sourcing(
     fetch_fn: FetchFn = fetch_url,
     extract_fn: ExtractFn = extract,
     jsonld_fn: JsonldFn = extract_jsonld,
+    page_cap: int = TRAVERSE_PAGE_CAP,
 ) -> SourcingReport:
     plan = targets_for_seeds(seeds)
     outcomes: list[TargetOutcome] = []
@@ -72,7 +73,22 @@ def run_sourcing(
             continue
 
         opportunities = list(jsonld_fn(result.body, result.final_url))
-        opportunities.extend(extract_fn(result.body, result.final_url).opportunities)
+        extraction = extract_fn(result.body, result.final_url)
+        traversal_report: TraverseReport | None = None
+        if extraction.kind == PageKind.LIST:
+            traversal = traverse(
+                extraction,
+                result.final_url,
+                fetch_fn=fetch_fn,
+                extract_fn=extract_fn,
+                jsonld_fn=jsonld_fn,
+                page_cap=page_cap,
+            )
+            opportunities.extend(traversal.opportunities)
+            traversal_report = traversal.report
+        else:
+            opportunities.extend(extraction.opportunities)
+
         for opportunity in opportunities:
             store.insert(opportunity)
 
@@ -82,6 +98,7 @@ def run_sourcing(
                 ok=True,
                 status_code=result.status_code,
                 opportunities_stored=len(opportunities),
+                traversal=traversal_report,
             )
         )
 
