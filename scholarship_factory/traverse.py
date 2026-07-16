@@ -59,7 +59,7 @@ def traverse(
 ) -> TraverseResult:
     opportunities: list[Opportunity] = []
     outcomes: list[LinkOutcome] = []
-    seen: set[str] = set()
+    seen: set[str] = {normalize_apply_url(listing_url)}
     cap_reached = False
     links_discovered = 0
 
