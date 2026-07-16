@@ -11,6 +11,6 @@
     "Unit tests cover `list` (incl. filter + empty) and `show` (found + not-found). `uv run pytest -q` green."
   ],
   "skill_match": null,
-  "passes": false,
-  "status": "open"
+  "passes": true,
+  "status": "done"
 }

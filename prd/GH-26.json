@@ -1,0 +1,19 @@
+{
+  "id": "GH-26",
+  "type": "feat",
+  "priority": 1,
+  "title": "Fetch - static open-web fetcher (httpx + UA + timeout + retry)",
+  "description": "Session 3 (Fetch) chain, first link. Distilled from `REPO_CONTENT.md` + `docs/s3-fetch-design.md`. The `FetchResult` contract (GH-11, `scholarship_factory/fetch.py`) is merged; this ticket adds the function that produces one: `fetch_url(url) -> FetchResult` over static HTTP. No adapters, no politeness/robots, no caching, no JS rendering - those are separate tickets.\n\n## Locked decisions (honor; do not re-litigate)\n\n- **Static `httpx` GET only.** Headless/Playwright is explicitly deferred until a real fixture proves a static fetch returns an empty SPA shell.\n- **Browser-like `User-Agent` by default.** lablab.ai's 403 is already diagnosed as a UA check, not real auth. A UA override is the fix; **no fingerprint-spoofing arms race** beyond that.\n- **Retry = exponential backoff (`tenacity`) on 429 / 5xx / timeouts / transport errors, bounded attempts (e.g. 3).** 4xx (other than 429) is a hard fail - never retry a 404/403.\n- **Every outcome is represented honestly in `FetchResult`** - never raise through to the caller for an expected web failure: non-2xx -> `status_code` set, `ok` False; timeout/transport error after retries -> `error` populated, `status_code` None. Follow redirects; record `final_url`.\n- Sensible default timeout (~15s), overridable.\n\n## Scope\n\n1. `fetch_url(url, *, timeout=..., user_agent=...) -> FetchResult` in `scholarship_factory/` (extend `fetch.py` or a sibling module - match repo conventions).\n2. Add `tenacity` as a dependency via uv (`pyproject.toml`).\n3. Unit tests using `httpx.MockTransport` (no real network).",
+  "acceptance_criteria": [
+    "200 with HTML body -> `FetchResult.ok` True, `body`/`content_type`/`final_url` populated.",
+    "404 and 403 -> exactly one attempt (no retry), `ok` False, `status_code` recorded, no exception.",
+    "429 then 200 (mock sequence) -> retried, final result `ok` True.",
+    "Persistent timeout/transport error -> bounded retries then an honest `FetchResult` with `error` set and `status_code` None; no exception escapes.",
+    "The request carries the browser-like `User-Agent` header (asserted in the mock).",
+    "A redirect records the followed `final_url` while preserving `requested_url`.",
+    "All tests offline (`httpx.MockTransport`); `uv run pytest -q` green."
+  ],
+  "skill_match": null,
+  "passes": false,
+  "status": "open"
+}
