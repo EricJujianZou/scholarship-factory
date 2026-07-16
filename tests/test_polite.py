@@ -65,9 +65,13 @@ def test_different_hosts_are_not_delayed():
         transport=httpx.MockTransport(handler),
     )
 
+    # Warm both hosts' robots cache and rate-limit state first.
     fetcher.fetch("https://example.com/a")
-    clock.slept.clear()
     fetcher.fetch("https://other.com/b")
+    clock.slept.clear()
+
+    fetcher.fetch("https://example.com/c")
+    fetcher.fetch("https://other.com/d")
 
     assert clock.slept == []
 
