@@ -79,9 +79,9 @@ _EDUCATION_ALIASES: dict[str, str] = {
 }
 
 _EDUCATION_CONSTRAINTS: list[tuple[re.Pattern, str, frozenset[str]]] = [
-    (re.compile(r"\bhigh school students? only\b|\bmust be a high school student\b", re.I), "high school students only", frozenset({"high_school"})),
-    (re.compile(r"\bundergraduates? only\b|\bmust be an undergraduate\b", re.I), "undergraduate students only", frozenset({"undergraduate"})),
-    (re.compile(r"\bgraduate students? only\b|\bPhD (students?|candidates?) only\b", re.I), "graduate students only", frozenset({"graduate"})),
+    (re.compile(r"\b(?:high school students? only|must be a high school student)\b", re.I), "high school students only", frozenset({"high_school"})),
+    (re.compile(r"\b(?:undergraduates? only|must be an undergraduate)\b", re.I), "undergraduate students only", frozenset({"undergraduate"})),
+    (re.compile(r"\b(?:graduate students? only|PhD (?:students?|candidates?) only)\b", re.I), "graduate students only", frozenset({"graduate"})),
 ]
 
 
