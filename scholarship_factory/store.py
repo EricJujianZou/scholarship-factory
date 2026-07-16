@@ -76,6 +76,10 @@ class OpportunityStore:
         self._conn.commit()
 
     def insert(self, opp: Opportunity) -> Opportunity:
+        existing = find_duplicate(self, opp)
+        if existing is not None:
+            return self.update(merge_into(existing, opp))
+
         now = datetime.now(timezone.utc).isoformat()
         normalized = normalize_apply_url(opp.apply_url)
         row = opp.model_dump()
