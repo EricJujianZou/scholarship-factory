@@ -209,3 +209,30 @@ def test_relative_apply_url_resolves_against_listing_url():
 
     assert fetch_fn.calls == ["https://example.com/details/a"]
     assert len(result.opportunities) == 1
+
+
+def test_thin_item_linking_to_listing_itself_is_not_traversed():
+    thin_items = [
+        make_opp("https://example.com/listing", title="Linkless"),
+        make_opp("https://example.com/detail", title="Detail"),
+    ]
+    listing = ExtractionResult(kind=PageKind.LIST, opportunities=thin_items)
+
+    fetch_fn = FakeFetch(
+        {"https://example.com/detail": ok_result("https://example.com/detail")}
+    )
+    extract_fn = RecordingExtract(
+        {"https://example.com/detail": [make_opp("https://example.com/detail")]}
+    )
+
+    result = traverse(
+        listing,
+        "https://example.com/listing",
+        fetch_fn=fetch_fn,
+        extract_fn=extract_fn,
+        jsonld_fn=no_jsonld,
+    )
+
+    assert fetch_fn.calls == ["https://example.com/detail"]
+    assert all(o.title != "Linkless" for o in result.opportunities)
+    assert result.report.links_discovered == 1
