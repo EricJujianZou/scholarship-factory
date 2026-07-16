@@ -1,5 +1,7 @@
 from datetime import date
 
+import pytest
+
 from scholarship_factory.models import Opportunity
 from scholarship_factory.profile import ApplicantProfile
 from scholarship_factory.rank import Verdict, rank
