@@ -1,6 +1,10 @@
 from datetime import datetime
 
-from scholarship_factory import FetchResult
+import httpx
+import pytest
+
+import scholarship_factory.fetch as fetch_module
+from scholarship_factory import FetchResult, fetch_url
 
 
 def test_success_result_is_ok():
