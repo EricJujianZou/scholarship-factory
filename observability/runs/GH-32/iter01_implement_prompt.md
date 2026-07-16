@@ -179,6 +179,7 @@ to change approach, not to retry harder.
 ## Prior stage outputs this run
 
 Read the ones relevant to your stage (the latest plan output is your work order):
+- C:/Users/zouju/Coding Projects/scholarship-factory/observability/runs/GH-32/iter01_implement_output.md
 - C:/Users/zouju/Coding Projects/scholarship-factory/observability/runs/GH-32/iter01_plan_output.md
 
 ## File manifest (from the plan)

@@ -3,7 +3,7 @@
   "stage": "implement",
   "iteration": 1,
   "branch": "adw/GH-32",
-  "last_failure": "provider usage limit reached; pausing instead of looping",
+  "last_failure": null,
   "budget_used_tokens": 8692,
   "cooldown_until": "2026-07-16T06:00:00+00:00"
 }
