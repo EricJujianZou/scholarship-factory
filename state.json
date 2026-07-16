@@ -1,9 +1,9 @@
 {
-  "ticket_id": "GH-28",
-  "stage": "document",
-  "iteration": 2,
-  "branch": "adw/GH-28",
-  "last_failure": null,
-  "budget_used_tokens": 57853,
-  "cooldown_until": null
+  "ticket_id": "GH-32",
+  "stage": "implement",
+  "iteration": 1,
+  "branch": "adw/GH-32",
+  "last_failure": "provider usage limit reached; pausing instead of looping",
+  "budget_used_tokens": 8692,
+  "cooldown_until": "2026-07-16T06:00:00+00:00"
 }
