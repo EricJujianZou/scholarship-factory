@@ -5,6 +5,7 @@ from .jsonld import extract_jsonld
 from .models import Opportunity, Provenance
 from .parse_dates import parse_deadline_dates, typed_deadlines
 from .parse_money import MoneyBound, MoneyValue, parse_money, typed_cost, typed_reward
+from .polite import DEFAULT_MIN_INTERVAL, PoliteFetcher
 from .profile import ApplicantProfile, ProfileStore
 from .seeds import Seed, SeedType, load_seeds
 from .store import OpportunityStore
@@ -23,6 +24,8 @@ __all__ = [
     "typed_deadlines",
     "FetchResult",
     "fetch_url",
+    "PoliteFetcher",
+    "DEFAULT_MIN_INTERVAL",
     "parse_money",
     "MoneyValue",
     "MoneyBound",

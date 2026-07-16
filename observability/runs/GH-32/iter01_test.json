@@ -1,0 +1,10 @@
+{
+  "stage": "test",
+  "outcome": "success",
+  "summary": "Ran full suite (106 passed) plus targeted test_polite.py (7/7); all 5 acceptance criteria verified with direct evidence, no real sleeps, all offline via MockTransport.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 2275,
+  "exit_code": 0,
+  "stderr_head": ""
+}

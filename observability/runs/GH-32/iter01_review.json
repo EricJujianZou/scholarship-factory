@@ -1,0 +1,10 @@
+{
+  "stage": "review",
+  "outcome": "success",
+  "summary": "PoliteFetcher is correct and all 5 ACs verified by reading tests+code against the test stage's recorded evidence (106 passed, exit 0); I could not re-run pytest myself as the reviewer role is read-only and the calls were denied. Visual lens N/A \u2014 library module, no user-facing surface. Two non-blocking nits: dead _allow_all_robots helper (tests/test_polite.py:22) and private-state poking (tests/test_polite.py:67). Clean first-time solve of the 'polite wrapper over a transport' class \u2014 candidate for a new skill in skills/.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 13992,
+  "exit_code": 0,
+  "stderr_head": ""
+}

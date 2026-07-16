@@ -1,0 +1,10 @@
+{
+  "stage": "plan",
+  "outcome": "success",
+  "summary": "Plan for a PoliteFetcher in a new scholarship_factory/polite.py wrapping fetch_url with per-host min-interval spacing (injected clock/sleep) and cached, fail-open robots.txt checks via urllib.robotparser; tests in tests/test_polite.py use httpx.MockTransport and a fake clock.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 8692,
+  "exit_code": 0,
+  "stderr_head": ""
+}
