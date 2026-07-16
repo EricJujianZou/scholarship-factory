@@ -1,0 +1,10 @@
+{
+  "stage": "review",
+  "outcome": "success",
+  "summary": "All 6 criteria verified by reading the committed assertions (test stage's prose evidence was too thin to rely on); composition adds no judgment logic, injection seams are clean, no security issues. No user-facing surface, so lens 3 is N/A rather than skipped. Caveat: pytest execution was permission-denied, so the 115-passed claim rests on the implement/test stages. Minor non-blocking hygiene: unused AdapterPlan import in test_pipeline.py, ExtractFn typed as `object` despite `.opportunities` access, and opportunities_stored counting extractions rather than distinct rows. Candidate for a `skills/` entry: this is the first clean 'compose merged units into an end-to-end run with injected seams + honest reporting' ticket.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 11084,
+  "exit_code": 0,
+  "stderr_head": ""
+}

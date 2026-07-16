@@ -1,0 +1,10 @@
+{
+  "stage": "implement",
+  "outcome": "success",
+  "summary": "Added run_sourcing pipeline composing fetch+dual-extract+store with honest per-target reporting, plus sf source CLI subcommand; all tests offline, 115 passed. Working tree clean.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 11438,
+  "exit_code": 0,
+  "stderr_head": ""
+}

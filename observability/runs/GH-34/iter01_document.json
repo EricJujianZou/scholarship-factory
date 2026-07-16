@@ -1,0 +1,10 @@
+{
+  "stage": "document",
+  "outcome": "success",
+  "summary": "docs/changes/GH-34.md committed; also swept up untracked observability artifacts and state.json from prior stages that had not yet been committed. Working tree clean.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 4585,
+  "exit_code": 0,
+  "stderr_head": ""
+}

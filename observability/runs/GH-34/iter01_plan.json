@@ -1,0 +1,10 @@
+{
+  "stage": "plan",
+  "outcome": "success",
+  "summary": "Plan for run_sourcing in a new pipeline.py (targets -> fetch -> jsonld+LLM extract -> upsert, honest SourcingReport with computed counts) plus an `sf source` subcommand, with offline tests via injected fetch/extract callables.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 12942,
+  "exit_code": 0,
+  "stderr_head": ""
+}
