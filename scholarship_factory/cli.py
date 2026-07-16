@@ -1,11 +1,12 @@
-"""Read-only dev CLI to inspect the opportunity store.
+"""Dev CLI to run and inspect the sourcing pipeline.
 
 The roadmap is pipeline-first (no dashboard until ~Session 7), so this is how the
-owner sanity-checks what's in the store meanwhile. Read-only over the existing
-OpportunityStore (GH-1) — no schema change, no mutation, no network.
+owner sanity-checks what's in the store meanwhile. `list`/`show` are read-only over
+the existing OpportunityStore (GH-1); `source` runs a sourcing pass and writes to it.
 
     sf list [--status new] [--db PATH]
     sf show <id> [--db PATH]
+    sf source --seeds seeds.toml [--db PATH]
 
 db path: `--db`, else $SF_DB_PATH, else ./scholarship_factory.db
 """
@@ -13,6 +14,10 @@ import argparse
 import os
 import sys
 
+from .extract import extract
+from .fetch import fetch_url
+from .pipeline import run_sourcing
+from .seeds import load_seeds
 from .store import OpportunityStore
 
 
