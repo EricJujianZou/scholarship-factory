@@ -1,0 +1,10 @@
+{
+  "stage": "review",
+  "outcome": "failure",
+  "summary": "Intent lens passes: all six acceptance criteria have real assertions behind them. Quality lens found a must-fix correctness bug \u2014 the US region pattern at rank.py:62 has broken alternation grouping (`\\bUS|United States (residents|citizens)\\b`), so bare `\\bUS` with re.I matches any word starting 'us' ('using', 'usually', 'us'), firing a 'US residents' exclusion on benign description prose and marking eligible opportunities INELIGIBLE for any non-USA profile. This inverts the ticket's central locked decision that unknown is never ineligible and exclusion fires only on explicit mismatch. Untested: 6 of 7 rules in the table, which is how it survived a green suite. No visual surface (pure library module). Could not independently re-run pytest \u2014 sandbox denied execution; bug confirmed by inspection of unambiguous Python alternation semantics.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 7764,
+  "exit_code": 0,
+  "stderr_head": ""
+}
