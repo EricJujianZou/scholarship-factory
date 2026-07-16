@@ -1,3 +1,4 @@
+from .adapters import AdapterPlan, FetchTarget, SkipReason, SkippedSeed, targets_for, targets_for_seeds
 from .extract import ExtractionResult, PageKind, extract
 from .fetch import FetchResult, fetch_url
 from .jsonld import extract_jsonld
