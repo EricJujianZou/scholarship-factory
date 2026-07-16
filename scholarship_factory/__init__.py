@@ -47,4 +47,7 @@ __all__ = [
     "FetchCache",
     "cached_fetch",
     "DEFAULT_MAX_AGE",
+    "run_sourcing",
+    "SourcingReport",
+    "TargetOutcome",
 ]
