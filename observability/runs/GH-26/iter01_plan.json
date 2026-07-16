@@ -1,0 +1,10 @@
+{
+  "stage": "plan",
+  "outcome": "success",
+  "summary": "Plan for fetch_url in scholarship_factory/fetch.py: httpx.Client with browser UA + follow_redirects, tenacity Retrying (429/5xx + TransportError, 3 attempts) built per-call so tests can zero the backoff, explicit RetryError/TransportError exhaustion branches producing honest FetchResults, and offline MockTransport tests. Also promotes httpx from dev-only to a runtime dependency and adds tenacity.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 8980,
+  "exit_code": 0,
+  "stderr_head": ""
+}
