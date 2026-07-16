@@ -90,7 +90,7 @@ These are settled — honor them; don't re-litigate.
   is light and well-suited to a single-user local service.
 - **SQLite** for storage. Single-user scale makes a server database unnecessary
   overhead; a file-backed DB is the right tool.
-- **Claude API at runtime** (`claude-opus-4-8` / `claude-sonnet-4-6`) for the
+- **Claude API at runtime** (`claude-sonnet-5`; opus reserved if quality demands) for the
   research/extraction agent. Note this spend is **separate** from the Claude Code
   subscription that *builds* the repo. *(Open in the parking lot: whether to use a
   Claude subscription / headless instead of metered API to manage cost — revisit

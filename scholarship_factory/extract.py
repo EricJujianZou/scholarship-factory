@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from .clean import clean_html
 from .models import Opportunity, Provenance
 
-DEFAULT_MODEL = "claude-opus-4-8"
+DEFAULT_MODEL = "claude-sonnet-5"
 _TOOL_NAME = "report_opportunities"
 
 _SYSTEM_PROMPT = """You extract funding/scholarship opportunities from a cleaned web page.
