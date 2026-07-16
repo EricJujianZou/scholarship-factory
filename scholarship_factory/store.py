@@ -1,6 +1,7 @@
 import sqlite3
 from datetime import datetime, timezone
 
+from .identity import find_duplicate, merge_into
 from .models import Opportunity, Provenance
 from .urls import normalize_apply_url
 
