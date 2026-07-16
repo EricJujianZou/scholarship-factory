@@ -1,0 +1,10 @@
+{
+  "stage": "test",
+  "outcome": "success",
+  "summary": "110 tests passed (full suite); all 4 cache-specific tests and 5 acceptance criteria verified individually.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 3740,
+  "exit_code": 0,
+  "stderr_head": ""
+}
