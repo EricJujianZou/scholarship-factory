@@ -45,3 +45,52 @@ class FetchResult(BaseModel):
             and 200 <= self.status_code < 300
             and self.body is not None
         )
+
+
+def _is_retryable_status(response: httpx.Response) -> bool:
+    return response.status_code == 429 or response.status_code >= 500
+
+
+def _retrying() -> Retrying:
+    return Retrying(
+        stop=stop_after_attempt(RETRY_ATTEMPTS),
+        wait=wait_exponential(multiplier=RETRY_WAIT_MULTIPLIER),
+        retry=retry_if_result(_is_retryable_status)
+        | retry_if_exception_type(httpx.TransportError),
+        reraise=True,
+    )
+
+
+def fetch_url(
+    url: str,
+    *,
+    timeout: float = DEFAULT_TIMEOUT,
+    user_agent: str = DEFAULT_USER_AGENT,
+    transport: httpx.BaseTransport | None = None,
+) -> FetchResult:
+    with httpx.Client(
+        follow_redirects=True,
+        timeout=timeout,
+        headers={"User-Agent": user_agent},
+        transport=transport,
+    ) as client:
+        try:
+            response = _retrying()(client.get, url)
+        except RetryError as exc:
+            response = exc.last_attempt.result()
+        except httpx.TransportError as exc:
+            return FetchResult(
+                requested_url=url,
+                final_url=url,
+                status_code=None,
+                body=None,
+                error=f"{type(exc).__name__}: {exc}",
+            )
+
+    return FetchResult(
+        requested_url=url,
+        final_url=str(response.url),
+        status_code=response.status_code,
+        content_type=response.headers.get("content-type"),
+        body=response.text,
+    )
