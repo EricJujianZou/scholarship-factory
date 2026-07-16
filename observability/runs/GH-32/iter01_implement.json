@@ -1,10 +1,10 @@
 {
   "stage": "implement",
-  "outcome": null,
-  "summary": null,
-  "parse_error": "no status block found in stage output",
+  "outcome": "success",
+  "summary": "Added PoliteFetcher (per-host rate limiting + fail-open robots.txt caching) with full test coverage; working tree committed and clean.",
+  "parse_error": null,
   "timed_out": false,
-  "tokens_used": 0,
-  "exit_code": 1,
+  "tokens_used": 10079,
+  "exit_code": 0,
   "stderr_head": ""
 }
