@@ -19,7 +19,6 @@ llm = ["anthropic"]
 [dependency-groups]
 dev = [
     "pytest",
-    "httpx",
 ]
 
 [build-system]
