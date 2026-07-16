@@ -1,0 +1,10 @@
+{
+  "stage": "document",
+  "outcome": "success",
+  "summary": "Committed docs/changes/GH-28.md plus remaining state.json/observability artifacts; working tree clean.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 3844,
+  "exit_code": 0,
+  "stderr_head": ""
+}
