@@ -48,14 +48,20 @@ class RecordingJsonld:
 
 
 class RecordingExtract:
-    def __init__(self, opportunities_by_url: dict[str, list[Opportunity]]):
+    def __init__(
+        self,
+        opportunities_by_url: dict[str, list[Opportunity]],
+        kind_by_url: dict[str, PageKind] | None = None,
+    ):
         self._by_url = opportunities_by_url
+        self._kind_by_url = kind_by_url or {}
         self.calls: list[tuple[str, str]] = []
 
     def __call__(self, body: str, url: str) -> ExtractionResult:
         self.calls.append((body, url))
         return ExtractionResult(
-            kind=PageKind.DETAIL, opportunities=self._by_url.get(url, [])
+            kind=self._kind_by_url.get(url, PageKind.DETAIL),
+            opportunities=self._by_url.get(url, []),
         )
 
 
