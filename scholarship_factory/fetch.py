@@ -36,6 +36,7 @@ class FetchResult(BaseModel):
     body: str | None = None
     fetched_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     error: str | None = None
+    from_cache: bool = False
 
     @computed_field
     @property
