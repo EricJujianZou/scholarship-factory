@@ -1,0 +1,18 @@
+{
+  "id": "GH-44",
+  "type": "feat",
+  "priority": 10,
+  "title": "Refresh - on-demand re-check of an opportunity's facts",
+  "description": "Session 8, the last v1 slice: on-demand refresh. The owner asks \"is this deadline still right?\" for opportunities they care about. **No scheduler, no automatic refresh** - v1 refreshes only on demand (locked scope boundary). Composes merged pieces: fetch (`fetch_url`/`PoliteFetcher`), extract (`extract.py`/`jsonld.py`), store, cache (bypassed here - a refresh must hit the live page), identity merge policy (GH-XX identity ticket) if merged.\n\n## Locked decisions (honor)\n\n- Refresh = re-fetch the opportunity's `source_url`, re-extract, and do a **field-level compare** on the uncertain facts (`deadline`/`reward`/`cost` + their source spans): unchanged -> just bump `last_seen`; changed -> update the fact, its provenance, and its source span honestly; fact disappeared from the page -> keep the old value but record that the re-check no longer found it (a `status`/note, not a silent delete and not a fabricated null).\n- A fetch failure (404/timeout) marks the refresh outcome honestly (e.g. status `unreachable`) - it does NOT delete or blank the record.\n- The store's `status` field (default `\"new\"`, GH-1) gets its first real states here - keep the machine tiny: `new | refreshed | changed | unreachable`. No bigger lifecycle.\n- LLM extractor injectable/stubbed in tests, as everywhere.\n\n## Scope\n\n1. `scholarship_factory/refresh.py`: `refresh_opportunity(store, opportunity_id, *, fetch_fn, extract_fn, ...) -> RefreshOutcome` implementing the compare/update policy.\n2. API + UI hook: `POST /api/opportunities/{id}/refresh` on the FastAPI app and a per-card refresh button on the dashboard (if the dashboard ticket is merged; otherwise ship the function + endpoint-ready signature).\n3. CLI: `sf refresh <id>`.",
+  "acceptance_criteria": [
+    "Stubbed re-extract with an unchanged deadline -> `last_seen` bumped, status `refreshed`, fact untouched.",
+    "Stubbed re-extract with a NEW deadline string -> fact + source span updated, status `changed`, old value gone from the row but the change visible in the outcome object.",
+    "Stubbed re-extract where the fact is absent -> old value retained, outcome records it as no-longer-found (no silent delete, no fabricated value).",
+    "Fetch failure -> status `unreachable`, record otherwise untouched.",
+    "Cache is bypassed (asserted: fetch fn called even with a fresh cache entry present).",
+    "All tests offline, temp db; `uv run pytest -q` green."
+  ],
+  "skill_match": null,
+  "passes": false,
+  "status": "open"
+}

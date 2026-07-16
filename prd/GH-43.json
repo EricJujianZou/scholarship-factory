@@ -1,0 +1,17 @@
+{
+  "id": "GH-43",
+  "type": "feat",
+  "priority": 9,
+  "title": "Dashboard - FastAPI read API + single-page opportunity dashboard",
+  "description": "Session 7: the first visible product. Everything it reads is merged: store (`store.py`), ranking (`rank.py`: `rank`, hard filters + sort, verdicts + reasons), profile (`profile.py`). Single user, local service - **no auth, no writes from the UI in this ticket** (refresh actions are Session 8).\n\n## Locked decisions (honor)\n\n- **Extracted facts only** - the UI shows stored/parsed facts and ranking verdicts; it never generates text.\n- Simple: **FastAPI + one self-contained HTML page** (vanilla JS/fetch, no build step, no React/npm). Serve it from FastAPI (static file or template).\n- Ranked view = `rank()` output: eligible list in rank order, excluded (ineligible/expired) shown separately with their `reasons`. Missing facts display as absent (e.g. \"no deadline found\"), NEVER as invented values.\n- `owner` stays `\"me\"`; db path configurable (env var or CLI arg) with the project's default.\n\n## Scope\n\n1. `scholarship_factory/api.py`: FastAPI app with `GET /api/opportunities` (ranked: eligible + excluded, verdicts, reasons, parsed deadline/reward alongside the verbatim strings) and `GET /api/profile` / `PUT /api/profile` (view + edit the single profile - the one write needed to make ranking usable).\n2. A single dashboard page at `/`: ranked eligible cards (title, org, deadline, reward, link to `apply_url`, provenance-honest display), a collapsed excluded section with reasons, and a minimal profile editor.\n3. `sf serve` subcommand on the existing CLI (`cli.py`) starting uvicorn (add `uvicorn` dependency via uv).\n4. Tests with FastAPI's TestClient against a temp db (no live server needed).",
+  "acceptance_criteria": [
+    "`GET /api/opportunities` on a seeded temp db returns eligible items in rank order plus excluded items with verdicts/reasons; parsed deadline/reward appear alongside the verbatim stored strings.",
+    "An opportunity with `deadline=None` serializes with a null deadline (nothing invented) and the page renders it as absent.",
+    "`PUT /api/profile` updates region/education_level/field_of_study/tags/bio and a subsequent `GET /api/opportunities` reflects re-ranking against the new profile.",
+    "`GET /` serves the dashboard HTML (asserted 200 + content-type html; page references the two API endpoints).",
+    "No auth added; TestClient only, no network; `uv run pytest -q` green."
+  ],
+  "skill_match": null,
+  "passes": false,
+  "status": "open"
+}
