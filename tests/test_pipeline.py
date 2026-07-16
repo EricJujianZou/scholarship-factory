@@ -165,3 +165,78 @@ def test_both_extract_paths_run_on_lablab_fixture(tmp_path):
     apply_urls = {o.apply_url for o in store.list()}
     assert "https://example.com/apply-prose" in apply_urls
     assert report.opportunities_stored == 2
+
+
+def test_listing_traversal_stores_detail_record_with_deadline(tmp_path):
+    store = OpportunityStore(str(tmp_path / "t.db"))
+    seeds = [Seed(type=SeedType.URL, value="https://example.com/listing")]
+    fetch_fn = FakeFetch(
+        {
+            "https://example.com/listing": ok_result("https://example.com/listing"),
+            "https://example.com/detail": ok_result("https://example.com/detail"),
+        }
+    )
+    thin_item = make_opp("https://example.com/detail", title="Thin")
+    detail_opp = make_opp(
+        "https://example.com/detail",
+        title="Detail",
+        deadline="2026-05-01",
+        deadline_source="Deadline: 2026-05-01",
+        deadline_provenance="quoted",
+    )
+    extract_fn = RecordingExtract(
+        {
+            "https://example.com/listing": [thin_item],
+            "https://example.com/detail": [detail_opp],
+        },
+        kind_by_url={"https://example.com/listing": PageKind.LIST},
+    )
+    jsonld_fn = RecordingJsonld({})
+
+    run_sourcing(
+        seeds, store, fetch_fn=fetch_fn, extract_fn=extract_fn, jsonld_fn=jsonld_fn
+    )
+
+    stored = store.list()
+    assert len(stored) == 1
+    assert stored[0].deadline == "2026-05-01"
+    assert stored[0].source_url == "https://example.com/detail"
+
+
+def test_target_outcome_exposes_traversal_cap_reached(tmp_path):
+    store = OpportunityStore(str(tmp_path / "t.db"))
+    seeds = [Seed(type=SeedType.URL, value="https://example.com/listing")]
+    thin_items = [make_opp(f"https://example.com/{i}", title=str(i)) for i in range(3)]
+    fetch_fn = FakeFetch(
+        {
+            "https://example.com/listing": ok_result("https://example.com/listing"),
+            **{
+                f"https://example.com/{i}": ok_result(f"https://example.com/{i}")
+                for i in range(3)
+            },
+        }
+    )
+    extract_fn = RecordingExtract(
+        {
+            "https://example.com/listing": thin_items,
+            **{
+                f"https://example.com/{i}": [make_opp(f"https://example.com/{i}")]
+                for i in range(3)
+            },
+        },
+        kind_by_url={"https://example.com/listing": PageKind.LIST},
+    )
+    jsonld_fn = RecordingJsonld({})
+
+    report = run_sourcing(
+        seeds,
+        store,
+        fetch_fn=fetch_fn,
+        extract_fn=extract_fn,
+        jsonld_fn=jsonld_fn,
+        page_cap=1,
+    )
+
+    outcome = next(o for o in report.outcomes if o.url == "https://example.com/listing")
+    assert outcome.traversal is not None
+    assert outcome.traversal.cap_reached is True
