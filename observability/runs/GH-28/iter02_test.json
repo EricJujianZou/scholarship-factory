@@ -1,0 +1,10 @@
+{
+  "stage": "test",
+  "outcome": "success",
+  "summary": "uv run pytest -q: 99 passed (21 in test_rank.py). Verified all 6 acceptance criteria with evidence, plus confirmed the reviewer-flagged US-regex bug is fixed (regex probe + regression test both show no false match on 'using/usually/us').",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 2202,
+  "exit_code": 0,
+  "stderr_head": ""
+}

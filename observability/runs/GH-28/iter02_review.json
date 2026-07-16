@@ -1,0 +1,10 @@
+{
+  "stage": "review",
+  "outcome": "success",
+  "summary": "Iteration-1 blocker is fixed: the US region pattern at rank.py:62 now hoists the required noun outside the alternation (\\b(?:US|United States) (?:residents?|citizens?)\\b), so 'using'/'usually'/'us' no longer false-match; the same shape was applied to all seven rules, making the bug class unrepresentable. Rule-shaped parametrized coverage (true-positive + benign-text negative per rule) plus the specific 'using'/'us' regression test closes the gap that let a green suite ship the bug. All six acceptance criteria verified with evidence; no user-facing surface, so visual lens is N/A. Caveat: sandbox denied pytest execution, so 99-passed is inherited from prior stages, corroborated by an independent test-count cross-check (21 in test_rank.py = 6+1+4+4+3+3, matches the file exactly). Non-blocking: the benign education case at test_rank.py:174 is vacuous (profile satisfies the only rule its text touches), and the plan's accepted Risk 1 ('join us residents' pronoun match) remains.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 6636,
+  "exit_code": 0,
+  "stderr_head": ""
+}

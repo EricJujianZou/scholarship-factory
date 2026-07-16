@@ -1,9 +1,9 @@
 {
   "ticket_id": "GH-28",
-  "stage": "test",
+  "stage": "document",
   "iteration": 2,
   "branch": "adw/GH-28",
   "last_failure": null,
-  "budget_used_tokens": 45171,
+  "budget_used_tokens": 54009,
   "cooldown_until": null
 }
