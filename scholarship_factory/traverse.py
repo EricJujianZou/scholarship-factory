@@ -5,6 +5,11 @@ page, re-extracts it, and returns the enriched records plus a per-link
 outcome report. It never recurses into a fetched page's own extraction
 kind (v1 traversal stops at depth 1) and never touches the store --
 identity/merge logic stays Session 5's job.
+
+A thin item with no link (`extract.py`'s `item.apply_url or source_url`
+fallback for a link-less item) resolves to the listing's own URL; that
+self-link is not a real link and is skipped so it can't be refetched and
+returned as a detail record.
 """
 from urllib.parse import urljoin
 
