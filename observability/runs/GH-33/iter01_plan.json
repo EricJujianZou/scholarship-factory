@@ -1,0 +1,10 @@
+{
+  "stage": "plan",
+  "outcome": "success",
+  "summary": "Plan for the S3 fetch cache: new cache.py with a SQLite-backed FetchCache (get/put + freshness window, injectable clock) and a cached_fetch(url, *, cache, fetch_fn) composition, plus a from_cache flag on FetchResult and offline tmp_path tests. Mirrors polite.py's wrapper pattern and store.py's SQLite pattern.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 7592,
+  "exit_code": 0,
+  "stderr_head": ""
+}

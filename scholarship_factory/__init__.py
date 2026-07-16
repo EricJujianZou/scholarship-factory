@@ -1,4 +1,5 @@
 from .adapters import AdapterPlan, FetchTarget, SkipReason, SkippedSeed, targets_for, targets_for_seeds
+from .cache import DEFAULT_MAX_AGE, FetchCache, cached_fetch
 from .extract import ExtractionResult, PageKind, extract
 from .fetch import FetchResult, fetch_url
 from .jsonld import extract_jsonld
@@ -42,4 +43,7 @@ __all__ = [
     "SkippedSeed",
     "targets_for",
     "targets_for_seeds",
+    "FetchCache",
+    "cached_fetch",
+    "DEFAULT_MAX_AGE",
 ]
