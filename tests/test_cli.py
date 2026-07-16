@@ -1,7 +1,10 @@
 import os
 import tempfile
 
+from scholarship_factory import cli
 from scholarship_factory.cli import main
+from scholarship_factory.extract import ExtractionResult, PageKind
+from scholarship_factory.fetch import FetchResult
 from scholarship_factory.models import Opportunity
 from scholarship_factory.store import OpportunityStore
 
