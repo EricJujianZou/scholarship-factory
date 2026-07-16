@@ -1,0 +1,10 @@
+{
+  "stage": "plan",
+  "outcome": "success",
+  "summary": "Retry diagnosis: GH-27 is already fully implemented and committed (adapters.py + __init__ re-exports + test_adapters.py, commits 15bb297-95de545) and every acceptance criterion traces to an existing assertion. Iteration 1 failed only because the test stage's saved output ended with a commit sign-off instead of its JSON status block, so the harness found nothing to parse. Plan is verification-only: run pytest firsthand, change no source, and end the test reply with the status block as its terminal content.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 6227,
+  "exit_code": 0,
+  "stderr_head": ""
+}

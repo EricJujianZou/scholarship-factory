@@ -1,0 +1,10 @@
+{
+  "stage": "plan",
+  "outcome": "success",
+  "summary": "Plan for GH-27 source adapters: new scholarship_factory/adapters.py with FetchTarget, targets_for (pure per-seed mapping, [] for disabled/auth-walled), and targets_for_seeds returning an AdapterPlan carrying targets + explicit SkippedSeed reasons; re-exported from __init__ and covered by a new tests/test_adapters.py. No network, no fetcher coupling.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 12539,
+  "exit_code": 0,
+  "stderr_head": ""
+}

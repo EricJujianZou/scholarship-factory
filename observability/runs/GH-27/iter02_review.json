@@ -1,0 +1,10 @@
+{
+  "stage": "review",
+  "outcome": "success",
+  "summary": "All 6 acceptance criteria verified by tracing each to a named test assertion I read directly; adapter seam holds (no network imports, confirmed by grep). No user-facing surface, so visual lens N/A. Could not execute pytest myself (tool permission denied) \u2014 relied on two independent prior-stage green runs (78 passed) plus line-by-line source tracing of _subreddit_name against all 5 parametrized inputs. Clean first solve of the seed-to-target adapter class: candidate for a new skill in skills/.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 7581,
+  "exit_code": 0,
+  "stderr_head": ""
+}

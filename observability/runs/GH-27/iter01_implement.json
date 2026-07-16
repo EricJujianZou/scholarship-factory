@@ -1,0 +1,10 @@
+{
+  "stage": "implement",
+  "outcome": "success",
+  "summary": "Implemented scholarship_factory/adapters.py per plan; re-exported from __init__.py; full test_adapters.py covering all acceptance criteria. 78/78 tests pass. Committed state.json/observability artifacts to satisfy clean-tree check.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 5152,
+  "exit_code": 0,
+  "stderr_head": ""
+}
