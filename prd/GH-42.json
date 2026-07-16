@@ -1,0 +1,17 @@
+{
+  "id": "GH-42",
+  "type": "feat",
+  "priority": 8,
+  "title": "Identity - cross-source dedup: merge the same opportunity seen via different URLs",
+  "description": "Session 5 (Identity). Replaces the v1 placeholder where opportunity-identity == normalized `apply_url` (a `UNIQUE` index, GH-1). Traverse (S4) makes this real: the same opportunity now arrives from a listing thin item and from its detail page, or from two different sources with different tracking URLs. Distilled from `REPO_CONTENT.md` (locked: the URL heuristic is *not* true identity; cross-source dedup was deferred to here).\n\n## Design (standard call - keep boring, no ML)\n\n- **Identity key, in order of trust:** (1) normalized `apply_url` equality (existing `urls.py` normalization - keep as the primary key); (2) a **secondary match**: same normalized `title` + same normalized `organization` (case/whitespace/punctuation-folded, both non-null). Nothing fuzzier: no edit distance, no embeddings - a miss is acceptable, a false merge is not (whole-record honesty).\n- **Merge policy on an identity hit:** field-wise \"richer wins\": a non-null fact beats null; if both non-null they conflict -> keep the EXISTING value and do not overwrite (facts are receipts - never silently replace a quoted fact with a different one), but always refresh `last_seen`. `source_url` of the record that contributed a new fact is preserved with that fact's source span (already stored per-fact).\n- Never merge two records that share only a title (different orgs) or only an org.\n\n## Scope\n\n1. `scholarship_factory/identity.py`: `find_duplicate(store, opportunity) -> Opportunity | None` (the identity probe) and a `merge_into(existing, incoming) -> Opportunity` implementing the field-wise policy.\n2. Wire the store's upsert path (or the pipeline's store step) to consult identity before insert: URL-dedup hit -> existing behavior; else secondary-match hit -> merge; else insert new.\n3. No retroactive dedup sweep of existing rows (out of scope).",
+  "acceptance_criteria": [
+    "Two records with different `apply_url`s (tracking params vs clean) still dedup via URL normalization (regression guard).",
+    "Two records with different hosts but identical normalized title + organization -> ONE stored row; the merged row has the union of facts (null filled from incoming), `last_seen` refreshed, and no existing non-null fact overwritten.",
+    "Same title but different organization -> two rows (no merge). Same org, different title -> two rows.",
+    "A thin listing item (title+url only) followed by its rich detail record (same normalized apply_url) -> one row carrying the detail facts.",
+    "All tests offline, temp db; `uv run pytest -q` green."
+  ],
+  "skill_match": null,
+  "passes": false,
+  "status": "open"
+}
