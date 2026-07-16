@@ -1,0 +1,10 @@
+{
+  "stage": "implement",
+  "outcome": "success",
+  "summary": "Verified GH-27 is already fully and correctly implemented (adapters.py, __init__ re-exports, test_adapters.py); confirmed firsthand with uv run pytest -q (78 passed). No source changes needed this iteration \u2014 the prior failure was a test-stage reporting issue, not a code defect. Committed pending observability/state artifacts to keep the tree clean.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 1694,
+  "exit_code": 0,
+  "stderr_head": ""
+}
