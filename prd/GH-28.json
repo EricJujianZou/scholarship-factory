@@ -1,0 +1,18 @@
+{
+  "id": "GH-28",
+  "type": "feat",
+  "priority": 3,
+  "title": "Rank - deterministic eligibility filter + sort vs applicant profile",
+  "description": "Session 6 (Ranking). Foundations merged: `ApplicantProfile` (GH-14, `scholarship_factory/profile.py`), typed deadline dates (GH-12, `parse_dates.py`), typed money (GH-13, `parse_money.py`), `Opportunity` model (`models.py`). This ticket ranks stored opportunities against the single applicant profile.\n\n## Locked decisions (owner UX call - honor)\n\n- **Deterministic hard filters + sort. No LLM call, no fit score float.**\n- **Unknown is never ineligible.** Missing/unparseable data must not exclude an opportunity (same ethos as no-fabrication): exclusion only on an **explicit, deterministic mismatch**.\n- Sort order (most actionable first): **deadline urgency ascending** (soonest parsed deadline first), tiebreak **reward descending** (parsed money), then title. Opportunities with no parseable deadline sort **after** dated ones (they are not urgent-unknown, not excluded).\n- Deadlines already in the past -> verdict `expired`, kept out of the eligible ranking but still returned (the dashboard may show them separately).\n\n## Scope\n\n1. `rank(opportunities, profile, *, today=...) -> RankedResults` in a new `scholarship_factory/rank.py`:\n   - Per-opportunity verdict enum: `eligible | ineligible | expired`, plus a human-readable `reasons: list[str]` (which rule fired: e.g. \"region mismatch: requires 'EU residents', profile region 'Canada'\", or \"deadline 2026-06-01 passed\").\n   - Hard filters (conservative, deterministic keyword/equality checks against `Opportunity.requirements` + `description` text and profile fields `region` / `education_level`): only exclude when the opportunity text explicitly names a constraint that contradicts the profile field, matched via a small explicit rule table - not fuzzy matching. When in doubt, keep it eligible.\n   - Deadline parsing via the existing `parse_dates` layer; reward via `parse_money`. `today` injectable for tests.\n2. Eligible items sorted per the locked order; verdicts + reasons on every item.\n\nKeep the rule table small and readable - this is v1; smarter matching is a later session.",
+  "acceptance_criteria": [
+    "An opportunity whose requirements explicitly demand a region different from the profile's region -> `ineligible` with a reason naming both values.",
+    "Missing `deadline` / `reward` / `requirements` -> stays `eligible`; sorts after opportunities with parsed deadlines.",
+    "A parsed deadline before `today` -> `expired`, excluded from the eligible ordering but present in results with a reason.",
+    "Two eligible dated opportunities -> soonest deadline first; equal deadlines -> larger parsed reward first.",
+    "Profile with all-null fields -> nothing excluded (everything eligible or expired).",
+    "Pure functions, no network, no LLM; `uv run pytest -q` green."
+  ],
+  "skill_match": null,
+  "passes": false,
+  "status": "open"
+}

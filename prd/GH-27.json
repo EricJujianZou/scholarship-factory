@@ -1,0 +1,18 @@
+{
+  "id": "GH-27",
+  "type": "feat",
+  "priority": 2,
+  "title": "Fetch - source adapters: Seed -> fetch targets (url / reddit / devpost / wordpress-listing)",
+  "description": "Session 3 (Fetch) chain. Distilled from `REPO_CONTENT.md` + `docs/s3-fetch-design.md`. The seed-list model (GH-15, `scholarship_factory/seeds.py`: `Seed`, `SeedType`, `load_seeds`) is merged. This ticket implements the **adapter side of the locked seam: adapters yield target URLs; one generic fetcher pulls them.** Adapters do **no network I/O** - they map a `Seed` to the URL(s) the fetcher should pull.\n\n## Locked decisions (honor)\n\n- **Open-web only.** `instagram` / `x` seeds are auth-walled and deferred to their own session: the adapter layer must **skip them explicitly** (a visible \"unsupported\" outcome, e.g. logged/returned as skipped), never crash and never silently drop.\n- Disabled seeds (`enabled=False`) are skipped.\n- The fetcher stays source-agnostic; anything source-specific (URL shapes, JSON endpoints) lives in the adapter.\n\n## Scope\n\n1. A small `FetchTarget` model: at minimum `url` + the originating seed / source kind (so Extract and later stages know what shape of content to expect).\n2. `targets_for(seed) -> list[FetchTarget]` (or equivalent) covering:\n   - `url`: the seed value itself, passed through as one target.\n   - `reddit`: a subreddit name or URL -> the **public JSON listing** `https://www.reddit.com/r/<sub>/new.json?limit=50` (no auth, no API key).\n   - `devpost`: a Devpost hackathons listing/search URL -> passed through (static HTML target; JS-shell risk is a later, separate concern).\n   - `wordpress` handling is covered by `url` (a WordPress listing like opportunitiesforyouth.org is just a URL seed) - do NOT invent a separate WordPress API integration.\n3. A `targets_for_seeds(seeds)` convenience that maps a whole seed list, skipping disabled + auth-walled seeds.\n\nNote `SeedType` currently has no `wordpress` member - do not add one; the `url` type covers it. Keep the adapter table small and boring.",
+  "acceptance_criteria": [
+    "`url` seed -> exactly one `FetchTarget` with the same URL.",
+    "`reddit` seed given as bare subreddit name (`scholarships`) and as full URL both -> the `/r/<sub>/new.json` public-JSON target.",
+    "`devpost` seed -> its listing URL as a target.",
+    "`instagram` / `x` seeds -> zero targets, surfaced as an explicit skipped/unsupported outcome (asserted in tests), no exception.",
+    "`enabled=False` seeds -> zero targets.",
+    "No network anywhere; `uv run pytest -q` green."
+  ],
+  "skill_match": null,
+  "passes": false,
+  "status": "open"
+}
