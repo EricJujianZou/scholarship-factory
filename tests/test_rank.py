@@ -89,3 +89,97 @@ def test_unrecognized_region_never_excludes():
 
     assert results.excluded == []
     assert results.eligible[0].verdict == Verdict.ELIGIBLE
+
+
+def test_benign_us_prose_does_not_exclude():
+    profile = ApplicantProfile(region="Canada")
+    opp = _opp(
+        description="For students using renewable energy research, usually joining us in the lab"
+    )
+
+    results = rank([opp], profile, today=TODAY)
+
+    assert results.excluded == []
+    assert results.eligible[0].verdict == Verdict.ELIGIBLE
+
+
+@pytest.mark.parametrize(
+    "requirements,profile_region,expected_label",
+    [
+        ("Open to EU residents only", "Canada", "EU residents"),
+        ("US citizens only", "Canada", "US residents"),
+        ("Canada only", "Germany", "Canadian residents"),
+        ("Open to UK residents", "Canada", "UK residents"),
+    ],
+)
+def test_region_rule_fires_on_explicit_constraint(requirements, profile_region, expected_label):
+    profile = ApplicantProfile(region=profile_region)
+    opp = _opp(requirements=requirements)
+
+    results = rank([opp], profile, today=TODAY)
+
+    assert results.eligible == []
+    assert len(results.excluded) == 1
+    ranked = results.excluded[0]
+    assert ranked.verdict == Verdict.INELIGIBLE
+    assert expected_label in ranked.reasons[0]
+    assert profile_region in ranked.reasons[0]
+
+
+@pytest.mark.parametrize(
+    "description,profile_region",
+    [
+        ("a European Union grant program", "Canada"),
+        ("we ship to United States addresses", "Canada"),
+        ("the Canadian Space Agency sponsors this", "Germany"),
+        ("UK based mentors will advise", "Canada"),
+    ],
+)
+def test_region_rule_does_not_fire_on_benign_text(description, profile_region):
+    profile = ApplicantProfile(region=profile_region)
+    opp = _opp(description=description)
+
+    results = rank([opp], profile, today=TODAY)
+
+    assert results.excluded == []
+    assert results.eligible[0].verdict == Verdict.ELIGIBLE
+
+
+@pytest.mark.parametrize(
+    "requirements,profile_education,expected_label",
+    [
+        ("High school students only", "undergraduate", "high school students only"),
+        ("Undergraduates only", "phd", "undergraduate students only"),
+        ("Graduate students only", "high school", "graduate students only"),
+    ],
+)
+def test_education_rule_fires_on_explicit_constraint(requirements, profile_education, expected_label):
+    profile = ApplicantProfile(education_level=profile_education)
+    opp = _opp(requirements=requirements)
+
+    results = rank([opp], profile, today=TODAY)
+
+    assert results.eligible == []
+    assert len(results.excluded) == 1
+    ranked = results.excluded[0]
+    assert ranked.verdict == Verdict.INELIGIBLE
+    assert expected_label in ranked.reasons[0]
+    assert profile_education in ranked.reasons[0]
+
+
+@pytest.mark.parametrize(
+    "description",
+    [
+        "open to high school students and undergraduates",
+        "undergraduate research experience preferred",
+        "graduate students are encouraged to apply",
+    ],
+)
+def test_education_rule_does_not_fire_on_benign_text(description):
+    profile = ApplicantProfile(education_level="undergraduate")
+    opp = _opp(description=description)
+
+    results = rank([opp], profile, today=TODAY)
+
+    assert results.excluded == []
+    assert results.eligible[0].verdict == Verdict.ELIGIBLE
