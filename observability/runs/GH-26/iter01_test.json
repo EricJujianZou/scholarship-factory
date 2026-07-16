@@ -1,0 +1,10 @@
+{
+  "stage": "test",
+  "outcome": "success",
+  "summary": "65 tests passed (15 in test_fetch.py); all 7 acceptance criteria verified against actual mock-transport behavior, no real network calls.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 5221,
+  "exit_code": 0,
+  "stderr_head": ""
+}

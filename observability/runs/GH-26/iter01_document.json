@@ -1,0 +1,10 @@
+{
+  "stage": "document",
+  "outcome": "success",
+  "summary": "docs/changes/GH-26.md committed; remaining stage/state artifacts also committed to satisfy the clean-tree check.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 3343,
+  "exit_code": 0,
+  "stderr_head": ""
+}

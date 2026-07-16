@@ -6,6 +6,8 @@ dependencies = [
     "fastapi",
     "pydantic>=2",
     "dateparser",
+    "httpx",
+    "tenacity",
 ]
 
 [project.scripts]
@@ -17,7 +19,6 @@ llm = ["anthropic"]
 [dependency-groups]
 dev = [
     "pytest",
-    "httpx",
 ]
 
 [build-system]

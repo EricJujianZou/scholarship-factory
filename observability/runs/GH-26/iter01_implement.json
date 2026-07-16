@@ -1,0 +1,10 @@
+{
+  "stage": "implement",
+  "outcome": "success",
+  "summary": "Implemented fetch_url in scholarship_factory/fetch.py with httpx+tenacity retry/backoff, honest FetchResult on all outcomes, offline MockTransport tests; working tree clean, full suite green (65 passed).",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 6436,
+  "exit_code": 0,
+  "stderr_head": ""
+}
