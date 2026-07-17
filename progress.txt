@@ -17,3 +17,11 @@
   static HTML page, keep it as a literal in JS rather than building it
   via template interpolation (`` `no ${label} found` ``) - the interpolated
   form never appears verbatim in the source file.
+- Any dashboard that renders scraped/remote content (titles, org names,
+  URLs from JSON-LD extraction) via `innerHTML` must escape every
+  interpolation (`escapeHtml()`) and scheme-validate URLs before using
+  them as `href` (`safeUrl()` rejecting non-http(s), e.g. `javascript:`).
+  TestClient/pytest run no JS, so this can only be verified by a source
+  contract test (helper functions exist, raw `${opp.field}` interpolation
+  absent) plus asserting the API returns the raw value unescaped in JSON
+  (JSON isn't HTML - escaping is the renderer's job, not the API's).
