@@ -51,21 +51,39 @@
   </form>
 
 <script>
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[ch]);
+}
+
 function missing(text) {
   return `<span class="missing">${text}</span>`;
 }
 
 function fmt(value, missingText) {
-  return value === null || value === undefined || value === '' ? missing(missingText) : value;
+  return value === null || value === undefined || value === '' ? missing(missingText) : escapeHtml(value);
+}
+
+function safeUrl(url) {
+  try {
+    const u = new URL(url, window.location.href);
+    return (u.protocol === "http:" || u.protocol === "https:") ? url : null;
+  } catch {
+    return null;
+  }
 }
 
 function renderCard(item) {
   const opp = item.opportunity;
   const deadline = fmt(opp.deadline, "no deadline found");
   const reward = fmt(opp.reward, "no reward found");
+  const title = escapeHtml(opp.title);
+  const href = safeUrl(opp.apply_url);
+  const heading = href
+    ? `<a href="${escapeHtml(href)}" target="_blank" rel="noopener">${title}</a>`
+    : title;
   return `
     <div class="card">
-      <h3><a href="${opp.apply_url}" target="_blank" rel="noopener">${opp.title}</a></h3>
+      <h3>${heading}</h3>
       <div class="meta">${fmt(opp.organization, "no organization found")} &middot; deadline: ${deadline} &middot; reward: ${reward}</div>
     </div>
   `;
@@ -73,11 +91,11 @@ function renderCard(item) {
 
 function renderExcludedCard(item) {
   const opp = item.opportunity;
-  const reasons = (item.reasons || []).join("; ") || "no reason recorded";
+  const reasons = escapeHtml((item.reasons || []).join("; ")) || "no reason recorded";
   return `
     <div class="card">
-      <h3>${opp.title}</h3>
-      <div class="meta">verdict: ${item.verdict}</div>
+      <h3>${escapeHtml(opp.title)}</h3>
+      <div class="meta">verdict: ${escapeHtml(item.verdict)}</div>
       <div class="reasons">${reasons}</div>
     </div>
   `;
