@@ -5,6 +5,8 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 
 from scholarship_factory.api import create_app
+from scholarship_factory.extract import ExtractionResult, PageKind
+from scholarship_factory.fetch import FetchResult
 from scholarship_factory.models import Opportunity
 from scholarship_factory.profile import ApplicantProfile, ProfileStore
 from scholarship_factory.store import OpportunityStore
