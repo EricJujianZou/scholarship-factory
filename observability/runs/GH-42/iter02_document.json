@@ -1,0 +1,10 @@
+{
+  "stage": "document",
+  "outcome": "success",
+  "summary": "docs/changes/GH-42.md committed; also committed pre-existing unstaged observability/state files to satisfy the clean-tree gate.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 3292,
+  "exit_code": 0,
+  "stderr_head": ""
+}
