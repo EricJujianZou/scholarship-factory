@@ -51,16 +51,18 @@
   </form>
 
 <script>
-function fmt(value, label) {
-  return value === null || value === undefined || value === ''
-    ? `<span class="missing">no ${label} found</span>`
-    : value;
+function missing(text) {
+  return `<span class="missing">${text}</span>`;
+}
+
+function fmt(value, missingText) {
+  return value === null || value === undefined || value === '' ? missing(missingText) : value;
 }
 
 function renderCard(item) {
   const opp = item.opportunity;
-  const deadline = fmt(opp.deadline, "deadline");
-  const reward = fmt(opp.reward, "reward");
+  const deadline = fmt(opp.deadline, "no deadline found");
+  const reward = fmt(opp.reward, "no reward found");
   return `
     <div class="card">
       <h3><a href="${opp.apply_url}" target="_blank" rel="noopener">${opp.title}</a></h3>
