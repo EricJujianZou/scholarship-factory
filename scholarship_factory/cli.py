@@ -7,6 +7,7 @@ the existing OpportunityStore (GH-1); `source` runs a sourcing pass and writes t
     sf list [--status new] [--db PATH]
     sf show <id> [--db PATH]
     sf source --seeds seeds.toml [--db PATH]
+    sf refresh <id> [--db PATH]
 
 db path: `--db`, else $SF_DB_PATH, else ./scholarship_factory.db
 """
@@ -17,6 +18,7 @@ import sys
 from .extract import extract
 from .fetch import fetch_url
 from .pipeline import run_sourcing
+from .refresh import refresh_opportunity
 from .seeds import load_seeds
 from .store import OpportunityStore
 
