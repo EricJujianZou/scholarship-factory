@@ -85,8 +85,14 @@ def main(argv: list[str] | None = None) -> int:
     p_show.add_argument("id")
     p_source = sub.add_parser("source", parents=[common], help="run a sourcing pass")
     p_source.add_argument("--seeds", required=True, help="seeds TOML path")
+    p_serve = sub.add_parser("serve", parents=[common], help="run the dashboard API")
+    p_serve.add_argument("--host", default="127.0.0.1")
+    p_serve.add_argument("--port", type=int, default=8000)
 
     args = parser.parse_args(argv)
+    if args.command == "serve":
+        return _cmd_serve(args.db or _default_db_path(), args.host, args.port)
+
     store = OpportunityStore(args.db or _default_db_path())
     if args.command == "list":
         return _cmd_list(store, args.status)
