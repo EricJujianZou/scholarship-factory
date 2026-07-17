@@ -1,0 +1,10 @@
+{
+  "stage": "plan",
+  "outcome": "success",
+  "summary": "Retry plan for the single review defect: tests/test_identity.py:51's vacuous `merged.last_seen >= merged.first_seen` is replaced by three real assertions against the first insert's returned row (id stable, first_seen preserved, last_seen strictly refreshed), closing AC2's unverified 'last_seen refreshed' clause. Test-only change, independently confirmed by tracing store.py:81 -> update(), which refreshes last_seen and excludes first_seen; identity.py and store.py stay untouched.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 5423,
+  "exit_code": 0,
+  "stderr_head": ""
+}

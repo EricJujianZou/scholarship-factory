@@ -1,6 +1,7 @@
 import sqlite3
 from datetime import datetime, timezone
 
+from .identity import find_duplicate, merge_into
 from .models import Opportunity, Provenance
 from .urls import normalize_apply_url
 
@@ -75,6 +76,10 @@ class OpportunityStore:
         self._conn.commit()
 
     def insert(self, opp: Opportunity) -> Opportunity:
+        existing = find_duplicate(self, opp)
+        if existing is not None:
+            return self.update(merge_into(existing, opp))
+
         now = datetime.now(timezone.utc).isoformat()
         normalized = normalize_apply_url(opp.apply_url)
         row = opp.model_dump()

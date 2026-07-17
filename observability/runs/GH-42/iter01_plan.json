@@ -1,0 +1,10 @@
+{
+  "stage": "plan",
+  "outcome": "success",
+  "summary": "Plan: new identity.py (normalize_text, merge_into, find_duplicate) consulted at the top of store.insert(), reusing the existing update() for the merged write. Resolved a real contradiction between the ticket's 'URL hit -> existing behavior' design text and AC4, which requires URL hits to merge facts; resolved in favor of AC4 (null-fill only, never overwrite a non-null fact), which stays consistent with REPO_CONTENT.md:110.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 10922,
+  "exit_code": 0,
+  "stderr_head": ""
+}
