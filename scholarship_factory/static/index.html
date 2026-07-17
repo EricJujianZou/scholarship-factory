@@ -142,6 +142,13 @@ document.getElementById("profile-form").addEventListener("submit", async (e) => 
   await loadOpportunities();
 });
 
+document.getElementById("eligible").addEventListener("click", async (e) => {
+  const id = e.target.dataset.refreshId;
+  if (!id) return;
+  await fetch(`/api/opportunities/${encodeURIComponent(id)}/refresh`, { method: "POST" });
+  await loadOpportunities();
+});
+
 loadOpportunities();
 loadProfile();
 </script>
