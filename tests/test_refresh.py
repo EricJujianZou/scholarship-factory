@@ -182,4 +182,3 @@ def test_cache_is_bypassed_even_with_fresh_entry(tmp_path):
 
     assert fetch_fn.calls == [opp.source_url]
     assert extract_fn.calls[0][0] == "<html>fresh</html>"
-    cache.get(opp.source_url, timedelta(days=1))
