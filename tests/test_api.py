@@ -136,3 +136,28 @@ def test_root_serves_dashboard():
     assert "text/html" in res.headers["content-type"]
     assert "/api/opportunities" in res.text
     assert "/api/profile" in res.text
+
+
+def test_markup_in_stored_fields_is_not_rendered_raw():
+    path = _temp_db()
+    store = OpportunityStore(path)
+    store.insert(
+        Opportunity(
+            title='<img src=x onerror="alert(1)">',
+            apply_url="javascript:alert(1)",
+            source_url="https://example.com",
+        )
+    )
+    ProfileStore(path).insert(ApplicantProfile(region="Canada"))
+    client = TestClient(create_app(path))
+
+    data = client.get("/api/opportunities").json()
+    titles = [item["opportunity"]["title"] for item in data["eligible"] + data["excluded"]]
+    assert '<img src=x onerror="alert(1)">' in titles
+
+    html = _index_html()
+    assert "function escapeHtml(" in html
+    assert "${opp.title}" not in html
+    assert "${opp.apply_url}" not in html
+    assert "${escapeHtml(opp.title)}" in html
+    assert "safeUrl(opp.apply_url)" in html
