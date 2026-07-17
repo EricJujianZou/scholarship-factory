@@ -135,6 +135,13 @@ class OpportunityStore:
         self._conn.commit()
         return self.get(opp.id)
 
+    def set_status(self, id: str, status: str) -> Opportunity | None:
+        self._conn.execute(
+            "UPDATE opportunities SET status = ? WHERE id = ?", (status, id)
+        )
+        self._conn.commit()
+        return self.get(id)
+
     def _row_to_opp(self, row: sqlite3.Row) -> Opportunity:
         data = dict(row)
         data.pop("normalized_apply_url", None)
