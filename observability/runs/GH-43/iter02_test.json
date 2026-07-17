@@ -1,0 +1,10 @@
+{
+  "stage": "test",
+  "outcome": "success",
+  "summary": "All 5 acceptance criteria + review's stored-XSS fix verified via TestClient; full suite 136 passed.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 2279,
+  "exit_code": 0,
+  "stderr_head": ""
+}

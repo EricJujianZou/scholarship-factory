@@ -1,0 +1,10 @@
+{
+  "stage": "plan",
+  "outcome": "success",
+  "summary": "Retry plan targeting the review's blocking stored-XSS finding only: add escapeHtml() folded into fmt()'s value branch, a safeUrl() http(s) allowlist for apply_url (degrading to an unlinked title), escape every interpolation in renderCard/renderExcludedCard, plus a source-contract test and the __import__ hygiene fix. api.py/cli.py/uvicorn from iter 1 are correct and untouched. Noted explicitly: TestClient runs no JS, so the fix is verified by source contract plus the API-returns-verbatim assertion, not by rendered output; rejected a CSP/script-split as unrequested scope.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 6736,
+  "exit_code": 0,
+  "stderr_head": ""
+}

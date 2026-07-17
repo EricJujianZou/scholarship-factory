@@ -1,0 +1,27 @@
+# Progress / learnings
+
+## Codebase Patterns
+
+- FastAPI + sqlite3 stores (OpportunityStore/ProfileStore): both open
+  `sqlite3.connect` with default `check_same_thread=True` at construction.
+  FastAPI runs sync `def` endpoints in a threadpool, so a store built once
+  at app-construction time raises `ProgrammingError` cross-thread. Fix:
+  construct stores per-request inside the endpoint body (cheap for a
+  single-user local sqlite service), not at app/module scope.
+- `RankedResults`/`RankedOpportunity` (rank.py) already pair parsed values
+  (`deadline: date | None`, `reward: MoneyValue | None`) with the verbatim
+  `Opportunity` strings, and pydantic serializes `None` to JSON `null` for
+  free - no extra serialization model needed for "never invent missing
+  facts" API contracts.
+- To assert a literal string (e.g. "no deadline found") appears in a
+  static HTML page, keep it as a literal in JS rather than building it
+  via template interpolation (`` `no ${label} found` ``) - the interpolated
+  form never appears verbatim in the source file.
+- Any dashboard that renders scraped/remote content (titles, org names,
+  URLs from JSON-LD extraction) via `innerHTML` must escape every
+  interpolation (`escapeHtml()`) and scheme-validate URLs before using
+  them as `href` (`safeUrl()` rejecting non-http(s), e.g. `javascript:`).
+  TestClient/pytest run no JS, so this can only be verified by a source
+  contract test (helper functions exist, raw `${opp.field}` interpolation
+  absent) plus asserting the API returns the raw value unescaped in JSON
+  (JSON isn't HTML - escaping is the renderer's job, not the API's).

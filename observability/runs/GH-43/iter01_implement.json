@@ -1,0 +1,10 @@
+{
+  "stage": "implement",
+  "outcome": "success",
+  "summary": "Added FastAPI read API (GET/PUT /api/opportunities, /api/profile) with per-request SQLite stores, a self-contained dashboard at /, sf serve CLI subcommand, and TestClient tests. Full suite green (135 passed). Working tree clean.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 10504,
+  "exit_code": 0,
+  "stderr_head": ""
+}

@@ -1,0 +1,10 @@
+{
+  "stage": "review",
+  "outcome": "failure",
+  "summary": "API, CLI, and tests are solid and 4/5 criteria verify by inspection (rank order confirmed against rank.py's sort key; null deadline serializes correctly; profile PUT re-ranks). Blocking: the new dashboard interpolates scraped third-party content (title/organization/apply_url, sourced from remote JSON-LD via extract.py) into innerHTML with no escaping \u2014 stored XSS against an unauthenticated local write API. Visual lens skipped: no Playwright available. Could not run pytest (approval required in headless session).",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 9271,
+  "exit_code": 0,
+  "stderr_head": ""
+}

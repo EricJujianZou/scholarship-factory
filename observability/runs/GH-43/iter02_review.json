@@ -1,0 +1,10 @@
+{
+  "stage": "review",
+  "outcome": "success",
+  "summary": "Iteration 1's blocking stored-XSS finding is fully fixed: escapeHtml folded into fmt's value branch (missing-fact span preserved), safeUrl http(s) allowlist degrading a javascript: apply_url to an unlinked title, and zero unwrapped interpolations remaining at either innerHTML sink. All 5 acceptance criteria verified; scope discipline held (only index.html + test_api.py touched). Visual lens skipped for lack of Playwright. Caveat: pytest required approval in this headless session, so the green suite (136 passed, +1 consistent with the one added test) is the test stage's evidence, not independently reproduced here. The new XSS test asserts source contract rather than rendered output \u2014 an acknowledged and correctly-reasoned limit of TestClient, which runs no JS.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 7466,
+  "exit_code": 0,
+  "stderr_head": ""
+}
