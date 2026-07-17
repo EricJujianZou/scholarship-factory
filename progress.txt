@@ -25,3 +25,8 @@
   contract test (helper functions exist, raw `${opp.field}` interpolation
   absent) plus asserting the API returns the raw value unescaped in JSON
   (JSON isn't HTML - escaping is the renderer's job, not the API's).
+- `refresh.py` (GH-44): a narrow `store.set_status(id, status)` (writes only
+  the status column) is how you bump a status without also bumping
+  `last_seen` - `store.update()` always bumps `last_seen`, which is correct
+  for `refreshed`/`changed` but wrong for `unreachable` (we didn't see the
+  record, so nothing about it should look freshly observed).
