@@ -1,0 +1,10 @@
+{
+  "stage": "implement",
+  "outcome": "success",
+  "summary": "Implemented on-demand refresh: refresh.py (field-level compare on deadline/reward/cost, statuses refreshed|changed|unreachable), store.set_status, POST /api/opportunities/{id}/refresh, dashboard refresh button, sf refresh CLI. Full suite green, working tree clean.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 16242,
+  "exit_code": 0,
+  "stderr_head": ""
+}
