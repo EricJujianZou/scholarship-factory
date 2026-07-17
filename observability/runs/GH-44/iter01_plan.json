@@ -1,0 +1,10 @@
+{
+  "stage": "plan",
+  "outcome": "success",
+  "summary": "Plan for on-demand refresh: new refresh.py (fetch->re-extract->field-level compare on deadline/reward/cost, statuses refreshed|changed|unreachable), a narrow store.set_status that leaves last_seen alone for unreachable, POST /api/opportunities/{id}/refresh with injectable fetch/extract, a per-card dashboard button, and sf refresh <id>.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 14122,
+  "exit_code": 0,
+  "stderr_head": ""
+}
