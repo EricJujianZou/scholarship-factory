@@ -113,6 +113,8 @@ def main(argv: list[str] | None = None) -> int:
     p_show.add_argument("id")
     p_source = sub.add_parser("source", parents=[common], help="run a sourcing pass")
     p_source.add_argument("--seeds", required=True, help="seeds TOML path")
+    p_refresh = sub.add_parser("refresh", parents=[common], help="re-check one opportunity's facts")
+    p_refresh.add_argument("id")
     p_serve = sub.add_parser("serve", parents=[common], help="run the dashboard API")
     p_serve.add_argument("--host", default="127.0.0.1")
     p_serve.add_argument("--port", type=int, default=8000)
