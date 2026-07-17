@@ -128,6 +128,8 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_list(store, args.status)
     if args.command == "source":
         return _cmd_source(store, args.seeds)
+    if args.command == "refresh":
+        return _cmd_refresh(store, args.id)
     return _cmd_show(store, args.id)
 
 
