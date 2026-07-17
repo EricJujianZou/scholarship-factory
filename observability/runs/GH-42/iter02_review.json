@@ -1,10 +1,10 @@
 {
   "stage": "review",
-  "outcome": null,
-  "summary": null,
-  "parse_error": "no status block found in stage output",
+  "outcome": "success",
+  "summary": "Iteration 1's sole blocker is genuinely resolved: tests/test_identity.py:51-53 now asserts merged.last_seen > first.last_seen (plus id stability and first_seen preservation) against the first insert's returned row, so AC2's 'last_seen refreshed' clause has real, falsifiable evidence. I traced store.py:79-81 -> update() to confirm the assertions can fail if the merge path breaks. All 5 criteria verified; identity.py and store.py are correct and surgical. Could not execute the suite myself (permission layer denied uv run pytest under both shells); relied on the test stage's recorded exit_code 0 / 131 passed plus direct code reading. No user-facing surface, so visual verification is not applicable. Non-blocking follow-up worth a ticket: the ticket's source_url design bullet assumes per-fact source URLs exist, but *_source columns hold text spans, not URLs \u2014 a fact filled from host-b lands on a row whose source_url still says host-a.",
+  "parse_error": null,
   "timed_out": false,
-  "tokens_used": 0,
-  "exit_code": 1,
+  "tokens_used": 12093,
+  "exit_code": 0,
   "stderr_head": ""
 }
