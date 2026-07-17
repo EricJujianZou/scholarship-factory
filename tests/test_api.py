@@ -76,6 +76,11 @@ def test_opportunities_ranked_with_parsed_and_verbatim():
     assert excluded_by_title["EU Only Grant"]["reasons"]
 
 
+def _index_html() -> str:
+    path = Path(__file__).parent.parent / "scholarship_factory" / "static" / "index.html"
+    return path.read_text(encoding="utf-8")
+
+
 def test_missing_deadline_serializes_null():
     path = _seeded_db()
     client = TestClient(create_app(path))
@@ -88,8 +93,7 @@ def test_missing_deadline_serializes_null():
     assert no_deadline["deadline"] is None
     assert no_deadline["opportunity"]["deadline"] is None
 
-    static_dir = __import__("pathlib").Path(__file__).parent.parent / "scholarship_factory" / "static" / "index.html"
-    assert "no deadline found" in static_dir.read_text(encoding="utf-8")
+    assert "no deadline found" in _index_html()
 
 
 def test_profile_update_reranks():
