@@ -60,4 +60,8 @@ __all__ = [
     "TraverseReport",
     "LinkOutcome",
     "TRAVERSE_PAGE_CAP",
+    "refresh_opportunity",
+    "RefreshOutcome",
+    "RefreshStatus",
+    "FieldChange",
 ]
