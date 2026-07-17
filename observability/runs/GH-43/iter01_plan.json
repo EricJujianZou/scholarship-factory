@@ -1,0 +1,10 @@
+{
+  "stage": "plan",
+  "outcome": "success",
+  "summary": "Plan for the read API + dashboard: create_app(db_path) factory in api.py with per-request SQLite stores (avoids FastAPI threadpool cross-thread error), RankedResults returned directly as the response model so parsed values ship alongside verbatim strings, a static index.html at /, an sf serve subcommand, and TestClient tests. uvicorn is missing from uv.lock and must be added via uv add.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 8988,
+  "exit_code": 0,
+  "stderr_head": ""
+}
