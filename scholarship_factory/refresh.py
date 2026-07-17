@@ -7,9 +7,10 @@ from enum import Enum
 
 from pydantic import BaseModel
 
-from .extract import ExtractFn, PageKind, extract
-from .fetch import FetchFn, fetch_url
+from .extract import PageKind, extract
+from .fetch import fetch_url
 from .models import Opportunity
+from .pipeline import ExtractFn, FetchFn
 from .store import OpportunityStore
 from .urls import normalize_apply_url
 
