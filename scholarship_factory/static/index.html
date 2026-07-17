@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Scholarship Factory</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; color: #222; }
+  h1 { margin-bottom: 0.25rem; }
+  h2 { margin-top: 2rem; }
+  .card { border: 1px solid #ddd; border-radius: 6px; padding: 0.75rem 1rem; margin-bottom: 0.75rem; }
+  .card h3 { margin: 0 0 0.25rem 0; }
+  .meta { color: #555; font-size: 0.9rem; }
+  .missing { color: #999; font-style: italic; }
+  .reasons { color: #a00; font-size: 0.9rem; }
+  form label { display: block; margin-top: 0.5rem; }
+  form input, form textarea { width: 100%; box-sizing: border-box; padding: 0.35rem; }
+  button { margin-top: 0.75rem; padding: 0.4rem 1rem; }
+  .status { font-size: 0.85rem; color: #070; margin-left: 0.5rem; }
+</style>
+</head>
+<body>
+  <h1>Scholarship Factory</h1>
+
+  <h2>Eligible opportunities</h2>
+  <div id="eligible"></div>
+
+  <details id="excluded-section">
+    <summary>Excluded opportunities</summary>
+    <div id="excluded"></div>
+  </details>
+
+  <h2>Profile</h2>
+  <form id="profile-form">
+    <label>Region
+      <input type="text" name="region">
+    </label>
+    <label>Education level
+      <input type="text" name="education_level">
+    </label>
+    <label>Field of study
+      <input type="text" name="field_of_study">
+    </label>
+    <label>Tags (comma-separated)
+      <input type="text" name="tags">
+    </label>
+    <label>Bio
+      <textarea name="bio" rows="3"></textarea>
+    </label>
+    <button type="submit">Save profile</button>
+    <span class="status" id="profile-status"></span>
+  </form>
+
+<script>
+function fmt(value, label) {
+  return value === null || value === undefined || value === ''
+    ? `<span class="missing">no ${label} found</span>`
+    : value;
+}
+
+function renderCard(item) {
+  const opp = item.opportunity;
+  const deadline = fmt(opp.deadline, "deadline");
+  const reward = fmt(opp.reward, "reward");
+  return `
+    <div class="card">
+      <h3><a href="${opp.apply_url}" target="_blank" rel="noopener">${opp.title}</a></h3>
+      <div class="meta">${fmt(opp.organization, "organization")} &middot; deadline: ${deadline} &middot; reward: ${reward}</div>
+    </div>
+  `;
+}
+
+function renderExcludedCard(item) {
+  const opp = item.opportunity;
+  const reasons = (item.reasons || []).join("; ") || "no reason recorded";
+  return `
+    <div class="card">
+      <h3>${opp.title}</h3>
+      <div class="meta">verdict: ${item.verdict}</div>
+      <div class="reasons">${reasons}</div>
+    </div>
+  `;
+}
+
+async function loadOpportunities() {
+  const res = await fetch("/api/opportunities");
+  const data = await res.json();
+  document.getElementById("eligible").innerHTML =
+    data.eligible.map(renderCard).join("") || "<p>No eligible opportunities.</p>";
+  document.getElementById("excluded").innerHTML =
+    data.excluded.map(renderExcludedCard).join("") || "<p>No excluded opportunities.</p>";
+}
+
+async function loadProfile() {
+  const res = await fetch("/api/profile");
+  const profile = await res.json();
+  const form = document.getElementById("profile-form");
+  form.region.value = profile.region || "";
+  form.education_level.value = profile.education_level || "";
+  form.field_of_study.value = profile.field_of_study || "";
+  form.tags.value = (profile.tags || []).join(", ");
+  form.bio.value = profile.bio || "";
+}
+
+document.getElementById("profile-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const body = {
+    region: form.region.value || null,
+    education_level: form.education_level.value || null,
+    field_of_study: form.field_of_study.value || null,
+    tags: form.tags.value.split(",").map(t => t.trim()).filter(Boolean),
+    bio: form.bio.value || null,
+  };
+  await fetch("/api/profile", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  document.getElementById("profile-status").textContent = "saved";
+  setTimeout(() => document.getElementById("profile-status").textContent = "", 2000);
+  await loadOpportunities();
+});
+
+loadOpportunities();
+loadProfile();
+</script>
+</body>
+</html>
