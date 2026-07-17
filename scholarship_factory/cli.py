@@ -73,6 +73,23 @@ def _cmd_source(store: OpportunityStore, seeds_path: str) -> int:
     return 0
 
 
+def _cmd_refresh(store: OpportunityStore, opp_id: str) -> int:
+    try:
+        outcome = refresh_opportunity(
+            store, opp_id, fetch_fn=fetch_url, extract_fn=extract
+        )
+    except KeyError:
+        print(f"not found: {opp_id}", file=sys.stderr)
+        return 1
+
+    print(f"status: {outcome.status}")
+    for change in outcome.changed_fields:
+        print(f"  {change.field}: {change.old_value!r} -> {change.new_value!r}")
+    for field in outcome.no_longer_found:
+        print(f"  {field}: no longer found on the page")
+    return 0
+
+
 def _cmd_serve(db_path: str, host: str, port: int) -> int:
     import uvicorn
 
