@@ -1,0 +1,10 @@
+{
+  "stage": "document",
+  "outcome": "success",
+  "summary": "Committed docs/changes/GH-43.md plus remaining harness state/observability files; working tree clean.",
+  "parse_error": null,
+  "timed_out": false,
+  "tokens_used": 4765,
+  "exit_code": 0,
+  "stderr_head": ""
+}
