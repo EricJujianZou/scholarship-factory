@@ -1,5 +1,3 @@
-from datetime import timedelta
-
 from scholarship_factory import (
     ExtractionResult,
     FetchCache,
