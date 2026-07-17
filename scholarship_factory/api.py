@@ -5,13 +5,16 @@ UI besides the profile editor.
 """
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from .cli import _default_db_path
+from .extract import extract
+from .fetch import fetch_url
 from .profile import ApplicantProfile, ProfileStore
 from .rank import RankedResults, rank
+from .refresh import RefreshOutcome, refresh_opportunity
 from .store import OpportunityStore
 
 _STATIC_DIR = Path(__file__).parent / "static"
