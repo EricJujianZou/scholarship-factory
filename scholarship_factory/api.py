@@ -35,7 +35,12 @@ def _load_or_create_profile(store: ProfileStore) -> ApplicantProfile:
     return store.insert(ApplicantProfile())
 
 
-def create_app(db_path: str | None = None) -> FastAPI:
+def create_app(
+    db_path: str | None = None,
+    *,
+    fetch_fn=fetch_url,
+    extract_fn=extract,
+) -> FastAPI:
     db_path = db_path or _default_db_path()
     app = FastAPI()
 
@@ -44,6 +49,16 @@ def create_app(db_path: str | None = None) -> FastAPI:
         opportunities = OpportunityStore(db_path).list()
         profile = _load_or_create_profile(ProfileStore(db_path))
         return rank(opportunities, profile)
+
+    @app.post("/api/opportunities/{id}/refresh", response_model=RefreshOutcome)
+    def post_refresh(id: str) -> RefreshOutcome:
+        store = OpportunityStore(db_path)
+        try:
+            return refresh_opportunity(
+                store, id, fetch_fn=fetch_fn, extract_fn=extract_fn
+            )
+        except KeyError:
+            raise HTTPException(status_code=404, detail="opportunity not found")
 
     @app.get("/api/profile", response_model=ApplicantProfile)
     def get_profile() -> ApplicantProfile:
