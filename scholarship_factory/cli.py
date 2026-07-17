@@ -71,6 +71,15 @@ def _cmd_source(store: OpportunityStore, seeds_path: str) -> int:
     return 0
 
 
+def _cmd_serve(db_path: str, host: str, port: int) -> int:
+    import uvicorn
+
+    from .api import create_app
+
+    uvicorn.run(create_app(db_path), host=host, port=port)
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="sf", description=__doc__)
     common = argparse.ArgumentParser(add_help=False)
