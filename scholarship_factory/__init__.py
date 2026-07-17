@@ -10,6 +10,7 @@ from .parse_money import MoneyBound, MoneyValue, parse_money, typed_cost, typed_
 from .pipeline import SourcingReport, TargetOutcome, run_sourcing
 from .polite import DEFAULT_MIN_INTERVAL, PoliteFetcher
 from .profile import ApplicantProfile, ProfileStore
+from .refresh import FieldChange, RefreshOutcome, RefreshStatus, refresh_opportunity
 from .seeds import Seed, SeedType, load_seeds
 from .store import OpportunityStore
 from .traverse import TRAVERSE_PAGE_CAP, LinkOutcome, TraverseReport, TraverseResult, traverse
