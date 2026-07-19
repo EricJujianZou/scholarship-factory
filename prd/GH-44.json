@@ -13,6 +13,6 @@
     "All tests offline, temp db; `uv run pytest -q` green."
   ],
   "skill_match": null,
-  "passes": false,
-  "status": "quotad"
+  "passes": true,
+  "status": "done"
 }
