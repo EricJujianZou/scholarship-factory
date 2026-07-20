@@ -16,6 +16,7 @@ sf = "scholarship_factory.cli:main"
 
 [project.optional-dependencies]
 llm = ["anthropic"]
+gemini = ["google-genai"]
 
 [dependency-groups]
 dev = [
