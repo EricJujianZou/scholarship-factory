@@ -1,3 +1,4 @@
+import os
 from enum import Enum
 from typing import Any, Protocol
 
@@ -7,6 +8,7 @@ from .clean import clean_html
 from .models import Opportunity, Provenance
 
 DEFAULT_MODEL = "claude-sonnet-5"
+DEFAULT_GEMINI_MODEL = "gemini-3.5-flash"
 _TOOL_NAME = "report_opportunities"
 
 _SYSTEM_PROMPT = """You extract funding/scholarship opportunities from a cleaned web page.
@@ -82,6 +84,36 @@ def _default_client() -> _AnthropicClient:
     return anthropic.Anthropic()
 
 
+def _default_gemini_client() -> Any:
+    try:
+        from google import genai
+    except ImportError as exc:
+        raise RuntimeError(
+            "extract() with provider='gemini' requires the 'google-genai' package; "
+            "install the 'gemini' extra or pass an explicit client."
+        ) from exc
+    return genai.Client()
+
+
+def _resolve_provider(provider: str | None, client: Any | None) -> str:
+    if provider is None:
+        provider = os.environ.get("SF_LLM_PROVIDER")
+    if provider is None:
+        if client is not None or os.environ.get("ANTHROPIC_API_KEY"):
+            provider = "anthropic"
+        elif os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY"):
+            provider = "gemini"
+        else:
+            raise RuntimeError(
+                "extract() cannot pick an LLM provider: set SF_LLM_PROVIDER to "
+                "'anthropic' or 'gemini', or set ANTHROPIC_API_KEY, GEMINI_API_KEY, "
+                "or GOOGLE_API_KEY."
+            )
+    if provider not in ("anthropic", "gemini"):
+        raise ValueError(f"unknown LLM provider: {provider!r}")
+    return provider
+
+
 def _quoted_fact(
     value: str | None, source: str | None, page_text: str
 ) -> tuple[str | None, str | None, Provenance]:
@@ -126,31 +158,67 @@ def extract(
     raw_html: str,
     source_url: str,
     *,
-    client: _AnthropicClient | None = None,
-    model: str = DEFAULT_MODEL,
+    client: Any | None = None,
+    model: str | None = None,
+    provider: str | None = None,
 ) -> ExtractionResult:
+    provider = _resolve_provider(provider, client)
     page_text = clean_html(raw_html)
-    if client is None:
-        client = _default_client()
+    user_content = f"source_url: {source_url}\n\npage text:\n{page_text}"
 
-    message = client.messages.create(
-        model=model,
-        max_tokens=4096,
-        system=_SYSTEM_PROMPT,
-        tools=[CONTRACT_TOOL],
-        tool_choice={"type": "tool", "name": _TOOL_NAME},
-        messages=[
-            {
-                "role": "user",
-                "content": f"source_url: {source_url}\n\npage text:\n{page_text}",
-            }
-        ],
-    )
-
-    tool_use = next(block for block in message.content if block.type == "tool_use")
-    llm_result = LLMResult.model_validate(tool_use.input)
+    if provider == "gemini":
+        llm_result = _call_gemini(client, model, user_content)
+    else:
+        llm_result = _call_anthropic(client, model, user_content)
 
     opportunities = [
         _to_opportunity(item, source_url, page_text) for item in llm_result.items
     ]
     return ExtractionResult(kind=llm_result.kind, opportunities=opportunities)
+
+
+def _call_anthropic(
+    client: _AnthropicClient | None, model: str | None, user_content: str
+) -> LLMResult:
+    if client is None:
+        client = _default_client()
+
+    message = client.messages.create(
+        model=model or DEFAULT_MODEL,
+        max_tokens=4096,
+        system=_SYSTEM_PROMPT,
+        tools=[CONTRACT_TOOL],
+        tool_choice={"type": "tool", "name": _TOOL_NAME},
+        messages=[{"role": "user", "content": user_content}],
+    )
+
+    tool_use = next(block for block in message.content if block.type == "tool_use")
+    return LLMResult.model_validate(tool_use.input)
+
+
+def _call_gemini(client: Any | None, model: str | None, user_content: str) -> LLMResult:
+    if client is None:
+        client = _default_gemini_client()
+
+    config: Any = {
+        "system_instruction": _SYSTEM_PROMPT,
+        "response_mime_type": "application/json",
+        "response_schema": LLMResult,
+    }
+    try:
+        from google.genai import types
+    except ImportError:
+        pass
+    else:
+        config = types.GenerateContentConfig(**config)
+
+    response = client.models.generate_content(
+        model=model or DEFAULT_GEMINI_MODEL,
+        contents=user_content,
+        config=config,
+    )
+
+    parsed = getattr(response, "parsed", None)
+    if isinstance(parsed, LLMResult):
+        return parsed
+    return LLMResult.model_validate_json(response.text)
