@@ -25,3 +25,20 @@
   contract test (helper functions exist, raw `${opp.field}` interpolation
   absent) plus asserting the API returns the raw value unescaped in JSON
   (JSON isn't HTML - escaping is the renderer's job, not the API's).
+- `refresh.py` (GH-44): a narrow `store.set_status(id, status)` (writes only
+  the status column) is how you bump a status without also bumping
+  `last_seen` - `store.update()` always bumps `last_seen`, which is correct
+  for `refreshed`/`changed` but wrong for `unreachable` (we didn't see the
+  record, so nothing about it should look freshly observed).
+
+## Close-out
+
+- GH-44 closed out manually after the harness run was quota-interrupted at
+  the test stage (`status: quotad`, not failed); the review/document stages
+  never ran, so their observability logs are legitimately absent. Tests
+  re-verified green (`uv run pytest -q`: 146 passed) before close-out.
+- Review confirmed the two intentional design points read correctly in
+  code: a re-check where a fact is no longer found yields status `changed`
+  (the `new|refreshed|changed|unreachable` machine has no separate state;
+  the outcome's `no_longer_found` records it), and `unreachable` is written
+  via `store.set_status()` so `last_seen` is not bumped.

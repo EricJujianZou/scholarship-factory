@@ -66,6 +66,33 @@ def _write_toml(text: str) -> str:
     return path
 
 
+def test_refresh_prints_status_and_changes(capsys, monkeypatch):
+    path, opp_id = _seeded_db()
+
+    def fake_fetch(url: str) -> FetchResult:
+        return FetchResult(requested_url=url, final_url=url, status_code=200, body="<html></html>")
+
+    def fake_extract(body: str, url: str) -> ExtractionResult:
+        return ExtractionResult(kind=PageKind.DETAIL, opportunities=[])
+
+    monkeypatch.setattr(cli, "fetch_url", fake_fetch)
+    monkeypatch.setattr(cli, "extract", fake_extract)
+
+    rc = main(["refresh", opp_id, "--db", path])
+    out = capsys.readouterr().out
+
+    assert rc == 0
+    assert "status: refreshed" in out
+
+
+def test_refresh_not_found_exits_nonzero(capsys):
+    path, _ = _seeded_db()
+    rc = main(["refresh", "does-not-exist", "--db", path])
+    err = capsys.readouterr().err
+    assert rc == 1
+    assert "not found" in err
+
+
 def test_source_prints_summary(capsys, monkeypatch, tmp_path):
     seeds_path = _write_toml(
         """

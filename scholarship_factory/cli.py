@@ -7,6 +7,7 @@ the existing OpportunityStore (GH-1); `source` runs a sourcing pass and writes t
     sf list [--status new] [--db PATH]
     sf show <id> [--db PATH]
     sf source --seeds seeds.toml [--db PATH]
+    sf refresh <id> [--db PATH]
 
 db path: `--db`, else $SF_DB_PATH, else ./scholarship_factory.db
 """
@@ -17,6 +18,7 @@ import sys
 from .extract import extract
 from .fetch import fetch_url
 from .pipeline import run_sourcing
+from .refresh import refresh_opportunity
 from .seeds import load_seeds
 from .store import OpportunityStore
 
@@ -71,6 +73,23 @@ def _cmd_source(store: OpportunityStore, seeds_path: str) -> int:
     return 0
 
 
+def _cmd_refresh(store: OpportunityStore, opp_id: str) -> int:
+    try:
+        outcome = refresh_opportunity(
+            store, opp_id, fetch_fn=fetch_url, extract_fn=extract
+        )
+    except KeyError:
+        print(f"not found: {opp_id}", file=sys.stderr)
+        return 1
+
+    print(f"status: {outcome.status}")
+    for change in outcome.changed_fields:
+        print(f"  {change.field}: {change.old_value!r} -> {change.new_value!r}")
+    for field in outcome.no_longer_found:
+        print(f"  {field}: no longer found on the page")
+    return 0
+
+
 def _cmd_serve(db_path: str, host: str, port: int) -> int:
     import uvicorn
 
@@ -94,6 +113,8 @@ def main(argv: list[str] | None = None) -> int:
     p_show.add_argument("id")
     p_source = sub.add_parser("source", parents=[common], help="run a sourcing pass")
     p_source.add_argument("--seeds", required=True, help="seeds TOML path")
+    p_refresh = sub.add_parser("refresh", parents=[common], help="re-check one opportunity's facts")
+    p_refresh.add_argument("id")
     p_serve = sub.add_parser("serve", parents=[common], help="run the dashboard API")
     p_serve.add_argument("--host", default="127.0.0.1")
     p_serve.add_argument("--port", type=int, default=8000)
@@ -107,6 +128,8 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_list(store, args.status)
     if args.command == "source":
         return _cmd_source(store, args.seeds)
+    if args.command == "refresh":
+        return _cmd_refresh(store, args.id)
     return _cmd_show(store, args.id)
 
 

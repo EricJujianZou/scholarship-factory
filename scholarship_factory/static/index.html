@@ -85,6 +85,7 @@ function renderCard(item) {
     <div class="card">
       <h3>${heading}</h3>
       <div class="meta">${fmt(opp.organization, "no organization found")} &middot; deadline: ${deadline} &middot; reward: ${reward}</div>
+      <button class="refresh" data-refresh-id="${escapeHtml(opp.id)}">Refresh</button>
     </div>
   `;
 }
@@ -138,6 +139,13 @@ document.getElementById("profile-form").addEventListener("submit", async (e) => 
   });
   document.getElementById("profile-status").textContent = "saved";
   setTimeout(() => document.getElementById("profile-status").textContent = "", 2000);
+  await loadOpportunities();
+});
+
+document.getElementById("eligible").addEventListener("click", async (e) => {
+  const id = e.target.dataset.refreshId;
+  if (!id) return;
+  await fetch(`/api/opportunities/${encodeURIComponent(id)}/refresh`, { method: "POST" });
   await loadOpportunities();
 });
 

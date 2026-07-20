@@ -5,6 +5,8 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 
 from scholarship_factory.api import create_app
+from scholarship_factory.extract import ExtractionResult, PageKind
+from scholarship_factory.fetch import FetchResult
 from scholarship_factory.models import Opportunity
 from scholarship_factory.profile import ApplicantProfile, ProfileStore
 from scholarship_factory.store import OpportunityStore
@@ -125,6 +127,58 @@ def test_profile_update_reranks():
     after = client.get("/api/opportunities").json()
     after_eligible_titles = [item["opportunity"]["title"] for item in after["eligible"]]
     assert "EU Only Grant" in after_eligible_titles
+
+
+def test_refresh_endpoint_updates_changed_field():
+    path = _temp_db()
+    store = OpportunityStore(path)
+    opp = store.insert(
+        Opportunity(
+            title="Test Grant",
+            apply_url="https://example.com/apply",
+            source_url="https://example.com/apply",
+            deadline="July 1, 2026",
+        )
+    )
+    ProfileStore(path).insert(ApplicantProfile(region="Canada"))
+
+    def stub_fetch(url: str) -> FetchResult:
+        return FetchResult(requested_url=url, final_url=url, status_code=200, body="<html></html>")
+
+    def stub_extract(body: str, url: str) -> ExtractionResult:
+        return ExtractionResult(
+            kind=PageKind.DETAIL,
+            opportunities=[
+                Opportunity(
+                    title=opp.title,
+                    apply_url=opp.apply_url,
+                    source_url=opp.source_url,
+                    deadline="August 1, 2026",
+                )
+            ],
+        )
+
+    client = TestClient(create_app(path, fetch_fn=stub_fetch, extract_fn=stub_extract))
+
+    res = client.post(f"/api/opportunities/{opp.id}/refresh")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["status"] == "changed"
+    assert data["changed_fields"][0]["new_value"] == "August 1, 2026"
+
+
+def test_refresh_endpoint_unknown_id_404():
+    path = _seeded_db()
+    client = TestClient(create_app(path))
+
+    res = client.post("/api/opportunities/does-not-exist/refresh")
+    assert res.status_code == 404
+
+
+def test_dashboard_has_refresh_control():
+    html = _index_html()
+    assert "data-refresh-id" in html
+    assert "/refresh" in html
 
 
 def test_root_serves_dashboard():

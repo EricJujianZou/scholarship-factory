@@ -5,13 +5,16 @@ UI besides the profile editor.
 """
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from .cli import _default_db_path
+from .extract import extract
+from .fetch import fetch_url
 from .profile import ApplicantProfile, ProfileStore
 from .rank import RankedResults, rank
+from .refresh import RefreshOutcome, refresh_opportunity
 from .store import OpportunityStore
 
 _STATIC_DIR = Path(__file__).parent / "static"
@@ -32,7 +35,12 @@ def _load_or_create_profile(store: ProfileStore) -> ApplicantProfile:
     return store.insert(ApplicantProfile())
 
 
-def create_app(db_path: str | None = None) -> FastAPI:
+def create_app(
+    db_path: str | None = None,
+    *,
+    fetch_fn=fetch_url,
+    extract_fn=extract,
+) -> FastAPI:
     db_path = db_path or _default_db_path()
     app = FastAPI()
 
@@ -41,6 +49,16 @@ def create_app(db_path: str | None = None) -> FastAPI:
         opportunities = OpportunityStore(db_path).list()
         profile = _load_or_create_profile(ProfileStore(db_path))
         return rank(opportunities, profile)
+
+    @app.post("/api/opportunities/{id}/refresh", response_model=RefreshOutcome)
+    def post_refresh(id: str) -> RefreshOutcome:
+        store = OpportunityStore(db_path)
+        try:
+            return refresh_opportunity(
+                store, id, fetch_fn=fetch_fn, extract_fn=extract_fn
+            )
+        except KeyError:
+            raise HTTPException(status_code=404, detail="opportunity not found")
 
     @app.get("/api/profile", response_model=ApplicantProfile)
     def get_profile() -> ApplicantProfile:
