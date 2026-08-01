@@ -6,7 +6,7 @@ the existing OpportunityStore (GH-1); `source` runs a sourcing pass and writes t
 
     sf list [--status new] [--db PATH]
     sf show <id> [--db PATH]
-    sf source --seeds seeds.toml [--db PATH]
+    sf source --seeds seeds.toml [--db PATH] [--page-cap N] [--min-interval S]
     sf refresh <id> [--db PATH]
 
 db path: `--db`, else $SF_DB_PATH, else ./scholarship_factory.db
@@ -15,12 +15,15 @@ import argparse
 import os
 import sys
 
+from .cache import FetchCache, cached_fetch
 from .extract import extract
 from .fetch import fetch_url
 from .pipeline import run_sourcing
+from .polite import DEFAULT_MIN_INTERVAL, PoliteFetcher
 from .refresh import refresh_opportunity
 from .seeds import load_seeds
 from .store import OpportunityStore
+from .traverse import TRAVERSE_PAGE_CAP
 
 
 def _default_db_path() -> str:
@@ -48,9 +51,26 @@ def _cmd_show(store: OpportunityStore, opp_id: str) -> int:
     return 0
 
 
-def _cmd_source(store: OpportunityStore, seeds_path: str) -> int:
+def _sourcing_fetch_fn(db_path: str, min_interval: float):
+    """robots.txt + per-host spacing + response cache around the plain fetcher.
+
+    Only sourcing gets this: `refresh` must see live bytes, so it stays on the
+    uncached `fetch_url`.
+    """
+    polite = PoliteFetcher(min_interval=min_interval, fetch_fn=fetch_url)
+    cache = FetchCache(db_path)
+    return lambda url: cached_fetch(url, cache=cache, fetch_fn=polite.fetch)
+
+
+def _cmd_source(
+    store: OpportunityStore, seeds_path: str, page_cap: int, min_interval: float
+) -> int:
     report = run_sourcing(
-        load_seeds(seeds_path), store, fetch_fn=fetch_url, extract_fn=extract
+        load_seeds(seeds_path),
+        store,
+        fetch_fn=_sourcing_fetch_fn(store.db_path, min_interval),
+        extract_fn=extract,
+        page_cap=page_cap,
     )
     print(f"targets attempted: {report.targets_attempted}")
     print(f"opportunities stored: {report.opportunities_stored}")
@@ -113,6 +133,14 @@ def main(argv: list[str] | None = None) -> int:
     p_show.add_argument("id")
     p_source = sub.add_parser("source", parents=[common], help="run a sourcing pass")
     p_source.add_argument("--seeds", required=True, help="seeds TOML path")
+    p_source.add_argument(
+        "--page-cap", type=int, default=TRAVERSE_PAGE_CAP,
+        help=f"max pages traversed per listing (default: {TRAVERSE_PAGE_CAP})",
+    )
+    p_source.add_argument(
+        "--min-interval", type=float, default=DEFAULT_MIN_INTERVAL,
+        help=f"min seconds between requests to one host (default: {DEFAULT_MIN_INTERVAL})",
+    )
     p_refresh = sub.add_parser("refresh", parents=[common], help="re-check one opportunity's facts")
     p_refresh.add_argument("id")
     p_serve = sub.add_parser("serve", parents=[common], help="run the dashboard API")
@@ -127,7 +155,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "list":
         return _cmd_list(store, args.status)
     if args.command == "source":
-        return _cmd_source(store, args.seeds)
+        return _cmd_source(store, args.seeds, args.page_cap, args.min_interval)
     if args.command == "refresh":
         return _cmd_refresh(store, args.id)
     return _cmd_show(store, args.id)

@@ -1,0 +1,31 @@
+# Seed sources for `sf source --seeds seeds.toml`.
+#
+# type = "url"      -> fetched as-is (listing or detail page)
+# type = "reddit"   -> r/<name>, fetched via reddit's public listing JSON
+# type = "devpost"  -> a devpost URL, fetched as-is
+# type = "instagram" / "x" -> accepted but skipped (auth wall, not yet supported)
+#
+# Every fetched page costs one LLM call, and a listing page can traverse up to
+# --page-cap more. Start with a couple of seeds and a small cap.
+
+[[seeds]]
+type = "url"
+value = "https://grants.uwaterloo.ca/"
+label = "uwaterloo grants"
+
+[[seeds]]
+type = "url"
+value = "https://opportunitiesforyouth.org/?s=grants"
+label = "opportunities for youth - grants"
+
+[[seeds]]
+type = "reddit"
+value = "r/scholarships"
+label = "r/scholarships"
+enabled = false
+
+[[seeds]]
+type = "url"
+value = "https://lablab.ai/ai-hackathons"
+label = "lablab hackathons"
+enabled = false
