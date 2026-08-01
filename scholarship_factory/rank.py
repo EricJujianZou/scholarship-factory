@@ -78,6 +78,24 @@ _EDUCATION_ALIASES: dict[str, str] = {
     "doctoral": "graduate",
 }
 
+# An opportunity whose eligibility section enumerates *organizations* as the
+# applicant is not something a person can apply for. Deliberately narrow: it
+# fires only on an explicit "eligible applicants ... <organization words>" and
+# stands down the moment the text also addresses individuals, so the
+# unknown-is-never-ineligible rule still holds.
+_ORGANIZATION_APPLICANT = re.compile(
+    r"eligible\s+(?:applicants?|organi[sz]ations?|entities)[^.]{0,240}?"
+    r"\b(organi[sz]ations?|charit(?:y|ies)|social enterprises?|community groups?|"
+    r"non-?profits?|NGOs?|campuses|institutions?|companies|associations?|"
+    r"coalitions?|consorti(?:um|a))\b",
+    re.I | re.S,
+)
+_INDIVIDUAL_APPLICANT = re.compile(
+    r"\b(students?|individuals?|undergraduates?|graduates?|youth|researchers?|"
+    r"candidates?|fellows?|applicants? must be a(?:n)? (?:person|citizen|resident))\b",
+    re.I,
+)
+
 _EDUCATION_CONSTRAINTS: list[tuple[re.Pattern, str, frozenset[str]]] = [
     (re.compile(r"\b(?:high school students? only|must be a high school student)\b", re.I), "high school students only", frozenset({"high_school"})),
     (re.compile(r"\b(?:undergraduates? only|must be an undergraduate)\b", re.I), "undergraduate students only", frozenset({"undergraduate"})),
@@ -97,6 +115,15 @@ def _mismatch_reasons(opp: Opportunity, profile: ApplicantProfile) -> list[str]:
         return []
 
     reasons: list[str] = []
+    # Judge the applicant type on the eligibility text alone: a description saying
+    # who *benefits* ("...solutions that benefit campuses, students...") is not a
+    # statement about who may apply.
+    eligibility = opp.requirements or opp.description or ""
+    if _ORGANIZATION_APPLICANT.search(eligibility) and not _INDIVIDUAL_APPLICANT.search(
+        eligibility
+    ):
+        reasons.append("applicant mismatch: the eligible applicant is an organization")
+
     for constraints, profile_value, aliases, field_label in (
         (_REGION_CONSTRAINTS, profile.region, _REGION_ALIASES, "region"),
         (_EDUCATION_CONSTRAINTS, profile.education_level, _EDUCATION_ALIASES, "education_level"),

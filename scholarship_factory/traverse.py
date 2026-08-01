@@ -44,8 +44,15 @@ class TraverseReport(BaseModel):
 
 
 class TraverseResult(BaseModel):
-    opportunities: list[Opportunity]
+    #: detail records keyed by the normalized link they were reached through, so
+    #: the caller can fold a listing's thin item into the record it linked to.
+    by_link: dict[str, list[Opportunity]]
     report: TraverseReport
+
+    @computed_field
+    @property
+    def opportunities(self) -> list[Opportunity]:
+        return [opp for records in self.by_link.values() for opp in records]
 
 
 def traverse(
@@ -57,7 +64,7 @@ def traverse(
     jsonld_fn=extract_jsonld,
     page_cap: int = TRAVERSE_PAGE_CAP,
 ) -> TraverseResult:
-    opportunities: list[Opportunity] = []
+    by_link: dict[str, list[Opportunity]] = {}
     outcomes: list[LinkOutcome] = []
     seen: set[str] = {normalize_apply_url(listing_url)}
     cap_reached = False
@@ -90,9 +97,20 @@ def traverse(
         detail_opportunities = list(
             jsonld_fn(fetch_result.body, fetch_result.final_url)
         )
-        detail_opportunities.extend(
-            extract_fn(fetch_result.body, fetch_result.final_url).opportunities
-        )
+        try:
+            detail_opportunities.extend(
+                extract_fn(fetch_result.body, fetch_result.final_url).opportunities
+            )
+        except Exception as exc:  # one link's LLM failure must not end the traversal
+            outcomes.append(
+                LinkOutcome(
+                    url=url,
+                    ok=False,
+                    status_code=fetch_result.status_code,
+                    error=f"extract failed: {type(exc).__name__}: {exc}",
+                )
+            )
+            continue
 
         if not detail_opportunities:
             outcomes.append(
@@ -113,10 +131,10 @@ def traverse(
                 opportunities_found=len(detail_opportunities),
             )
         )
-        opportunities.extend(detail_opportunities)
+        by_link[key] = detail_opportunities
 
     return TraverseResult(
-        opportunities=opportunities,
+        by_link=by_link,
         report=TraverseReport(
             outcomes=outcomes,
             links_discovered=links_discovered,

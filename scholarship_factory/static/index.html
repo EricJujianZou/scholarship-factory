@@ -16,12 +16,42 @@
   form input, form textarea { width: 100%; box-sizing: border-box; padding: 0.35rem; }
   button { margin-top: 0.75rem; padding: 0.4rem 1rem; }
   .status { font-size: 0.85rem; color: #070; margin-left: 0.5rem; }
+  .fit { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em;
+         border-radius: 3px; padding: 0.1rem 0.4rem; margin-right: 0.4rem; }
+  .fit-high { background: #d8f0dc; color: #14532d; }
+  .fit-medium { background: #eee; color: #444; }
+  .fit-low { background: #f3e3e3; color: #7a2020; }
+  .fit-reason { color: #555; font-size: 0.85rem; margin-top: 0.3rem; font-style: italic; }
+  .card.rejected { opacity: 0.45; }
+  .actions button { margin-right: 0.4rem; }
+  .actions button[aria-pressed="true"] { outline: 2px solid #14532d; }
+  .controls { display: flex; gap: 0.75rem; align-items: center; margin-top: 0.75rem; }
+  .controls input, .controls select { padding: 0.35rem; }
+  .controls input[type=search] { flex: 1; }
+  .summary { background: #f6f6f6; border-left: 3px solid #bbb; padding: 0.6rem 0.9rem;
+             font-size: 0.9rem; margin-top: 0.75rem; }
 </style>
 </head>
 <body>
   <h1>Scholarship Factory</h1>
 
   <h2>Eligible opportunities</h2>
+  <div class="summary" id="preference-summary" hidden></div>
+  <div class="controls">
+    <input type="search" id="search" placeholder="Search title, organization, eligibility…">
+    <select id="fit-filter">
+      <option value="">any fit</option>
+      <option value="high">high fit</option>
+      <option value="medium">medium fit</option>
+      <option value="low">low fit</option>
+    </select>
+    <select id="sort">
+      <option value="fit">sort: fit</option>
+      <option value="deadline">sort: deadline</option>
+      <option value="reward">sort: reward</option>
+    </select>
+    <label><input type="checkbox" id="hide-rejected" checked> hide rejected</label>
+  </div>
   <div id="eligible"></div>
 
   <details id="excluded-section">
@@ -72,6 +102,12 @@ function safeUrl(url) {
   }
 }
 
+function fitBadge(fit) {
+  if (!fit) return "";
+  const cls = ["high", "medium", "low"].includes(fit) ? fit : "medium";
+  return `<span class="fit fit-${cls}">${escapeHtml(fit)}</span>`;
+}
+
 function renderCard(item) {
   const opp = item.opportunity;
   const deadline = fmt(opp.deadline, "no deadline found");
@@ -81,11 +117,22 @@ function renderCard(item) {
   const heading = href
     ? `<a href="${escapeHtml(href)}" target="_blank" rel="noopener">${title}</a>`
     : title;
+  const rejected = item.decision === "not_interested";
+  const reason = item.fit_reason
+    ? `<div class="fit-reason">${escapeHtml(item.fit_reason)}</div>`
+    : "";
   return `
-    <div class="card">
-      <h3>${heading}</h3>
+    <div class="card${rejected ? " rejected" : ""}">
+      <h3>${fitBadge(item.fit)}${heading}</h3>
       <div class="meta">${fmt(opp.organization, "no organization found")} &middot; deadline: ${deadline} &middot; reward: ${reward}</div>
-      <button class="refresh" data-refresh-id="${escapeHtml(opp.id)}">Refresh</button>
+      ${reason}
+      <div class="actions">
+        <button data-decide-id="${escapeHtml(opp.id)}" data-verdict="interested"
+                aria-pressed="${item.decision === "interested"}">Interested</button>
+        <button data-decide-id="${escapeHtml(opp.id)}" data-verdict="not_interested"
+                aria-pressed="${rejected}">Not interested</button>
+        <button class="refresh" data-refresh-id="${escapeHtml(opp.id)}">Refresh</button>
+      </div>
     </div>
   `;
 }
@@ -102,13 +149,62 @@ function renderExcludedCard(item) {
   `;
 }
 
+let CURRENT = { eligible: [], excluded: [] };
+
+function haystack(item) {
+  const o = item.opportunity;
+  return [o.title, o.organization, o.requirements, o.description, item.fit_reason]
+    .filter(Boolean).join(" ").toLowerCase();
+}
+
+const FIT_ORDER = { high: 0, medium: 1, low: 2 };
+
+function visibleEligible() {
+  const query = document.getElementById("search").value.trim().toLowerCase();
+  const wantFit = document.getElementById("fit-filter").value;
+  const hideRejected = document.getElementById("hide-rejected").checked;
+  const sortBy = document.getElementById("sort").value;
+
+  let items = CURRENT.eligible.filter(item => {
+    if (hideRejected && item.decision === "not_interested") return false;
+    if (wantFit && item.fit !== wantFit) return false;
+    if (query && !haystack(item).includes(query)) return false;
+    return true;
+  });
+
+  const byDeadline = (a, b) => {
+    if (!a.deadline) return 1;
+    if (!b.deadline) return -1;
+    return a.deadline < b.deadline ? -1 : a.deadline > b.deadline ? 1 : 0;
+  };
+  if (sortBy === "deadline") items = items.slice().sort(byDeadline);
+  else if (sortBy === "reward") items = items.slice().sort(
+    (a, b) => (b.reward ? b.reward.amount : -1) - (a.reward ? a.reward.amount : -1));
+  else items = items.slice().sort(
+    (a, b) => (FIT_ORDER[a.fit] ?? 1) - (FIT_ORDER[b.fit] ?? 1) || byDeadline(a, b));
+
+  return items;
+}
+
+function render() {
+  const items = visibleEligible();
+  document.getElementById("eligible").innerHTML =
+    items.map(renderCard).join("") || "<p>No opportunities match these filters.</p>";
+  document.getElementById("excluded").innerHTML =
+    CURRENT.excluded.map(renderExcludedCard).join("") || "<p>No excluded opportunities.</p>";
+}
+
 async function loadOpportunities() {
   const res = await fetch("/api/opportunities");
-  const data = await res.json();
-  document.getElementById("eligible").innerHTML =
-    data.eligible.map(renderCard).join("") || "<p>No eligible opportunities.</p>";
-  document.getElementById("excluded").innerHTML =
-    data.excluded.map(renderExcludedCard).join("") || "<p>No excluded opportunities.</p>";
+  CURRENT = await res.json();
+  const summary = document.getElementById("preference-summary");
+  if (CURRENT.preference_summary) {
+    summary.textContent = CURRENT.preference_summary;
+    summary.hidden = false;
+  } else {
+    summary.hidden = true;
+  }
+  render();
 }
 
 async function loadProfile() {
@@ -143,11 +239,25 @@ document.getElementById("profile-form").addEventListener("submit", async (e) => 
 });
 
 document.getElementById("eligible").addEventListener("click", async (e) => {
-  const id = e.target.dataset.refreshId;
-  if (!id) return;
-  await fetch(`/api/opportunities/${encodeURIComponent(id)}/refresh`, { method: "POST" });
+  const refreshId = e.target.dataset.refreshId;
+  if (refreshId) {
+    await fetch(`/api/opportunities/${encodeURIComponent(refreshId)}/refresh`, { method: "POST" });
+    await loadOpportunities();
+    return;
+  }
+  const decideId = e.target.dataset.decideId;
+  if (!decideId) return;
+  await fetch(`/api/opportunities/${encodeURIComponent(decideId)}/decision`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ verdict: e.target.dataset.verdict }),
+  });
   await loadOpportunities();
 });
+
+for (const id of ["search", "fit-filter", "sort", "hide-rejected"]) {
+  document.getElementById(id).addEventListener("input", render);
+}
 
 loadOpportunities();
 loadProfile();

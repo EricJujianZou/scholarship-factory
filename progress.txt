@@ -31,6 +31,21 @@
   for `refreshed`/`changed` but wrong for `unreachable` (we didn't see the
   record, so nothing about it should look freshly observed).
 
+- Fixture-driven tests hid three live-only defects (first real run, 2026-07-31).
+  `test_pipeline`/`test_traverse` hand-build `ExtractionResult`s with
+  `apply_url` already set, so they never exercised what the LLM actually
+  receives. Lesson: for any stage whose input is LLM output, at least one test
+  must run the real `clean_html` -> prompt path, or a whole feature (link
+  traversal) can be dead in production while the suite is green.
+- `PoliteFetcher._fetch` forwards `timeout`/`user_agent`/`transport` kwargs, so
+  a fake fetch injected for tests must accept `**kwargs`. Its robots.txt fetch
+  goes through the same injected fn - a fake returning HTML parses as an empty
+  ruleset (allow-all), which is usually what you want in a test.
+- Free-tier Gemini returns a persistent 503 "high demand" on some models
+  (3.5-flash) while others (3.6-flash) serve the same payload fine. Treat a 503
+  as a model-availability signal, not only a transient one - google-genai has
+  already retried internally by the time it surfaces.
+
 ## Close-out
 
 - GH-44 closed out manually after the harness run was quota-interrupted at
