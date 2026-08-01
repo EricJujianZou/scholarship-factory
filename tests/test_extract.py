@@ -40,6 +40,14 @@ def test_clean_html_preserves_inline_facts():
     assert "June 1st, and October 1st" in cleaned
 
 
+def test_clean_html_preserves_anchor_links():
+    """A listing item's href is the only route to an `apply_url` for Traverse."""
+    raw = (FIXTURES / "uwaterloo_grants.html").read_text(encoding="utf-8")
+    cleaned = clean_html(raw)
+    assert "https://grants.uwaterloo.ca/index.php/lite-seed" in cleaned
+    assert "javascript:" not in cleaned
+
+
 def test_uwaterloo_grants_facts_are_quoted_and_verbatim():
     raw = (FIXTURES / "uwaterloo_grants.html").read_text(encoding="utf-8")
     url = "https://grants.uwaterloo.ca/"

@@ -8,7 +8,7 @@ from .clean import clean_html
 from .models import Opportunity, Provenance
 
 DEFAULT_MODEL = "claude-sonnet-5"
-DEFAULT_GEMINI_MODEL = "gemini-3.5-flash"
+DEFAULT_GEMINI_MODEL = "gemini-3.6-flash"
 _TOOL_NAME = "report_opportunities"
 
 _SYSTEM_PROMPT = """You extract funding/scholarship opportunities from a cleaned web page.

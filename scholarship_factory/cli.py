@@ -83,6 +83,9 @@ def _cmd_source(
             if outcome.traversal and outcome.traversal.cap_reached:
                 not_followed = outcome.traversal.links_discovered - outcome.traversal.links_traversed
                 print(f"  cap reached on {outcome.url} -> {not_followed} links not followed")
+    unlinked = sum(o.unlinked_items_dropped for o in report.outcomes)
+    if unlinked:
+        print(f"dropped: {unlinked} listing items with no link of their own")
     print(f"skipped: {len(report.skipped)}")
     for skipped in report.skipped:
         print(f"  {skipped.seed.type.value}:{skipped.seed.value} -> {skipped.reason.value}")

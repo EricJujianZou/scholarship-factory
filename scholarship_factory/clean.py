@@ -22,6 +22,12 @@ class _TextExtractor(HTMLParser):
             datetime_attr = dict(attrs).get("datetime")
             if datetime_attr:
                 self._chunks.append(datetime_attr)
+        elif tag == "a":
+            # Link targets are fact-bearing: a listing's per-item href is the only
+            # way the LLM can report an `apply_url`, which is what Traverse follows.
+            href = dict(attrs).get("href")
+            if href and not href.startswith(("#", "javascript:", "mailto:")):
+                self._chunks.append(f" {href} ")
 
     def handle_endtag(self, tag: str) -> None:
         if tag == "script" and self._ldjson_depth > 0:
