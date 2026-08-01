@@ -17,10 +17,14 @@ import sys
 
 from .cache import FetchCache, cached_fetch
 from .extract import extract
+from .feedback import DecisionStore, PreferenceStore
 from .fetch import fetch_url
 from .pipeline import run_sourcing
+from .paginate import DEFAULT_MAX_PAGES
 from .polite import DEFAULT_MIN_INTERVAL, PoliteFetcher
+from .profile import ApplicantProfile, ProfileStore
 from .refresh import refresh_opportunity
+from .relevance import RelevanceStore, refresh_summary_if_due, score
 from .seeds import load_seeds
 from .store import OpportunityStore
 from .traverse import TRAVERSE_PAGE_CAP
@@ -63,7 +67,11 @@ def _sourcing_fetch_fn(db_path: str, min_interval: float):
 
 
 def _cmd_source(
-    store: OpportunityStore, seeds_path: str, page_cap: int, min_interval: float
+    store: OpportunityStore,
+    seeds_path: str,
+    page_cap: int,
+    min_interval: float,
+    max_pages: int,
 ) -> int:
     report = run_sourcing(
         load_seeds(seeds_path),
@@ -71,6 +79,7 @@ def _cmd_source(
         fetch_fn=_sourcing_fetch_fn(store.db_path, min_interval),
         extract_fn=extract,
         page_cap=page_cap,
+        max_pages=max_pages,
     )
     print(f"targets attempted: {report.targets_attempted}")
     print(f"opportunities stored: {report.opportunities_stored}")
@@ -113,6 +122,46 @@ def _cmd_refresh(store: OpportunityStore, opp_id: str) -> int:
     return 0
 
 
+def _cmd_rank(store: OpportunityStore) -> int:
+    """Score stored opportunities against the profile, decisions and summary."""
+    db_path = store.db_path
+    opportunities = store.list()
+    if not opportunities:
+        print("nothing stored yet - run `sf source` first")
+        return 0
+
+    profile_store = ProfileStore(db_path)
+    profiles = profile_store.list()
+    profile = profiles[0] if profiles else ApplicantProfile()
+    decisions = DecisionStore(db_path)
+    preferences = PreferenceStore(db_path)
+
+    refreshed = refresh_summary_if_due(
+        decisions,
+        preferences,
+        {o.id: o.title for o in opportunities},
+        profile,
+    )
+    if refreshed:
+        print(f"preference summary refreshed:\n  {refreshed}\n")
+
+    decided = {d.opportunity_id for d in decisions.list()}
+    undecided = [o for o in opportunities if o.id not in decided]
+    scored = score(
+        undecided,
+        profile,
+        decisions=decisions.list(),
+        preference_summary=preferences.get(),
+    )
+    RelevanceStore(db_path).replace(scored)
+
+    for item in scored:
+        print(f"{item.fit:<6} {item.opportunity.title[:58]}")
+        print(f"       {item.reason}")
+    print(f"\n{len(scored)} scored, {len(decided)} already decided")
+    return 0
+
+
 def _cmd_serve(db_path: str, host: str, port: int) -> int:
     import uvicorn
 
@@ -123,6 +172,12 @@ def _cmd_serve(db_path: str, host: str, port: int) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
+    # Opportunity text carries whatever currency the source used; a Windows
+    # console defaults to cp1252 and dies on the first naira or euro sign.
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
+
     parser = argparse.ArgumentParser(prog="sf", description=__doc__)
     common = argparse.ArgumentParser(add_help=False)
     common.add_argument(
@@ -141,9 +196,14 @@ def main(argv: list[str] | None = None) -> int:
         help=f"max pages traversed per listing (default: {TRAVERSE_PAGE_CAP})",
     )
     p_source.add_argument(
+        "--max-pages", type=int, default=DEFAULT_MAX_PAGES,
+        help=f"listing pages to follow per seed (default: {DEFAULT_MAX_PAGES})",
+    )
+    p_source.add_argument(
         "--min-interval", type=float, default=DEFAULT_MIN_INTERVAL,
         help=f"min seconds between requests to one host (default: {DEFAULT_MIN_INTERVAL})",
     )
+    sub.add_parser("rank", parents=[common], help="score stored opportunities by fit")
     p_refresh = sub.add_parser("refresh", parents=[common], help="re-check one opportunity's facts")
     p_refresh.add_argument("id")
     p_serve = sub.add_parser("serve", parents=[common], help="run the dashboard API")
@@ -158,7 +218,11 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "list":
         return _cmd_list(store, args.status)
     if args.command == "source":
-        return _cmd_source(store, args.seeds, args.page_cap, args.min_interval)
+        return _cmd_source(
+            store, args.seeds, args.page_cap, args.min_interval, args.max_pages
+        )
+    if args.command == "rank":
+        return _cmd_rank(store)
     if args.command == "refresh":
         return _cmd_refresh(store, args.id)
     return _cmd_show(store, args.id)

@@ -1,15 +1,18 @@
 from .adapters import AdapterPlan, FetchTarget, SkipReason, SkippedSeed, targets_for, targets_for_seeds
 from .cache import DEFAULT_MAX_AGE, FetchCache, cached_fetch
 from .extract import ExtractionResult, PageKind, extract
+from .feedback import Decision, DecisionStore, DecisionVerdict, PreferenceStore
 from .fetch import FetchResult, fetch_url
 from .identity import find_duplicate, merge_into
 from .jsonld import extract_jsonld
 from .models import Opportunity, Provenance
+from .paginate import DEFAULT_MAX_PAGES, next_page_url
 from .parse_dates import parse_deadline_dates, typed_deadlines
 from .parse_money import MoneyBound, MoneyValue, parse_money, typed_cost, typed_reward
 from .pipeline import SourcingReport, TargetOutcome, run_sourcing
 from .polite import DEFAULT_MIN_INTERVAL, PoliteFetcher
 from .profile import ApplicantProfile, ProfileStore
+from .relevance import RelevanceStore, ScoredOpportunity, distil_preferences, score
 from .refresh import FieldChange, RefreshOutcome, RefreshStatus, refresh_opportunity
 from .seeds import Seed, SeedType, load_seeds
 from .store import OpportunityStore
@@ -64,4 +67,14 @@ __all__ = [
     "RefreshOutcome",
     "RefreshStatus",
     "FieldChange",
+    "Decision",
+    "DecisionStore",
+    "DecisionVerdict",
+    "PreferenceStore",
+    "RelevanceStore",
+    "ScoredOpportunity",
+    "score",
+    "distil_preferences",
+    "next_page_url",
+    "DEFAULT_MAX_PAGES",
 ]
