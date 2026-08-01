@@ -16,6 +16,7 @@ from .fetch import FetchResult, fetch_url
 from .identity import merge_into
 from .jsonld import extract_jsonld
 from .models import Opportunity
+from .paginate import DEFAULT_MAX_PAGES, next_page_url
 from .seeds import Seed
 from .store import OpportunityStore
 from .traverse import TRAVERSE_PAGE_CAP, TraverseReport, TraverseResult, traverse
@@ -104,70 +105,96 @@ def run_sourcing(
     extract_fn: ExtractFn = extract,
     jsonld_fn: JsonldFn = extract_jsonld,
     page_cap: int = TRAVERSE_PAGE_CAP,
+    max_pages: int = DEFAULT_MAX_PAGES,
 ) -> SourcingReport:
     plan = targets_for_seeds(seeds)
     outcomes: list[TargetOutcome] = []
 
     for target in plan.targets:
-        result = fetch_fn(target.url)
-        if not result.ok:
-            outcomes.append(
-                TargetOutcome(
-                    url=target.url,
-                    ok=False,
-                    status_code=result.status_code,
-                    error=result.error,
-                )
-            )
-            continue
-
-        opportunities = list(jsonld_fn(result.body, result.final_url))
-        try:
-            extraction = extract_fn(result.body, result.final_url)
-        except Exception as exc:  # LLM outage/quota: record it, keep the run going
-            outcomes.append(
-                TargetOutcome(
-                    url=target.url,
-                    ok=False,
-                    status_code=result.status_code,
-                    error=f"extract failed: {type(exc).__name__}: {exc}",
-                )
-            )
-            continue
-
-        traversal_report: TraverseReport | None = None
-        unlinked_dropped = 0
-        if extraction.kind == PageKind.LIST:
-            traversal = traverse(
-                extraction,
-                result.final_url,
+        page_url: str | None = target.url
+        for _ in range(max(1, max_pages)):
+            if page_url is None:
+                break
+            outcome, page_url = _process_page(
+                page_url,
+                store,
                 fetch_fn=fetch_fn,
                 extract_fn=extract_fn,
                 jsonld_fn=jsonld_fn,
                 page_cap=page_cap,
             )
-            linked, unlinked_dropped = _linked_items(
-                extraction.opportunities, result.final_url
-            )
-            opportunities.extend(
-                _fold_listing_items(linked, traversal, result.final_url)
-            )
-            traversal_report = traversal.report
-        else:
-            opportunities.extend(extraction.opportunities)
-
-        for opportunity in opportunities:
-            store.insert(opportunity)
-
-        outcomes.append(
-            TargetOutcome(
-                url=target.url,
-                ok=True,
-                status_code=result.status_code,
-                opportunities_stored=len(opportunities),
-                traversal=traversal_report,
-                unlinked_items_dropped=unlinked_dropped,
-            )
-        )
+            outcomes.append(outcome)
 
     return SourcingReport(outcomes=outcomes, skipped=plan.skipped)
+
+
+def _process_page(
+    url: str,
+    store: OpportunityStore,
+    *,
+    fetch_fn: FetchFn,
+    extract_fn: ExtractFn,
+    jsonld_fn: JsonldFn,
+    page_cap: int,
+) -> tuple[TargetOutcome, str | None]:
+    """Fetch, extract and store one page, returning its outcome and the next
+    listing page to visit (None when the page declares none, or on failure --
+    there is no next link to read off a page we could not process)."""
+    result = fetch_fn(url)
+    if not result.ok:
+        return (
+            TargetOutcome(
+                url=url, ok=False, status_code=result.status_code, error=result.error
+            ),
+            None,
+        )
+
+    opportunities = list(jsonld_fn(result.body, result.final_url))
+    try:
+        extraction = extract_fn(result.body, result.final_url)
+    except Exception as exc:  # LLM outage/quota: record it, keep the run going
+        return (
+            TargetOutcome(
+                url=url,
+                ok=False,
+                status_code=result.status_code,
+                error=f"extract failed: {type(exc).__name__}: {exc}",
+            ),
+            None,
+        )
+
+    traversal_report: TraverseReport | None = None
+    unlinked_dropped = 0
+    next_url: str | None = None
+    if extraction.kind == PageKind.LIST:
+        traversal = traverse(
+            extraction,
+            result.final_url,
+            fetch_fn=fetch_fn,
+            extract_fn=extract_fn,
+            jsonld_fn=jsonld_fn,
+            page_cap=page_cap,
+        )
+        linked, unlinked_dropped = _linked_items(
+            extraction.opportunities, result.final_url
+        )
+        opportunities.extend(_fold_listing_items(linked, traversal, result.final_url))
+        traversal_report = traversal.report
+        next_url = next_page_url(result.body, result.final_url)
+    else:
+        opportunities.extend(extraction.opportunities)
+
+    for opportunity in opportunities:
+        store.insert(opportunity)
+
+    return (
+        TargetOutcome(
+            url=url,
+            ok=True,
+            status_code=result.status_code,
+            opportunities_stored=len(opportunities),
+            traversal=traversal_report,
+            unlinked_items_dropped=unlinked_dropped,
+        ),
+        next_url,
+    )

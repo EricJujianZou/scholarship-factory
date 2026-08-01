@@ -221,3 +221,44 @@ dependency layer, sequence by merges):
   - **Ticket B** — the LLM extract spine (clean → LLM → 0..N, provenance, source
     spans, fixture-tested).
   - **Ticket C** — the JSON-LD structured path.
+
+## Settled design — relevance + the feedback loop
+
+Added once a real corpus existed and the problem turned out to be *relevance*,
+not extraction: 30 honestly-extracted opportunities, almost none of them aimed
+at the owner. Deterministic filters could not fix it — nothing on those pages
+says "not for Canadians", they are simply aimed elsewhere.
+
+**Locked decisions:**
+
+- **Two questions, two mechanisms.** `rank.py` stays deterministic and answers
+  *can I apply at all* — a wrong answer there silently hides a real
+  opportunity, so it keeps hard filters, no LLM, no score float. `relevance.py`
+  answers *would I want to*, where being wrong only reorders a visible list.
+  Only the second question gets an LLM. The earlier "no LLM in ranking"
+  decision is therefore narrowed, not overturned.
+- **Fit is `high|medium|low` with a written reason**, never a float — same
+  objection to false precision that produced the provenance enum. An
+  opportunity the model skips is `medium` ("not judged"), never `low`: silence
+  is not a negative judgment.
+- **Relevance never touches facts.** It reads stored opportunities and writes
+  only an ordering plus a reason, so it cannot invent a deadline.
+- **Scores are persisted** (`relevance` table, refreshed by `sf rank`). The
+  dashboard reads them, so opening the page costs nothing.
+- **The feedback loop learns by prompt, not by training.** Two memories,
+  because they decay differently: recent decisions quoted verbatim as few-shot
+  examples, plus a distilled written preference summary re-generated every few
+  decisions. The summary is human-readable and hand-editable on purpose — the
+  owner can see and correct what the system thinks they want.
+- **Decisions are their own dimension**, not `Opportunity.status`: that column
+  is the freshness lifecycle and `refresh` overwrites it, which would erase a
+  decision parked there.
+- **Pagination is deterministic** (`rel="next"` only). Link *text* ("Next",
+  "older posts") is not consulted — a missed page is much cheaper than walking
+  a run into the wrong part of a site.
+
+**Known open:** thin listing items with no eligibility text rank `medium`
+("too thin to judge") — the ranker is honest about it, but the fix is
+traversing to their detail pages, i.e. a higher `--page-cap`/`--max-pages`,
+which costs calls. Also open: sources aimed at Canadian students; the
+aggregators that serve that audience mostly sit behind 403 bot walls.

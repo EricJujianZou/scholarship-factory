@@ -215,3 +215,57 @@ def test_markup_in_stored_fields_is_not_rendered_raw():
     assert "${opp.apply_url}" not in html
     assert "${escapeHtml(opp.title)}" in html
     assert "safeUrl(opp.apply_url)" in html
+
+
+def test_decision_endpoint_records_and_annotates(tmp_path):
+    from scholarship_factory.models import Opportunity
+    from scholarship_factory.store import OpportunityStore
+
+    db = str(tmp_path / "t.db")
+    opp = OpportunityStore(db).insert(
+        Opportunity(title="G", apply_url="https://e.com/a", source_url="https://e.com")
+    )
+    client = TestClient(create_app(db))
+
+    posted = client.post(
+        f"/api/opportunities/{opp.id}/decision",
+        json={"verdict": "not_interested", "note": "wrong country"},
+    )
+    assert posted.status_code == 200
+    assert posted.json()["verdict"] == "not_interested"
+
+    listed = client.get("/api/opportunities").json()
+    assert listed["eligible"][0]["decision"] == "not_interested"
+    assert listed["eligible"][0]["fit"] is None  # sf rank has not run
+
+
+def test_decision_on_unknown_opportunity_is_404(tmp_path):
+    client = TestClient(create_app(str(tmp_path / "t.db")))
+    res = client.post("/api/opportunities/nope/decision", json={"verdict": "interested"})
+    assert res.status_code == 404
+
+
+def test_stored_fit_is_surfaced_and_orders_the_list(tmp_path):
+    from scholarship_factory.models import Opportunity
+    from scholarship_factory.relevance import RelevanceStore, ScoredOpportunity
+    from scholarship_factory.store import OpportunityStore
+
+    db = str(tmp_path / "t.db")
+    store = OpportunityStore(db)
+    low = store.insert(
+        Opportunity(title="Low", apply_url="https://e.com/l", source_url="https://e.com")
+    )
+    high = store.insert(
+        Opportunity(title="High", apply_url="https://e.com/h", source_url="https://e.com")
+    )
+    RelevanceStore(db).replace(
+        [
+            ScoredOpportunity(opportunity=low, fit="low", reason="far away"),
+            ScoredOpportunity(opportunity=high, fit="high", reason="right fit"),
+        ]
+    )
+
+    listed = TestClient(create_app(db)).get("/api/opportunities").json()
+
+    assert [e["opportunity"]["title"] for e in listed["eligible"]] == ["High", "Low"]
+    assert listed["eligible"][0]["fit_reason"] == "right fit"

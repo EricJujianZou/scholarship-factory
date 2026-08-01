@@ -183,3 +183,45 @@ def test_education_rule_does_not_fire_on_benign_text(description):
 
     assert results.excluded == []
     assert results.eligible[0].verdict == Verdict.ELIGIBLE
+
+
+def test_organization_only_grant_is_excluded():
+    opp = _opp(
+        requirements=(
+            "Eligible applicants include: Scottish civil society organizations, "
+            "small charities, social enterprises, community groups."
+        )
+    )
+    result = rank([opp], ApplicantProfile(), today=TODAY)
+
+    assert result.eligible == []
+    assert result.excluded[0].verdict == Verdict.INELIGIBLE
+    assert "organization" in result.excluded[0].reasons[0]
+
+
+def test_beneficiaries_in_the_description_do_not_rescue_an_org_only_grant():
+    """Who benefits is not who may apply - the gate reads the eligibility text."""
+    opp = _opp(
+        requirements="Eligible applicants include campuses that are: Active members.",
+        description="Supports colleges implementing solutions that benefit students.",
+    )
+    result = rank([opp], ApplicantProfile(), today=TODAY)
+
+    assert result.eligible == []
+
+
+def test_scholarship_open_to_students_is_not_gated():
+    opp = _opp(
+        requirements=(
+            "Eligible applicants include students enrolled at a recognized "
+            "institution, and individuals from partner organizations."
+        )
+    )
+    result = rank([opp], ApplicantProfile(), today=TODAY)
+
+    assert len(result.eligible) == 1
+
+
+def test_unstated_eligibility_is_never_gated():
+    result = rank([_opp(requirements=None, description=None)], ApplicantProfile(), today=TODAY)
+    assert len(result.eligible) == 1

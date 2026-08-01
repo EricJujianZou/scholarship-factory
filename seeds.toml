@@ -1,31 +1,43 @@
 # Seed sources for `sf source --seeds seeds.toml`.
 #
 # type = "url"      -> fetched as-is (listing or detail page)
-# type = "reddit"   -> r/<name>, fetched via reddit's public listing JSON
+# type = "reddit"   -> r/<name>, via reddit's public listing JSON
 # type = "devpost"  -> a devpost URL, fetched as-is
 # type = "instagram" / "x" -> accepted but skipped (auth wall, not yet supported)
 #
 # Every fetched page costs one LLM call, and a listing page can traverse up to
-# --page-cap more. Start with a couple of seeds and a small cap.
+# --page-cap more. Start with a small cap and raise it once the yield looks good.
+#
+# Probed 2026-08-01 with the polite fetcher; only sources that actually return
+# content are enabled. Known-blocked (do not re-add without a fix):
+#   scholarshipscanada.com, scholarshipportal.com  -> 403 bot wall
+#   scholartree.ca                                 -> robots.txt disallow
+#   reddit.com/r/*/new.json                        -> robots.txt disallow
 
 [[seeds]]
 type = "url"
-value = "https://grants.uwaterloo.ca/"
-label = "uwaterloo grants"
+value = "https://uwaterloo.ca/student-awards-financial-aid/"
+label = "waterloo awards directory"
 
 [[seeds]]
 type = "url"
-value = "https://opportunitiesforyouth.org/?s=grants"
-label = "opportunities for youth - grants"
+value = "https://opportunitiesforyouth.org/category/scholarships/"
+label = "opportunities for youth - scholarships"
 
+[[seeds]]
+type = "url"
+value = "https://opportunitydesk.org/"
+label = "opportunity desk"
+
+[[seeds]]
+type = "url"
+value = "https://devpost.com/hackathons"
+label = "devpost hackathons"
+enabled = false
+
+# Auth-walled: the adapter skips these, kept to document intent.
 [[seeds]]
 type = "reddit"
 value = "r/scholarships"
-label = "r/scholarships"
-enabled = false
-
-[[seeds]]
-type = "url"
-value = "https://lablab.ai/ai-hackathons"
-label = "lablab hackathons"
+label = "r/scholarships (robots-disallowed, see above)"
 enabled = false

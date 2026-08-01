@@ -391,3 +391,63 @@ def test_listing_item_folds_into_the_detail_record_it_linked_to(tmp_path):
     assert stored[0].apply_url == "https://apply.example.org/form"  # detail wins
     assert stored[0].deadline == "10 August 2026"                   # from the detail
     assert stored[0].reward == "grants from GBP 2,000 to GBP 50,000"  # from the listing
+
+
+def test_max_pages_follows_rel_next_across_listing_pages(tmp_path):
+    store = OpportunityStore(str(tmp_path / "t.db"))
+    seeds = [Seed(type=SeedType.URL, value="https://example.com/page/1")]
+    page1 = ok_result(
+        "https://example.com/page/1", '<a rel="next" href="/page/2">older</a>'
+    )
+    page2 = ok_result("https://example.com/page/2", "<html></html>")  # no next
+    fetch_fn = FakeFetch(
+        {
+            "https://example.com/page/1": page1,
+            "https://example.com/page/2": page2,
+            "https://example.com/a": ok_result("https://example.com/a"),
+            "https://example.com/b": ok_result("https://example.com/b"),
+        }
+    )
+    extract_fn = RecordingExtract(
+        {
+            "https://example.com/page/1": [make_opp("https://example.com/a", title="A")],
+            "https://example.com/page/2": [make_opp("https://example.com/b", title="B")],
+            "https://example.com/a": [make_opp("https://example.com/a", title="A")],
+            "https://example.com/b": [make_opp("https://example.com/b", title="B")],
+        },
+        kind_by_url={
+            "https://example.com/page/1": PageKind.LIST,
+            "https://example.com/page/2": PageKind.LIST,
+        },
+    )
+
+    report = run_sourcing(
+        seeds, store, fetch_fn=fetch_fn, extract_fn=extract_fn,
+        jsonld_fn=RecordingJsonld({}), max_pages=3,
+    )
+
+    assert report.targets_attempted == 2  # stopped when page 2 declared no next
+    assert sorted(o.title for o in store.list()) == ["A", "B"]
+
+
+def test_max_pages_default_visits_only_the_seed_page(tmp_path):
+    store = OpportunityStore(str(tmp_path / "t.db"))
+    seeds = [Seed(type=SeedType.URL, value="https://example.com/page/1")]
+    fetch_fn = FakeFetch(
+        {
+            "https://example.com/page/1": ok_result(
+                "https://example.com/page/1", '<a rel="next" href="/page/2">older</a>'
+            )
+        }
+    )
+    extract_fn = RecordingExtract(
+        {}, kind_by_url={"https://example.com/page/1": PageKind.LIST}
+    )
+
+    report = run_sourcing(
+        seeds, store, fetch_fn=fetch_fn, extract_fn=extract_fn,
+        jsonld_fn=RecordingJsonld({}),
+    )
+
+    assert report.targets_attempted == 1
+    assert fetch_fn.calls == ["https://example.com/page/1"]
