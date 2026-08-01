@@ -106,7 +106,7 @@ value = "somepage"
 """
     )
 
-    def fake_fetch(url: str) -> FetchResult:
+    def fake_fetch(url: str, **kwargs) -> FetchResult:
         return FetchResult(requested_url=url, final_url=url, status_code=200, body="<html></html>")
 
     def fake_extract(body: str, url: str) -> ExtractionResult:
@@ -115,9 +115,73 @@ value = "somepage"
     monkeypatch.setattr(cli, "fetch_url", fake_fetch)
     monkeypatch.setattr(cli, "extract", fake_extract)
 
-    rc = main(["source", "--seeds", seeds_path, "--db", str(tmp_path / "t.db")])
+    rc = main([
+        "source", "--seeds", seeds_path, "--db", str(tmp_path / "t.db"),
+        "--min-interval", "0",
+    ])
     out = capsys.readouterr().out
 
     assert rc == 0
     assert "targets attempted: 1" in out
     assert "skipped: 1" in out
+
+
+def test_source_honors_robots(capsys, monkeypatch, tmp_path):
+    """`sf source` fetches through the polite chain, not raw fetch_url."""
+    seeds_path = _write_toml(
+        """
+[[seeds]]
+type = "url"
+value = "https://example.com/private/a"
+"""
+    )
+    requested: list[str] = []
+
+    def fake_fetch(url: str, **kwargs) -> FetchResult:
+        requested.append(url)
+        body = "User-agent: *\nDisallow: /private/" if url.endswith("robots.txt") else "<html></html>"
+        return FetchResult(requested_url=url, final_url=url, status_code=200, body=body)
+
+    def fake_extract(body: str, url: str) -> ExtractionResult:
+        return ExtractionResult(kind=PageKind.DETAIL, opportunities=[])
+
+    monkeypatch.setattr(cli, "fetch_url", fake_fetch)
+    monkeypatch.setattr(cli, "extract", fake_extract)
+
+    db = str(tmp_path / "t.db")
+    rc = main(["source", "--seeds", seeds_path, "--db", db, "--min-interval", "0"])
+    out = capsys.readouterr().out
+
+    assert rc == 0
+    assert requested == ["https://example.com/robots.txt"]  # disallowed page never fetched
+    assert "failures: 1" in out
+    assert "robots.txt disallows" in out
+
+
+def test_source_reuses_cached_page_across_runs(monkeypatch, tmp_path):
+    seeds_path = _write_toml(
+        """
+[[seeds]]
+type = "url"
+value = "https://example.com/a"
+"""
+    )
+    pages: list[str] = []
+
+    def fake_fetch(url: str, **kwargs) -> FetchResult:
+        if not url.endswith("robots.txt"):
+            pages.append(url)
+        return FetchResult(requested_url=url, final_url=url, status_code=200, body="<html></html>")
+
+    def fake_extract(body: str, url: str) -> ExtractionResult:
+        return ExtractionResult(kind=PageKind.DETAIL, opportunities=[])
+
+    monkeypatch.setattr(cli, "fetch_url", fake_fetch)
+    monkeypatch.setattr(cli, "extract", fake_extract)
+
+    db = str(tmp_path / "t.db")
+    argv = ["source", "--seeds", seeds_path, "--db", db, "--min-interval", "0"]
+    assert main(argv) == 0
+    assert main(argv) == 0
+
+    assert pages == ["https://example.com/a"]  # second run served from the fetch cache
