@@ -262,3 +262,33 @@ says "not for Canadians", they are simply aimed elsewhere.
 traversing to their detail pages, i.e. a higher `--page-cap`/`--max-pages`,
 which costs calls. Also open: sources aimed at Canadian students; the
 aggregators that serve that audience mostly sit behind 403 bot walls.
+
+## Direction change — toward the daily loop and drafting (owner decision)
+
+The owner's stated target: the system runs unattended, and they spend ~20
+minutes a day approving what it flagged and reviewing drafts it prepared. That
+crosses three v1 boundaries above, deliberately and on the owner's instruction.
+Recorded here rather than left to drift:
+
+- **"No scheduler / automatic refresh" is lifted.** `sf poll` is one unattended
+  pass (source -> score -> digest) intended for Task Scheduler; see
+  `docs/operating.md`. On-demand refresh still exists and is unchanged.
+- **"v1 stores no personal data" is lifted**, narrowly. `context.py` stores the
+  applicant's own material - facts, education, awards, experience, projects,
+  past essays, referees, documents - because a draft cannot be written without
+  it. Same local SQLite file, unencrypted, single user. The database and
+  `context.toml` are gitignored; nothing personal leaves the machine except
+  inside the prompts sent to the LLM provider, which the owner should know.
+- **"No generated text" still holds.** The two *inputs* to drafting now exist -
+  the applicant's context, and `application.py` reading what a given
+  application asks for - but nothing generates an application yet.
+- **Auto-submission is ruled out, not deferred.** The owner chose draft-only:
+  the system prepares text against the real prompts and the owner pastes it.
+  No browser automation, no submission. Beyond the engineering cost, many
+  awards require the applicant's own writing and some ask applicants to declare
+  AI use (the DLGS form we tested asks exactly that), so an unattended
+  submission is the one failure mode that could disqualify a real application.
+
+**Maturity, honestly:** sourcing and triage work end to end. Drafting does not
+exist. The gap between "it found this for you" and "it applied for you" is
+still most of the remaining work.

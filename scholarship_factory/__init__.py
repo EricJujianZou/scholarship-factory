@@ -1,5 +1,8 @@
+from .application import ApplicationRequirements, RequirementsStore, read_requirements
 from .adapters import AdapterPlan, FetchTarget, SkipReason, SkippedSeed, targets_for, targets_for_seeds
 from .cache import DEFAULT_MAX_AGE, FetchCache, cached_fetch
+from .context import ContextEntry, ContextKind, ContextStore, load_context_file
+from .digest import Digest, RunStore, build_digest
 from .extract import ExtractionResult, PageKind, extract
 from .feedback import Decision, DecisionStore, DecisionVerdict, PreferenceStore
 from .fetch import FetchResult, fetch_url
@@ -77,4 +80,14 @@ __all__ = [
     "distil_preferences",
     "next_page_url",
     "DEFAULT_MAX_PAGES",
+    "ContextEntry",
+    "ContextKind",
+    "ContextStore",
+    "load_context_file",
+    "ApplicationRequirements",
+    "RequirementsStore",
+    "read_requirements",
+    "Digest",
+    "RunStore",
+    "build_digest",
 ]
