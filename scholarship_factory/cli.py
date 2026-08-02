@@ -7,6 +7,9 @@ the existing OpportunityStore (GH-1); `source` runs a sourcing pass and writes t
     sf list [--status new] [--db PATH]
     sf show <id> [--db PATH]
     sf source --seeds seeds.toml [--db PATH] [--page-cap N] [--min-interval S]
+    sf rank [--db PATH]
+    sf poll --seeds seeds.toml [--db PATH]      # source + rank + digest, unattended
+    sf digest [--since ISO] [--mark] [--db PATH]
     sf refresh <id> [--db PATH]
 
 db path: `--db`, else $SF_DB_PATH, else ./scholarship_factory.db
@@ -15,14 +18,17 @@ import argparse
 import os
 import sys
 
+from .application import RequirementsStore, read_requirements
 from .cache import FetchCache, cached_fetch
+from .context import ContextKind, ContextStore, load_context_file
+from .digest import RunStore, build_digest, render
 from .extract import extract
 from .feedback import DecisionStore, PreferenceStore
 from .fetch import fetch_url
 from .pipeline import run_sourcing
 from .paginate import DEFAULT_MAX_PAGES
 from .polite import DEFAULT_MIN_INTERVAL, PoliteFetcher
-from .profile import ApplicantProfile, ProfileStore
+from .profile import ApplicantProfile, ProfileStore, load_profile_file, save_profile
 from .refresh import refresh_opportunity
 from .relevance import RelevanceStore, refresh_summary_if_due, score
 from .seeds import load_seeds
@@ -122,43 +128,170 @@ def _cmd_refresh(store: OpportunityStore, opp_id: str) -> int:
     return 0
 
 
-def _cmd_rank(store: OpportunityStore) -> int:
-    """Score stored opportunities against the profile, decisions and summary."""
+def _profile_for(db_path: str) -> ApplicantProfile:
+    profiles = ProfileStore(db_path).list()
+    return profiles[0] if profiles else ApplicantProfile()
+
+
+def _score_undecided(store: OpportunityStore) -> list:
+    """Re-score everything the owner has not already ruled on."""
     db_path = store.db_path
     opportunities = store.list()
-    if not opportunities:
-        print("nothing stored yet - run `sf source` first")
-        return 0
-
-    profile_store = ProfileStore(db_path)
-    profiles = profile_store.list()
-    profile = profiles[0] if profiles else ApplicantProfile()
     decisions = DecisionStore(db_path)
     preferences = PreferenceStore(db_path)
+    profile = _profile_for(db_path)
 
     refreshed = refresh_summary_if_due(
-        decisions,
-        preferences,
-        {o.id: o.title for o in opportunities},
-        profile,
+        decisions, preferences, {o.id: o.title for o in opportunities}, profile
     )
     if refreshed:
         print(f"preference summary refreshed:\n  {refreshed}\n")
 
     decided = {d.opportunity_id for d in decisions.list()}
-    undecided = [o for o in opportunities if o.id not in decided]
     scored = score(
-        undecided,
+        [o for o in opportunities if o.id not in decided],
         profile,
         decisions=decisions.list(),
         preference_summary=preferences.get(),
     )
     RelevanceStore(db_path).replace(scored)
+    return scored
 
+
+def _cmd_digest(store: OpportunityStore, since: str | None, mark: bool) -> int:
+    db_path = store.db_path
+    runs = RunStore(db_path)
+    digest = build_digest(
+        store.list(),
+        _profile_for(db_path),
+        fits=RelevanceStore(db_path).all(),
+        decisions=DecisionStore(db_path).list(),
+        since=since if since is not None else runs.last_digest_at(),
+    )
+    print(render(digest))
+    if mark:
+        runs.mark()
+    return 0
+
+
+def _cmd_poll(
+    store: OpportunityStore,
+    seeds_path: str,
+    page_cap: int,
+    min_interval: float,
+    max_pages: int,
+) -> int:
+    """One unattended pass: source, re-score, then report what changed.
+
+    This is what a scheduler runs. It never prompts and never fails the run on a
+    single bad source - `run_sourcing` already records those - so a cron-style
+    job either produces a digest or produces an error worth reading.
+    """
+    _cmd_source(store, seeds_path, page_cap, min_interval, max_pages)
+    print()
+    _score_undecided(store)
+    print()
+    return _cmd_digest(store, None, mark=True)
+
+
+def _cmd_rank(store: OpportunityStore) -> int:
+    """Score stored opportunities against the profile, decisions and summary."""
+    if not store.list():
+        print("nothing stored yet - run `sf source` first")
+        return 0
+
+    scored = _score_undecided(store)
     for item in scored:
         print(f"{item.fit:<6} {item.opportunity.title[:58]}")
         print(f"       {item.reason}")
-    print(f"\n{len(scored)} scored, {len(decided)} already decided")
+    decided = len(DecisionStore(store.db_path).list())
+    print(f"\n{len(scored)} scored, {decided} already decided")
+    return 0
+
+
+def _cmd_context_import(store: OpportunityStore, path: str) -> int:
+    context = ContextStore(store.db_path)
+    entries = load_context_file(path)
+    for entry in entries:
+        context.upsert(entry)
+    by_kind: dict[str, int] = {}
+    for entry in entries:
+        by_kind[entry.kind.value] = by_kind.get(entry.kind.value, 0) + 1
+    print(f"imported {len(entries)} entries from {path}")
+    for kind, count in sorted(by_kind.items()):
+        print(f"  {kind}: {count}")
+
+    profile = load_profile_file(path)
+    if profile is not None:
+        saved = save_profile(ProfileStore(store.db_path), profile)
+        print("  profile: " + ", ".join(
+            f"{field}={value!r}"
+            for field, value in (
+                ("region", saved.region),
+                ("education_level", saved.education_level),
+                ("field_of_study", saved.field_of_study),
+            )
+        ))
+    return 0
+
+
+def _cmd_context_list(store: OpportunityStore, kind: str | None) -> int:
+    entries = ContextStore(store.db_path).list(ContextKind(kind) if kind else None)
+    if not entries:
+        print("no context stored - see context.example.toml and `sf context import`")
+        return 0
+    for entry in entries:
+        when = " ".join(p for p in (entry.started, entry.ended) if p)
+        print(f"[{entry.kind.value}] {entry.title}{f'  ({when})' if when else ''}")
+        if entry.body:
+            print(f"    {entry.body[:120]}")
+    return 0
+
+
+def _cmd_requirements(store: OpportunityStore, opp_id: str) -> int:
+    """Read one opportunity's apply page for what the application demands."""
+    opp = store.get(opp_id)
+    if opp is None:
+        print(f"not found: {opp_id}", file=sys.stderr)
+        return 1
+
+    result = fetch_url(opp.apply_url)
+    if not result.ok:
+        print(
+            f"could not fetch {opp.apply_url}: status={result.status_code} "
+            f"error={result.error}",
+            file=sys.stderr,
+        )
+        return 1
+
+    requirements = read_requirements(result.body, result.final_url)
+    RequirementsStore(store.db_path).set(opp_id, requirements)
+
+    if not requirements.is_application_page:
+        print(f"{opp.apply_url} does not look like an application page")
+        return 0
+
+    print(f"{opp.title}\n{opp.apply_url}\n")
+    for prompt in requirements.essay_prompts:
+        limit = f" ({prompt.word_limit} words)" if prompt.word_limit else ""
+        print(f"  essay{limit}: {prompt.prompt}")
+    for document in requirements.documents:
+        print(f"  document: {document}")
+    if requirements.referees:
+        print(f"  referees: {requirements.referees}")
+    for other in requirements.other_requirements:
+        print(f"  also: {other}")
+    if requirements.notes:
+        print(f"  notes: {requirements.notes}")
+    if not any(
+        (
+            requirements.essay_prompts,
+            requirements.documents,
+            requirements.referees,
+            requirements.other_requirements,
+        )
+    ):
+        print("  the page states no specific requirements")
     return 0
 
 
@@ -204,6 +337,41 @@ def main(argv: list[str] | None = None) -> int:
         help=f"min seconds between requests to one host (default: {DEFAULT_MIN_INTERVAL})",
     )
     sub.add_parser("rank", parents=[common], help="score stored opportunities by fit")
+    p_poll = sub.add_parser(
+        "poll", parents=[common],
+        help="unattended pass: source, score, then print the digest",
+    )
+    p_poll.add_argument("--seeds", required=True, help="seeds TOML path")
+    p_poll.add_argument("--page-cap", type=int, default=TRAVERSE_PAGE_CAP)
+    p_poll.add_argument("--max-pages", type=int, default=DEFAULT_MAX_PAGES)
+    p_poll.add_argument("--min-interval", type=float, default=DEFAULT_MIN_INTERVAL)
+    p_digest = sub.add_parser(
+        "digest", parents=[common], help="what is new and what closes soon"
+    )
+    p_digest.add_argument(
+        "--since", default=None,
+        help="ISO timestamp; default is the last digest (or everything, first run)",
+    )
+    p_context = sub.add_parser(
+        "context", parents=[common], help="your own material, for drafting later"
+    )
+    context_sub = p_context.add_subparsers(dest="context_command", required=True)
+    p_context_import = context_sub.add_parser("import", help="load a context TOML file")
+    p_context_import.add_argument("path")
+    p_context_list = context_sub.add_parser("list", help="show stored context")
+    p_context_list.add_argument(
+        "--kind", default=None,
+        choices=[k.value for k in ContextKind], help="only this kind",
+    )
+    p_requirements = sub.add_parser(
+        "requirements", parents=[common],
+        help="read one opportunity's apply page for what it asks for",
+    )
+    p_requirements.add_argument("id")
+    p_digest.add_argument(
+        "--mark", action="store_true",
+        help="record this run, so the next digest reports only newer items",
+    )
     p_refresh = sub.add_parser("refresh", parents=[common], help="re-check one opportunity's facts")
     p_refresh.add_argument("id")
     p_serve = sub.add_parser("serve", parents=[common], help="run the dashboard API")
@@ -223,6 +391,18 @@ def main(argv: list[str] | None = None) -> int:
         )
     if args.command == "rank":
         return _cmd_rank(store)
+    if args.command == "poll":
+        return _cmd_poll(
+            store, args.seeds, args.page_cap, args.min_interval, args.max_pages
+        )
+    if args.command == "context":
+        if args.context_command == "import":
+            return _cmd_context_import(store, args.path)
+        return _cmd_context_list(store, args.kind)
+    if args.command == "requirements":
+        return _cmd_requirements(store, args.id)
+    if args.command == "digest":
+        return _cmd_digest(store, args.since, args.mark)
     if args.command == "refresh":
         return _cmd_refresh(store, args.id)
     return _cmd_show(store, args.id)

@@ -1,10 +1,16 @@
 import os
 import tempfile
+import time
 from pathlib import Path
 
 from fastapi.testclient import TestClient
 
 from scholarship_factory.api import create_app
+from scholarship_factory.application import (
+    ApplicationRequirements,
+    EssayPrompt,
+    RequirementsStore,
+)
 from scholarship_factory.extract import ExtractionResult, PageKind
 from scholarship_factory.fetch import FetchResult
 from scholarship_factory.models import Opportunity
@@ -76,6 +82,16 @@ def test_opportunities_ranked_with_parsed_and_verbatim():
     assert excluded_by_title["Expired Grant"]["verdict"] == "expired"
     assert excluded_by_title["EU Only Grant"]["verdict"] == "ineligible"
     assert excluded_by_title["EU Only Grant"]["reasons"]
+
+
+def _finished_job(client: TestClient, timeout: float = 30.0) -> dict:
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        job = client.get("/api/jobs/current").json()["job"]
+        if job and job["state"] != "running":
+            return job
+        time.sleep(0.05)
+    raise AssertionError("job did not finish")
 
 
 def _index_html() -> str:
@@ -192,6 +208,105 @@ def test_root_serves_dashboard():
     assert "/api/profile" in res.text
 
 
+def test_actions_are_described_for_the_buttons():
+    client = TestClient(create_app(_temp_db()))
+
+    body = client.get("/api/actions").json()
+    by_id = {a["id"]: a for a in body["actions"]}
+    assert {"poll", "rank", "context"} <= set(by_id)
+    assert by_id["poll"]["description"]
+    assert by_id["poll"]["cost"]
+    assert by_id["context"]["needs_llm"] is False
+
+
+def test_actions_report_whether_a_provider_is_configured(monkeypatch):
+    for name in ("SF_LLM_PROVIDER", "ANTHROPIC_API_KEY", "GEMINI_API_KEY", "GOOGLE_API_KEY"):
+        monkeypatch.delenv(name, raising=False)
+    client = TestClient(create_app(_temp_db()))
+
+    llm = client.get("/api/actions").json()["llm"]
+    assert llm["ready"] is False
+    assert "GEMINI_API_KEY" in llm["hint"]
+
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+    assert client.get("/api/actions").json()["llm"]["ready"] is True
+
+
+def test_an_llm_action_is_refused_when_no_key_is_set(monkeypatch):
+    """Refuse before the click rather than fail with a traceback after it."""
+    for name in ("SF_LLM_PROVIDER", "ANTHROPIC_API_KEY", "GEMINI_API_KEY", "GOOGLE_API_KEY"):
+        monkeypatch.delenv(name, raising=False)
+    path = _seeded_db()
+    client = TestClient(create_app(path))
+
+    res = client.post("/api/actions/poll")
+    assert res.status_code == 409
+    assert "GEMINI_API_KEY" in res.json()["detail"]
+
+    opp_id = OpportunityStore(path).list()[0].id
+    assert client.post(f"/api/opportunities/{opp_id}/requirements").status_code == 409
+
+    # The one action that spends nothing stays available.
+    assert client.get("/api/jobs/current").json()["job"] is None
+
+
+def test_unknown_action_is_404():
+    client = TestClient(create_app(_temp_db()))
+    assert client.post("/api/actions/rm-rf").status_code == 404
+
+
+def test_running_an_action_reports_a_job(monkeypatch):
+    """`rank` on an empty store returns without calling an LLM."""
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+    client = TestClient(create_app(_temp_db()))
+
+    res = client.post("/api/actions/rank")
+    assert res.status_code == 200
+    assert res.json()["state"] in {"running", "succeeded"}
+
+    job = _finished_job(client)
+    assert job["state"] == "succeeded"
+    assert any("nothing stored yet" in line for line in job["lines"])
+
+
+def test_no_job_running_reports_nothing():
+    client = TestClient(create_app(_temp_db()))
+    assert client.get("/api/jobs/current").json()["job"] is None
+
+
+def test_requirements_for_an_unknown_opportunity_is_404():
+    client = TestClient(create_app(_seeded_db()))
+    assert client.post("/api/opportunities/nope/requirements").status_code == 404
+
+
+def test_stored_requirements_ride_along_with_the_opportunity():
+    """The row can show what an application asks for without a second request."""
+    path = _seeded_db()
+    opp = OpportunityStore(path).list()[0]
+    RequirementsStore(path).set(
+        opp.id,
+        ApplicationRequirements(
+            essay_prompts=[EssayPrompt(prompt="Why you?", word_limit=500)],
+            documents=["Transcript"],
+            referees=2,
+        ),
+    )
+
+    data = TestClient(create_app(path)).get("/api/opportunities").json()
+    item = next(
+        i for i in data["eligible"] + data["excluded"]
+        if i["opportunity"]["id"] == opp.id
+    )
+    assert item["requirements"]["essay_prompts"][0]["word_limit"] == 500
+    assert item["requirements"]["referees"] == 2
+
+    other = next(
+        i for i in data["eligible"] + data["excluded"]
+        if i["opportunity"]["id"] != opp.id
+    )
+    assert other["requirements"] is None
+
+
 def test_markup_in_stored_fields_is_not_rendered_raw():
     path = _temp_db()
     store = OpportunityStore(path)
@@ -269,3 +384,37 @@ def test_stored_fit_is_surfaced_and_orders_the_list(tmp_path):
 
     assert [e["opportunity"]["title"] for e in listed["eligible"]] == ["High", "Low"]
     assert listed["eligible"][0]["fit_reason"] == "right fit"
+
+
+def test_rereading_env_turns_the_llm_actions_back_on(tmp_path, monkeypatch):
+    from scholarship_factory import env as env_module
+
+    env_file = tmp_path / ".env"
+    env_file.write_text('GEMINI_API_KEY="pasted-after-start-up"\n', encoding="utf-8")
+    monkeypatch.setattr(env_module, "ENV_PATH", env_file)
+    for key in ("GEMINI_API_KEY", "GOOGLE_API_KEY", "ANTHROPIC_API_KEY", "SF_LLM_PROVIDER"):
+        monkeypatch.delenv(key, raising=False)
+    client = TestClient(create_app(str(tmp_path / "t.db")))
+
+    assert client.get("/api/actions").json()["llm"]["ready"] is False
+
+    reloaded = client.post("/api/env/reload").json()
+
+    assert reloaded["llm"]["ready"] is True
+    assert client.get("/api/actions").json()["llm"]["ready"] is True
+
+
+def test_rereading_env_reports_key_names_but_never_their_values(tmp_path, monkeypatch):
+    from scholarship_factory import env as env_module
+
+    env_file = tmp_path / ".env"
+    env_file.write_text('GEMINI_API_KEY="super-secret"\n', encoding="utf-8")
+    monkeypatch.setattr(env_module, "ENV_PATH", env_file)
+    for key in ("GEMINI_API_KEY", "GOOGLE_API_KEY", "ANTHROPIC_API_KEY", "SF_LLM_PROVIDER"):
+        monkeypatch.delenv(key, raising=False)
+    client = TestClient(create_app(str(tmp_path / "t.db")))
+
+    body = client.post("/api/env/reload").text
+
+    assert "GEMINI_API_KEY" in body
+    assert "super-secret" not in body

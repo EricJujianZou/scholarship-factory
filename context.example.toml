@@ -1,0 +1,95 @@
+# Your material, for drafting applications later.
+#
+#   cp context.example.toml context.toml     # context.toml is gitignored
+#   uv run sf context import context.toml    # re-run any time; matches on title
+#
+# This file holds PERSONAL DATA. It and the database are gitignored on purpose.
+# Do not commit either, and do not paste them into a chat.
+#
+# Every section is optional and repeatable. Fill in what you have; more detail
+# means less rewriting later. `title` is the identity, so re-importing an edited
+# entry updates it instead of creating a second copy.
+
+# What ranking filters and sorts on. The same fields as the dashboard's profile
+# editor; whichever you edit last wins. Omit the whole section to leave the
+# stored profile alone.
+#
+# `region` and `education_level` drive the deterministic hard filters, so they
+# only work on values the filters recognise:
+#   region:          Canada | USA | EU | UK  (or a member state: Germany, France, ...)
+#   education_level: high school | undergraduate | graduate  (masters/PhD -> graduate)
+# Anything unrecognised is treated as unstated, which excludes nothing.
+#
+# `field_of_study`, `tags` and `bio` are free text - they go to the LLM relevance
+# ranker, which is what decides *how well* something fits. Write the bio the way
+# you would describe yourself to someone deciding whether to fund you.
+[profile]
+region = "Canada"
+education_level = "undergraduate"
+field_of_study = "computer science"
+tags = ["software", "research", "entrepreneurship"]
+bio = """
+Two or three sentences: what you study, what you work on, what you are trying to
+fund. Concrete beats flattering - the ranker matches on specifics.
+"""
+
+# Plain answers to the questions eligibility forms ask.
+[[fact]]
+title = "citizenship"
+body = "Canadian citizen"
+
+[[fact]]
+title = "residency"
+body = "Ontario, Canada"
+
+[[fact]]
+title = "date of birth"
+body = "YYYY-MM-DD"
+
+[[fact]]
+title = "financial need"
+body = "Describe your situation, or delete this entry."
+
+[[education]]
+title = "BASc Computer Science, University of Waterloo"
+body = "Expected graduation 20XX. Cumulative average XX%. Relevant coursework: ..."
+started = "20XX-09"
+ended = "20XX-04"
+tags = ["current"]
+
+[[award]]
+title = "Example Entrance Scholarship"
+body = "What it was for, how competitive, what it recognized."
+started = "20XX"
+
+[[experience]]
+title = "Software Engineering Intern, Example Corp"
+body = "What you built, the scale of it, and what changed because you were there."
+started = "20XX-05"
+ended = "20XX-08"
+tags = ["internship", "backend"]
+
+[[project]]
+title = "Example Project"
+body = "What it does, why you built it, what you learned, any users or results."
+url = "https://github.com/you/example"
+tags = ["side-project"]
+
+# Past answers. The point is reuse: a new prompt close to an old one starts here
+# rather than from nothing. Paste the real text, not a summary.
+[[essay]]
+title = "Why this field - 500 words"
+body = """
+Paste the full essay text here.
+"""
+tags = ["motivation", "500-words"]
+
+[[reference]]
+title = "Prof. Example Name"
+body = "Professor, School of Computer Science. Supervised my research on X. Agreed to act as a referee."
+url = "mailto:referee@example.edu"
+
+[[document]]
+title = "Official transcript"
+body = "Where it lives and how to request it, so you are not hunting at 2am."
+url = "file:///C:/path/to/transcript.pdf"

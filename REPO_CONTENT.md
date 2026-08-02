@@ -262,3 +262,58 @@ says "not for Canadians", they are simply aimed elsewhere.
 traversing to their detail pages, i.e. a higher `--page-cap`/`--max-pages`,
 which costs calls. Also open: sources aimed at Canadian students; the
 aggregators that serve that audience mostly sit behind 403 bot walls.
+
+## Direction change — toward the daily loop and drafting (owner decision)
+
+The owner's stated target: the system runs unattended, and they spend ~20
+minutes a day approving what it flagged and reviewing drafts it prepared. That
+crosses three v1 boundaries above, deliberately and on the owner's instruction.
+Recorded here rather than left to drift:
+
+- **"No scheduler / automatic refresh" is lifted.** `sf poll` is one unattended
+  pass (source -> score -> digest) intended for Task Scheduler; see
+  `docs/operating.md`. On-demand refresh still exists and is unchanged.
+- **"v1 stores no personal data" is lifted**, narrowly. `context.py` stores the
+  applicant's own material - facts, education, awards, experience, projects,
+  past essays, referees, documents - because a draft cannot be written without
+  it. Same local SQLite file, unencrypted, single user. The database and
+  `context.toml` are gitignored; nothing personal leaves the machine except
+  inside the prompts sent to the LLM provider, which the owner should know.
+- **"No generated text" still holds.** The two *inputs* to drafting now exist -
+  the applicant's context, and `application.py` reading what a given
+  application asks for - but nothing generates an application yet.
+- **Auto-submission is ruled out, not deferred.** The owner chose draft-only:
+  the system prepares text against the real prompts and the owner pastes it.
+  No browser automation, no submission. Beyond the engineering cost, many
+  awards require the applicant's own writing and some ask applicants to declare
+  AI use (the DLGS form we tested asks exactly that), so an unattended
+  submission is the one failure mode that could disqualify a real application.
+
+**Maturity, honestly:** sourcing and triage work end to end. Drafting does not
+exist. The gap between "it found this for you" and "it applied for you" is
+still most of the remaining work.
+
+## Settled design — the dashboard runs the CLI (owner UX call)
+
+The owner asked for every capability to be reachable from one place, one click,
+with the explanation next to the button. What that settled into:
+
+- **The dashboard does not reimplement anything.** An action shells out to
+  `python -m scholarship_factory.cli ...` (`jobs.py`) and streams the output
+  back for the browser to poll. The CLI stays the single definition of what
+  sourcing, ranking and importing context *do*; a button is a label on one.
+- **One job at a time.** These jobs fetch pages and spend LLM calls, so a second
+  concurrent run would double the cost of a mis-click and interleave writes.
+- **The button copy is the only warning before an expensive run**, so it lives
+  next to the args it runs (`jobs.ACTIONS`) and is asserted by a test. Every
+  action states its cost in LLM calls and rough wall-clock.
+- **Readiness is reported, not assumed.** With no provider key configured, every
+  LLM-spending control is disabled and says why. This was found the honest way:
+  the first click after shipping produced a 25-line traceback, because the key
+  had only ever been set in a shell and never persisted.
+- Job state is in memory and a restart forgets it, which is correct: a job that
+  was running when the server died is not running now.
+
+Still true: the UI never writes a fact about an opportunity. It writes the
+owner's own input (profile, decisions) and it starts commands. Facts come only
+from extraction.
