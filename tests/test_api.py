@@ -384,3 +384,37 @@ def test_stored_fit_is_surfaced_and_orders_the_list(tmp_path):
 
     assert [e["opportunity"]["title"] for e in listed["eligible"]] == ["High", "Low"]
     assert listed["eligible"][0]["fit_reason"] == "right fit"
+
+
+def test_rereading_env_turns_the_llm_actions_back_on(tmp_path, monkeypatch):
+    from scholarship_factory import env as env_module
+
+    env_file = tmp_path / ".env"
+    env_file.write_text('GEMINI_API_KEY="pasted-after-start-up"\n', encoding="utf-8")
+    monkeypatch.setattr(env_module, "ENV_PATH", env_file)
+    for key in ("GEMINI_API_KEY", "GOOGLE_API_KEY", "ANTHROPIC_API_KEY", "SF_LLM_PROVIDER"):
+        monkeypatch.delenv(key, raising=False)
+    client = TestClient(create_app(str(tmp_path / "t.db")))
+
+    assert client.get("/api/actions").json()["llm"]["ready"] is False
+
+    reloaded = client.post("/api/env/reload").json()
+
+    assert reloaded["llm"]["ready"] is True
+    assert client.get("/api/actions").json()["llm"]["ready"] is True
+
+
+def test_rereading_env_reports_key_names_but_never_their_values(tmp_path, monkeypatch):
+    from scholarship_factory import env as env_module
+
+    env_file = tmp_path / ".env"
+    env_file.write_text('GEMINI_API_KEY="super-secret"\n', encoding="utf-8")
+    monkeypatch.setattr(env_module, "ENV_PATH", env_file)
+    for key in ("GEMINI_API_KEY", "GOOGLE_API_KEY", "ANTHROPIC_API_KEY", "SF_LLM_PROVIDER"):
+        monkeypatch.delenv(key, raising=False)
+    client = TestClient(create_app(str(tmp_path / "t.db")))
+
+    body = client.post("/api/env/reload").text
+
+    assert "GEMINI_API_KEY" in body
+    assert "super-secret" not in body

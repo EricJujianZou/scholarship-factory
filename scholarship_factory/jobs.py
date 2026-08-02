@@ -162,9 +162,9 @@ ACTIONS: list[Action] = [
 
 #: shown when no provider key is set, in place of every LLM-spending button
 LLM_HINT = (
-    "No LLM key found, so anything that reads a page is switched off. Set "
-    "GEMINI_API_KEY (setx GEMINI_API_KEY \"your-key\"), then close this window "
-    "and reopen the dashboard."
+    "No LLM key found, so anything that reads a page is switched off. Put "
+    "GEMINI_API_KEY=\"your-key\" in the .env file in the repo folder, save it, "
+    "then press Re-read .env."
 )
 
 ACTIONS_BY_ID = {action.id: action for action in ACTIONS}

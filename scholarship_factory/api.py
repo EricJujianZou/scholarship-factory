@@ -16,6 +16,7 @@ from pydantic import BaseModel
 from .application import RequirementsStore
 from .cli import _default_db_path
 from .extract import extract
+from .env import load_env
 from .feedback import DecisionStore, DecisionVerdict, PreferenceStore
 from .fetch import fetch_url
 from .jobs import ACTIONS, ACTIONS_BY_ID, LLM_HINT, Job, JobBusy, JobRunner
@@ -70,6 +71,21 @@ def create_app(
         ready = provider_configured()
         return {
             "actions": [a.model_dump() for a in ACTIONS],
+            "llm": {"ready": ready, "hint": "" if ready else LLM_HINT},
+        }
+
+    @app.post("/api/env/reload")
+    def post_env_reload() -> dict:
+        """Re-read `.env` so a key set after start-up takes effect.
+
+        Restarting the process would do this too, but the server is a window
+        that is easy to leave running for hours -- which is exactly how a key
+        gets set and stays unseen. Key names only; values are never returned.
+        """
+        applied = load_env(reload=True)
+        ready = provider_configured()
+        return {
+            "keys": sorted(applied),
             "llm": {"ready": ready, "hint": "" if ready else LLM_HINT},
         }
 

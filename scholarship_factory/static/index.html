@@ -300,6 +300,12 @@
     border-radius: 0 8px 8px 0; padding: 10px 13px; margin-bottom: 14px;
     font-size: 12px;
   }
+  .notice { display: flex; align-items: center; gap: 12px; }
+  .notice p { margin: 0; flex: 1; min-width: 0; }
+  .notice button { flex: none; }
+  .notice code {
+    background: rgba(242,181,68,0.13); border-radius: 3px; padding: 1px 4px;
+  }
   .job-error {
     padding: 9px 13px; border-bottom: 1px solid var(--line-soft);
     color: var(--red); font-size: 12px;
@@ -863,10 +869,33 @@ async function loadActions() {
       <button data-action="${escapeHtml(action.id)}" ${blocked ? "disabled" : ""}>Run</button>
     </div>`;
   }).join("");
+  showNotice(llm);
+  if (!llm.ready) render();  // the rows' own LLM buttons switch off too
+}
+
+function showNotice(llm) {
   const notice = document.getElementById("llm-notice");
   notice.hidden = llm.ready;
-  notice.textContent = llm.hint;
-  if (!llm.ready) render();  // the rows' own LLM buttons switch off too
+  notice.innerHTML = `<p>${escapeHtml(llm.hint)}</p>
+    <button id="reload-env">Re-read .env</button>`;
+}
+
+// A key set after the server started is invisible to it until something
+// re-reads the file. Cheaper and safer than restarting: no lost job, no port
+// race, no console window to hunt for.
+async function reloadEnv() {
+  const button = document.getElementById("reload-env");
+  button.disabled = true;
+  button.textContent = "Reading…";
+  const { llm } = await (await fetch("/api/env/reload", { method: "POST" })).json();
+  LLM_READY = llm.ready;
+  if (llm.ready) {
+    await loadActions();  // redraws every button, notice included
+    render();
+  } else {
+    showNotice(llm);
+    document.getElementById("reload-env").textContent = "Still no key — re-read .env";
+  }
 }
 
 function renderJob(job) {
@@ -919,6 +948,10 @@ async function startJob(url) {
   }
   renderJob(await res.json());
 }
+
+document.getElementById("llm-notice").addEventListener("click", (e) => {
+  if (e.target.closest("#reload-env")) reloadEnv();
+});
 
 document.getElementById("runs").addEventListener("click", (e) => {
   const button = e.target.closest("[data-action]");
