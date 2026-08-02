@@ -10,6 +10,29 @@
 # means less rewriting later. `title` is the identity, so re-importing an edited
 # entry updates it instead of creating a second copy.
 
+# What ranking filters and sorts on. The same fields as the dashboard's profile
+# editor; whichever you edit last wins. Omit the whole section to leave the
+# stored profile alone.
+#
+# `region` and `education_level` drive the deterministic hard filters, so they
+# only work on values the filters recognise:
+#   region:          Canada | USA | EU | UK  (or a member state: Germany, France, ...)
+#   education_level: high school | undergraduate | graduate  (masters/PhD -> graduate)
+# Anything unrecognised is treated as unstated, which excludes nothing.
+#
+# `field_of_study`, `tags` and `bio` are free text - they go to the LLM relevance
+# ranker, which is what decides *how well* something fits. Write the bio the way
+# you would describe yourself to someone deciding whether to fund you.
+[profile]
+region = "Canada"
+education_level = "undergraduate"
+field_of_study = "computer science"
+tags = ["software", "research", "entrepreneurship"]
+bio = """
+Two or three sentences: what you study, what you work on, what you are trying to
+fund. Concrete beats flattering - the ranker matches on specifics.
+"""
+
 # Plain answers to the questions eligibility forms ask.
 [[fact]]
 title = "citizenship"

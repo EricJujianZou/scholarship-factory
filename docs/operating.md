@@ -10,13 +10,18 @@ uv sync --extra gemini
 setx GEMINI_API_KEY "your-key"        # persists for scheduled runs; reopen the shell
 ```
 
-Fill in the profile (ranking filters on it) at <http://127.0.0.1:8000> after
-`uv run sf serve`, and your own material:
+One file holds everything you supply - the ranking profile and your own
+material:
 
 ```powershell
 copy context.example.toml context.toml   # gitignored - it holds personal data
 uv run sf context import context.toml    # re-run whenever you edit it
 ```
+
+The `[profile]` section is what ranking filters and sorts on; the rest is the
+corpus a draft gets written from. The dashboard's profile editor at
+<http://127.0.0.1:8000> edits the same profile - whichever you touch last wins,
+and omitting the section from the file leaves the stored profile alone.
 
 ## The daily loop
 

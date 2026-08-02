@@ -25,6 +25,8 @@ from uuid import uuid4
 
 from pydantic import BaseModel, Field
 
+from .profile import PROFILE_SECTION
+
 
 class ContextKind(str, Enum):
     FACT = "fact"  # "citizenship: Canadian" - the answers eligibility questions want
@@ -174,7 +176,8 @@ def load_context_file(path: str | Path) -> list[ContextEntry]:
         for item in data.get(kind.value, []):
             entries.append(ContextEntry(kind=kind, **item))
 
-    unknown = set(data) - {k.value for k in ContextKind}
+    # `[profile]` shares the file but belongs to profile.py -- see load_profile_file.
+    unknown = set(data) - {k.value for k in ContextKind} - {PROFILE_SECTION}
     if unknown:
         raise ValueError(
             f"unknown context section(s): {', '.join(sorted(unknown))}; "

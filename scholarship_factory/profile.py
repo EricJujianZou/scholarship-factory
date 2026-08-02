@@ -8,7 +8,9 @@ patterns (GH-1); single-user (`owner="me"`), no auth. No ranking/matching here.
 """
 import json
 import sqlite3
+import tomllib
 from datetime import datetime, timezone
+from pathlib import Path
 from uuid import uuid4
 
 from pydantic import BaseModel, Field
@@ -109,3 +111,44 @@ class ProfileStore:
         data = dict(row)
         data["tags"] = json.loads(data["tags"])
         return ApplicantProfile(**data)
+
+
+PROFILE_SECTION = "profile"
+_EDITABLE_FIELDS = {"region", "education_level", "field_of_study", "tags", "bio"}
+
+
+def load_profile_file(path: str | Path) -> ApplicantProfile | None:
+    """Read the `[profile]` table out of a context TOML file, if it has one.
+
+    The dashboard's profile editor is fine for a one-off tweak, but the profile
+    is filled in at the same sitting as the rest of the applicant's material, so
+    it lives in the same file. Returns None when the section is absent, which
+    leaves whatever the dashboard already stored alone.
+    """
+    data = tomllib.loads(Path(path).read_text(encoding="utf-8"))
+    section = data.get(PROFILE_SECTION)
+    if section is None:
+        return None
+
+    unknown = set(section) - _EDITABLE_FIELDS
+    if unknown:
+        raise ValueError(
+            f"unknown [profile] field(s): {', '.join(sorted(unknown))}; "
+            f"expected one of {', '.join(sorted(_EDITABLE_FIELDS))}"
+        )
+    return ApplicantProfile(**section)
+
+
+def save_profile(store: ProfileStore, profile: ApplicantProfile) -> ApplicantProfile:
+    """Write the profile fields onto the single stored profile, creating it once.
+
+    Single-user, so there is exactly one row; the file sets the fields it names
+    and the row's identity and timestamps stay put.
+    """
+    existing = store.list()
+    if not existing:
+        return store.insert(profile)
+    updated = existing[0].model_copy(
+        update={f: getattr(profile, f) for f in _EDITABLE_FIELDS}
+    )
+    return store.update(updated)

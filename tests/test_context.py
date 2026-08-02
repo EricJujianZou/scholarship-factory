@@ -6,6 +6,12 @@ from scholarship_factory.context import (
     ContextStore,
     load_context_file,
 )
+from scholarship_factory.profile import (
+    ApplicantProfile,
+    ProfileStore,
+    load_profile_file,
+    save_profile,
+)
 
 
 def _write(tmp_path, text):
@@ -96,3 +102,51 @@ def test_the_shipped_example_file_parses():
         ContextKind.ESSAY,
         ContextKind.REFERENCE,
     }
+
+
+def test_profile_section_is_not_an_unknown_section(tmp_path):
+    """It shares the file; profile.py, not this module, is what reads it."""
+    path = _write(tmp_path, '[profile]\nregion = "Canada"\n\n[[fact]]\ntitle = "x"\n')
+    assert [e.title for e in load_context_file(path)] == ["x"]
+
+
+def test_load_profile_file_reads_the_section(tmp_path):
+    path = _write(
+        tmp_path,
+        '[profile]\nregion = "Canada"\neducation_level = "undergraduate"\n'
+        'tags = ["software"]\n',
+    )
+    profile = load_profile_file(path)
+    assert profile.region == "Canada"
+    assert profile.education_level == "undergraduate"
+    assert profile.tags == ["software"]
+
+
+def test_a_file_without_a_profile_section_leaves_the_profile_alone(tmp_path):
+    path = _write(tmp_path, '[[fact]]\ntitle = "citizenship"\n')
+    assert load_profile_file(path) is None
+
+
+def test_unknown_profile_field_names_the_valid_ones(tmp_path):
+    path = _write(tmp_path, '[profile]\ngpa = "4.0"\n')
+    with pytest.raises(ValueError, match="gpa"):
+        load_profile_file(path)
+
+
+def test_save_profile_updates_the_single_row_rather_than_adding_one(tmp_path):
+    store = ProfileStore(str(tmp_path / "t.db"))
+    first = save_profile(store, ApplicantProfile(region="Canada"))
+    second = save_profile(store, ApplicantProfile(region="EU", bio="new"))
+
+    assert len(store.list()) == 1
+    assert second.id == first.id
+    assert (second.region, second.bio) == ("EU", "new")
+
+
+def test_the_shipped_example_profile_is_one_the_hard_filters_understand():
+    """A region the filters cannot canonicalise silently filters nothing."""
+    from scholarship_factory.rank import _EDUCATION_ALIASES, _REGION_ALIASES
+
+    profile = load_profile_file("context.example.toml")
+    assert profile.region.lower() in _REGION_ALIASES
+    assert profile.education_level.lower() in _EDUCATION_ALIASES

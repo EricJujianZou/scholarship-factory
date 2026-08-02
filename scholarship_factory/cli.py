@@ -28,7 +28,7 @@ from .fetch import fetch_url
 from .pipeline import run_sourcing
 from .paginate import DEFAULT_MAX_PAGES
 from .polite import DEFAULT_MIN_INTERVAL, PoliteFetcher
-from .profile import ApplicantProfile, ProfileStore
+from .profile import ApplicantProfile, ProfileStore, load_profile_file, save_profile
 from .refresh import refresh_opportunity
 from .relevance import RelevanceStore, refresh_summary_if_due, score
 from .seeds import load_seeds
@@ -220,6 +220,18 @@ def _cmd_context_import(store: OpportunityStore, path: str) -> int:
     print(f"imported {len(entries)} entries from {path}")
     for kind, count in sorted(by_kind.items()):
         print(f"  {kind}: {count}")
+
+    profile = load_profile_file(path)
+    if profile is not None:
+        saved = save_profile(ProfileStore(store.db_path), profile)
+        print("  profile: " + ", ".join(
+            f"{field}={value!r}"
+            for field, value in (
+                ("region", saved.region),
+                ("education_level", saved.education_level),
+                ("field_of_study", saved.field_of_study),
+            )
+        ))
     return 0
 
 
