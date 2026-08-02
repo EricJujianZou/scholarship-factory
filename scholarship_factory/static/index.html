@@ -2,83 +2,442 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Scholarship Factory</title>
 <style>
-  body { font-family: system-ui, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; color: #222; }
-  h1 { margin-bottom: 0.25rem; }
-  h2 { margin-top: 2rem; }
-  .card { border: 1px solid #ddd; border-radius: 6px; padding: 0.75rem 1rem; margin-bottom: 0.75rem; }
-  .card h3 { margin: 0 0 0.25rem 0; }
-  .meta { color: #555; font-size: 0.9rem; }
-  .missing { color: #999; font-style: italic; }
-  .reasons { color: #a00; font-size: 0.9rem; }
-  form label { display: block; margin-top: 0.5rem; }
-  form input, form textarea { width: 100%; box-sizing: border-box; padding: 0.35rem; }
-  button { margin-top: 0.75rem; padding: 0.4rem 1rem; }
-  .status { font-size: 0.85rem; color: #070; margin-left: 0.5rem; }
-  .fit { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em;
-         border-radius: 3px; padding: 0.1rem 0.4rem; margin-right: 0.4rem; }
-  .fit-high { background: #d8f0dc; color: #14532d; }
-  .fit-medium { background: #eee; color: #444; }
-  .fit-low { background: #f3e3e3; color: #7a2020; }
-  .fit-reason { color: #555; font-size: 0.85rem; margin-top: 0.3rem; font-style: italic; }
-  .card.rejected { opacity: 0.45; }
-  .actions button { margin-right: 0.4rem; }
-  .actions button[aria-pressed="true"] { outline: 2px solid #14532d; }
-  .controls { display: flex; gap: 0.75rem; align-items: center; margin-top: 0.75rem; }
-  .controls input, .controls select { padding: 0.35rem; }
-  .controls input[type=search] { flex: 1; }
-  .summary { background: #f6f6f6; border-left: 3px solid #bbb; padding: 0.6rem 0.9rem;
-             font-size: 0.9rem; margin-top: 0.75rem; }
+  :root {
+    --ink: #090c11;
+    --panel: #0f141c;
+    --panel-2: #131a24;
+    --line: #1d2733;
+    --line-soft: #161e28;
+    --text: #e3e9f2;
+    --muted: #8593a7;
+    --dim: #5c6879;
+    --blue: #5aa2ff;
+    --green: #43c57e;
+    --amber: #f2b544;
+    --red: #ff6b6b;
+    --mono: ui-monospace, "Cascadia Mono", "JetBrains Mono", "SF Mono", Consolas, monospace;
+    --ui: -apple-system, "Segoe UI", Inter, system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ink);
+    color: var(--text);
+    font-family: var(--ui);
+    font-size: 14px;
+    line-height: 1.45;
+    display: grid;
+    grid-template-columns: 216px 1fr;
+    min-height: 100vh;
+  }
+
+  a { color: var(--blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+  .mono { font-family: var(--mono); }
+
+  /* --- micro label: the uppercase spaced caption used for every group ------ */
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  /* --- sidebar ------------------------------------------------------------ */
+  .rail {
+    background: var(--panel);
+    border-right: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+  .brand {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .brand-mark {
+    width: 30px; height: 30px; flex: none;
+    border-radius: 7px;
+    background: linear-gradient(150deg, #2c6ed5, #1b3b6f);
+    color: #fff;
+    display: grid; place-items: center;
+    font-family: var(--mono); font-size: 11px; font-weight: 700;
+  }
+  .brand-name { font-weight: 600; letter-spacing: -0.01em; }
+  .brand-sub { font-family: var(--mono); font-size: 10px; color: var(--dim); letter-spacing: 0.06em; }
+
+  .rail-group { padding: 16px 10px 4px; }
+  .rail-group .eyebrow { padding: 0 6px 8px; display: block; }
+  .rail-item {
+    display: flex; align-items: center; gap: 9px;
+    width: 100%;
+    padding: 6px 8px;
+    border: 0; border-radius: 6px;
+    background: none; color: var(--muted);
+    font: inherit; text-align: left;
+    cursor: pointer;
+  }
+  .rail-item:hover { background: var(--panel-2); color: var(--text); }
+  .rail-item[aria-pressed="true"] { background: #182231; color: var(--text); }
+  .rail-item .count {
+    margin-left: auto;
+    font-family: var(--mono); font-size: 11px; color: var(--dim);
+  }
+  .dot { width: 7px; height: 7px; border-radius: 50%; flex: none; background: var(--dim); }
+  .dot-high { background: var(--green); }
+  .dot-medium { background: var(--amber); }
+  .dot-low { background: var(--red); }
+
+  .rail-foot {
+    margin-top: auto;
+    padding: 12px 16px;
+    border-top: 1px solid var(--line-soft);
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 11px; color: var(--dim);
+  }
+  .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+
+  /* --- top bar ------------------------------------------------------------ */
+  .topbar {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--line);
+    background: var(--panel);
+    position: sticky; top: 0; z-index: 5;
+  }
+  .topbar h1 { font-size: 16px; margin: 0; font-weight: 600; letter-spacing: -0.01em; }
+  .topbar .meta { font-family: var(--mono); font-size: 11px; color: var(--dim); }
+  .topbar .spacer { flex: 1; }
+
+  input[type=search], select, input[type=text], textarea {
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--text);
+    font: inherit;
+    padding: 5px 9px;
+  }
+  input[type=search] { width: 230px; font-size: 13px; }
+  select { font-size: 12px; }
+  input::placeholder, textarea::placeholder { color: var(--dim); }
+
+  .toggle {
+    display: flex; align-items: center; gap: 6px;
+    font-family: var(--mono); font-size: 11px; color: var(--muted);
+    letter-spacing: 0.04em; cursor: pointer;
+  }
+  .toggle input { accent-color: var(--blue); }
+
+  main { padding: 16px 20px 40px; }
+
+  /* --- deadline alert: the thing you are meant to see first --------------- */
+  .alert {
+    border: 1px solid #40202a;
+    background: linear-gradient(90deg, rgba(255,107,107,0.09), rgba(255,107,107,0.02));
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    display: grid;
+    grid-template-columns: 18px 1fr;
+    gap: 10px;
+  }
+  .alert-icon { color: var(--red); font-size: 15px; line-height: 1.2; }
+  .alert h2 {
+    margin: 0 0 6px; font-family: var(--mono); font-size: 11px;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--red);
+  }
+  .alert-row { font-size: 13px; margin-top: 3px; }
+  .alert-row .who { color: var(--red); font-weight: 600; }
+  .alert-more { font-family: var(--mono); font-size: 11px; color: var(--dim); margin-top: 6px; }
+
+  /* --- stat strip --------------------------------------------------------- */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+  .stat {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 11px 13px 12px;
+  }
+  .stat .value {
+    font-family: var(--mono); font-size: 27px; line-height: 1.15;
+    letter-spacing: -0.02em; margin-top: 5px;
+  }
+  .stat .sub { font-family: var(--mono); font-size: 11px; color: var(--dim); margin-top: 2px; }
+  .v-amber { color: var(--amber); }
+  .v-green { color: var(--green); }
+  .v-red { color: var(--red); }
+
+  /* --- board -------------------------------------------------------------- */
+  .board { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 12px; align-items: start; }
+
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
+  .panel-head {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border-bottom: 1px solid var(--line-soft);
+  }
+  .panel-head h2 { margin: 0; font-size: 13px; font-weight: 600; }
+  .panel-head .count { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--dim); }
+  .panel-body { padding: 12px 14px; }
+
+  .col-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 74px 120px 108px;
+    gap: 12px;
+    padding: 7px 14px;
+    border-bottom: 1px solid var(--line-soft);
+    background: var(--panel-2);
+  }
+  .col-head span { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; color: var(--dim); }
+
+  .row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 74px 120px 108px;
+    gap: 12px;
+    padding: 11px 14px 11px 12px;
+    border-bottom: 1px solid var(--line-soft);
+    border-left: 2px solid transparent;
+  }
+  .row:last-child { border-bottom: 0; }
+  .row:hover { background: var(--panel-2); }
+  .row.urgent { border-left-color: var(--red); }
+  .row.soon { border-left-color: var(--amber); }
+  .row.rejected { opacity: 0.4; }
+
+  .row .title { font-weight: 600; letter-spacing: -0.01em; }
+  .row .org { font-family: var(--mono); font-size: 11px; color: var(--dim); margin-top: 3px; }
+  .row .fit-reason { font-size: 12px; color: var(--muted); margin-top: 6px; max-width: 62ch; }
+  .row .cell { font-family: var(--mono); font-size: 12px; }
+  .row .cell .when { color: var(--dim); font-size: 11px; display: block; margin-top: 2px; }
+  .reward { color: var(--green); }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 7px; border-radius: 4px;
+    border: 1px solid var(--line);
+    background: var(--panel-2); color: var(--muted);
+  }
+  .pill-high { color: var(--green); border-color: #1d4433; background: rgba(67,197,126,0.08); }
+  .pill-medium { color: var(--amber); border-color: #46381c; background: rgba(242,181,68,0.07); }
+  .pill-low { color: var(--red); border-color: #472429; background: rgba(255,107,107,0.07); }
+  .pill-expired, .pill-ineligible { color: var(--dim); }
+
+  .actions { display: flex; flex-wrap: wrap; gap: 5px; }
+  .actions button {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 4px 7px;
+    border: 1px solid var(--line); border-radius: 5px;
+    background: var(--panel-2); color: var(--muted);
+    cursor: pointer;
+  }
+  .actions button:hover { color: var(--text); border-color: #2b3a4c; }
+  .actions button[data-verdict="interested"][aria-pressed="true"] {
+    color: var(--green); border-color: #1d4433; background: rgba(67,197,126,0.1);
+  }
+  .actions button[data-verdict="not_interested"][aria-pressed="true"] {
+    color: var(--red); border-color: #472429; background: rgba(255,107,107,0.1);
+  }
+
+  .missing { color: var(--dim); font-style: italic; }
+  .reasons { color: var(--red); font-size: 12px; margin-top: 4px; }
+  .empty { padding: 26px 14px; color: var(--muted); font-size: 13px; }
+  .empty code { font-family: var(--mono); color: var(--blue); font-size: 12px; }
+
+  /* --- side rail cards ---------------------------------------------------- */
+  .summary-text { font-size: 13px; color: var(--muted); }
+  form label { display: block; margin-bottom: 9px; }
+  form .eyebrow { display: block; margin-bottom: 4px; }
+  form input, form textarea { width: 100%; font-size: 13px; }
+  form textarea { resize: vertical; font-family: var(--ui); }
+  .save {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 6px 12px; border-radius: 6px; cursor: pointer;
+    border: 1px solid #2c6ed5; background: #1c4d97; color: #fff;
+  }
+  .save:hover { background: #2360b8; }
+  .status { font-family: var(--mono); font-size: 11px; color: var(--green); margin-left: 8px; }
+
+  details { margin-top: 12px; }
+  details > summary {
+    cursor: pointer; padding: 9px 14px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--dim);
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+  }
+  details[open] > summary { border-radius: 8px 8px 0 0; border-bottom: 0; }
+  #excluded { border: 1px solid var(--line); border-top: 0; border-radius: 0 0 8px 8px; background: var(--panel); }
+  #excluded .row { grid-template-columns: minmax(0, 1fr) 100px; }
+
+  /* Grid children default to min-width:auto, which lets long titles push the
+     page wider than the viewport instead of wrapping. */
+  body > *, .board > *, .row > * { min-width: 0; }
+  .row .title { overflow-wrap: anywhere; }
+
+  @media (max-width: 1080px) {
+    .board { grid-template-columns: minmax(0, 1fr); }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 820px) {
+    body { grid-template-columns: 1fr; }
+    .rail { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; }
+    .rail-group, .rail-foot { padding: 8px 12px; border: 0; margin: 0; }
+    .rail-group .eyebrow { display: none; }
+    .rail-group > div { display: flex; flex-wrap: wrap; gap: 4px; }
+    .rail-item { width: auto; }
+    .topbar { flex-wrap: wrap; }
+    input[type=search] { flex: 1 1 160px; width: auto; }
+    .col-head { display: none; }
+    .row, #excluded .row { grid-template-columns: 1fr; gap: 7px; }
+  }
+  @media (max-width: 560px) {
+    .stats { grid-template-columns: 1fr; }
+    main { padding: 12px; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .row, .stat { animation: rise 0.24s ease both; }
+    @keyframes rise { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+  }
 </style>
 </head>
 <body>
-  <h1>Scholarship Factory</h1>
+  <nav class="rail">
+    <div class="brand">
+      <div class="brand-mark">SF</div>
+      <div>
+        <div class="brand-name">Scholarship Factory</div>
+        <div class="brand-sub" id="brand-sub">LOCALHOST:8000</div>
+      </div>
+    </div>
 
-  <h2>Eligible opportunities</h2>
-  <div class="summary" id="preference-summary" hidden></div>
-  <div class="controls">
-    <input type="search" id="search" placeholder="Search title, organization, eligibility…">
-    <select id="fit-filter">
-      <option value="">any fit</option>
-      <option value="high">high fit</option>
-      <option value="medium">medium fit</option>
-      <option value="low">low fit</option>
-    </select>
-    <select id="sort">
-      <option value="fit">sort: fit</option>
-      <option value="deadline">sort: deadline</option>
-      <option value="reward">sort: reward</option>
-    </select>
-    <label><input type="checkbox" id="hide-rejected" checked> hide rejected</label>
+    <div class="rail-group">
+      <span class="eyebrow">Queue</span>
+      <div>
+        <button class="rail-item" type="button" data-fit="" aria-pressed="true">
+          <span class="dot"></span> All opportunities <span class="count" id="count-all">–</span>
+        </button>
+        <button class="rail-item" type="button" data-fit="high">
+          <span class="dot dot-high"></span> High fit <span class="count" id="count-high">–</span>
+        </button>
+        <button class="rail-item" type="button" data-fit="medium">
+          <span class="dot dot-medium"></span> Medium fit <span class="count" id="count-medium">–</span>
+        </button>
+        <button class="rail-item" type="button" data-fit="low">
+          <span class="dot dot-low"></span> Low fit <span class="count" id="count-low">–</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="rail-group">
+      <span class="eyebrow">Profile</span>
+      <div>
+        <div class="rail-item" id="rail-region"><span class="dot"></span> <span></span></div>
+        <div class="rail-item" id="rail-level"><span class="dot"></span> <span></span></div>
+        <div class="rail-item" id="rail-field"><span class="dot"></span> <span></span></div>
+      </div>
+    </div>
+
+    <div class="rail-foot">
+      <span class="pulse"></span> <span id="foot-status">loading</span>
+    </div>
+  </nav>
+
+  <div>
+    <header class="topbar">
+      <h1>Opportunities</h1>
+      <span class="meta" id="headline">reading store…</span>
+      <span class="spacer"></span>
+      <input type="search" id="search" placeholder="Search title, organization, eligibility…">
+      <select id="fit-filter" aria-label="Filter by fit">
+        <option value="">any fit</option>
+        <option value="high">high fit</option>
+        <option value="medium">medium fit</option>
+        <option value="low">low fit</option>
+      </select>
+      <select id="sort" aria-label="Sort by">
+        <option value="fit">sort: fit</option>
+        <option value="deadline">sort: deadline</option>
+        <option value="reward">sort: reward</option>
+      </select>
+      <label class="toggle"><input type="checkbox" id="hide-rejected" checked> hide rejected</label>
+    </header>
+
+    <main>
+      <section class="alert" id="deadline-alert" hidden>
+        <div class="alert-icon">&#9888;</div>
+        <div>
+          <h2 id="alert-title">Closing soon</h2>
+          <div id="alert-rows"></div>
+        </div>
+      </section>
+
+      <section class="stats" id="stats"></section>
+
+      <div class="board">
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Eligible</h2>
+            <span class="count" id="eligible-count"></span>
+          </div>
+          <div class="col-head">
+            <span>OPPORTUNITY</span><span>FIT</span><span>DEADLINE</span><span>REWARD</span>
+          </div>
+          <div id="eligible"></div>
+        </section>
+
+        <aside>
+          <section class="panel" id="preference-panel" hidden>
+            <div class="panel-head"><h2>What you tend to want</h2></div>
+            <div class="panel-body summary-text" id="preference-summary"></div>
+          </section>
+
+          <section class="panel" style="margin-top: 12px;">
+            <div class="panel-head"><h2>Profile</h2><span class="count">ranking filters</span></div>
+            <div class="panel-body">
+              <form id="profile-form">
+                <label><span class="eyebrow">Region</span>
+                  <input type="text" name="region" placeholder="Canada">
+                </label>
+                <label><span class="eyebrow">Education level</span>
+                  <input type="text" name="education_level" placeholder="undergraduate">
+                </label>
+                <label><span class="eyebrow">Field of study</span>
+                  <input type="text" name="field_of_study" placeholder="computer science">
+                </label>
+                <label><span class="eyebrow">Tags (comma-separated)</span>
+                  <input type="text" name="tags" placeholder="research, hackathon">
+                </label>
+                <label><span class="eyebrow">Bio</span>
+                  <textarea name="bio" rows="4" placeholder="What you study and what you are trying to fund."></textarea>
+                </label>
+                <button class="save" type="submit">Save profile</button>
+                <span class="status" id="profile-status"></span>
+              </form>
+            </div>
+          </section>
+        </aside>
+      </div>
+
+      <details id="excluded-section">
+        <summary>Excluded opportunities</summary>
+        <div id="excluded"></div>
+      </details>
+    </main>
   </div>
-  <div id="eligible"></div>
-
-  <details id="excluded-section">
-    <summary>Excluded opportunities</summary>
-    <div id="excluded"></div>
-  </details>
-
-  <h2>Profile</h2>
-  <form id="profile-form">
-    <label>Region
-      <input type="text" name="region">
-    </label>
-    <label>Education level
-      <input type="text" name="education_level">
-    </label>
-    <label>Field of study
-      <input type="text" name="field_of_study">
-    </label>
-    <label>Tags (comma-separated)
-      <input type="text" name="tags">
-    </label>
-    <label>Bio
-      <textarea name="bio" rows="3"></textarea>
-    </label>
-    <button type="submit">Save profile</button>
-    <span class="status" id="profile-status"></span>
-  </form>
 
 <script>
 function escapeHtml(value) {
@@ -105,13 +464,45 @@ function safeUrl(url) {
 function fitBadge(fit) {
   if (!fit) return "";
   const cls = ["high", "medium", "low"].includes(fit) ? fit : "medium";
-  return `<span class="fit fit-${cls}">${escapeHtml(fit)}</span>`;
+  return `<span class="pill pill-${cls}">${escapeHtml(fit)}</span>`;
+}
+
+/** Whole days from today to an ISO date, or null when the deadline is unknown. */
+function daysUntil(iso) {
+  if (!iso) return null;
+  const then = new Date(`${iso}T00:00:00`);
+  if (isNaN(then)) return null;
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.round((then - today) / 86400000);
+}
+
+function countdown(days) {
+  if (days === null) return "";
+  if (days < 0) return `${-days}d ago`;
+  if (days === 0) return "today";
+  if (days === 1) return "tomorrow";
+  return `in ${days}d`;
+}
+
+function urgency(days) {
+  if (days === null) return "";
+  if (days <= 7) return "urgent";
+  if (days <= 14) return "soon";
+  return "";
+}
+
+/** Organization when it was extracted, else the host it came from, said as such. */
+function provenanceLine(opp) {
+  if (opp.organization) return escapeHtml(opp.organization);
+  const url = safeUrl(opp.source_url || opp.apply_url);
+  if (!url) return missing("no organization found");
+  return `via ${escapeHtml(new URL(url, window.location.href).host)}`;
 }
 
 function renderCard(item) {
   const opp = item.opportunity;
-  const deadline = fmt(opp.deadline, "no deadline found");
-  const reward = fmt(opp.reward, "no reward found");
+  const days = daysUntil(item.deadline);
   const title = escapeHtml(opp.title);
   const href = safeUrl(opp.apply_url);
   const heading = href
@@ -121,18 +512,29 @@ function renderCard(item) {
   const reason = item.fit_reason
     ? `<div class="fit-reason">${escapeHtml(item.fit_reason)}</div>`
     : "";
+  const deadline = opp.deadline
+    ? `${escapeHtml(opp.deadline)}<span class="when">${countdown(days)}</span>`
+    : missing("no deadline found");
+  const reward = opp.reward
+    ? `<span class="reward">${escapeHtml(opp.reward)}</span>`
+    : missing("no reward found");
   return `
-    <div class="card${rejected ? " rejected" : ""}">
-      <h3>${fitBadge(item.fit)}${heading}</h3>
-      <div class="meta">${fmt(opp.organization, "no organization found")} &middot; deadline: ${deadline} &middot; reward: ${reward}</div>
-      ${reason}
-      <div class="actions">
-        <button data-decide-id="${escapeHtml(opp.id)}" data-verdict="interested"
-                aria-pressed="${item.decision === "interested"}">Interested</button>
-        <button data-decide-id="${escapeHtml(opp.id)}" data-verdict="not_interested"
-                aria-pressed="${rejected}">Not interested</button>
-        <button class="refresh" data-refresh-id="${escapeHtml(opp.id)}">Refresh</button>
+    <div class="row ${urgency(days)}${rejected ? " rejected" : ""}">
+      <div>
+        <div class="title">${heading}</div>
+        <div class="org">${provenanceLine(opp)}</div>
+        ${reason}
+        <div class="actions" style="margin-top: 8px;">
+          <button data-decide-id="${escapeHtml(opp.id)}" data-verdict="interested"
+                  aria-pressed="${item.decision === "interested"}">Interested</button>
+          <button data-decide-id="${escapeHtml(opp.id)}" data-verdict="not_interested"
+                  aria-pressed="${rejected}">Not interested</button>
+          <button data-refresh-id="${escapeHtml(opp.id)}">Refresh</button>
+        </div>
       </div>
+      <div class="cell">${fitBadge(item.fit)}</div>
+      <div class="cell">${deadline}</div>
+      <div class="cell">${reward}</div>
     </div>
   `;
 }
@@ -141,10 +543,12 @@ function renderExcludedCard(item) {
   const opp = item.opportunity;
   const reasons = escapeHtml((item.reasons || []).join("; ")) || "no reason recorded";
   return `
-    <div class="card">
-      <h3>${escapeHtml(opp.title)}</h3>
-      <div class="meta">verdict: ${escapeHtml(item.verdict)}</div>
-      <div class="reasons">${reasons}</div>
+    <div class="row">
+      <div>
+        <div class="title">${escapeHtml(opp.title)}</div>
+        <div class="reasons">${reasons}</div>
+      </div>
+      <div class="cell"><span class="pill pill-${escapeHtml(item.verdict)}">${escapeHtml(item.verdict)}</span></div>
     </div>
   `;
 }
@@ -186,24 +590,102 @@ function visibleEligible() {
   return items;
 }
 
+/** Undecided and closing within a fortnight - the only thing worth interrupting for. */
+function closingSoon() {
+  return CURRENT.eligible
+    .filter(item => !item.decision)
+    .map(item => ({ item, days: daysUntil(item.deadline) }))
+    .filter(({ days }) => days !== null && days <= 14)
+    .sort((a, b) => a.days - b.days);
+}
+
+function renderAlert() {
+  const closing = closingSoon();
+  const alert = document.getElementById("deadline-alert");
+  if (!closing.length) {
+    alert.hidden = true;
+    return;
+  }
+  alert.hidden = false;
+  document.getElementById("alert-title").textContent =
+    `Closing soon · ${closing.length}`;
+  const shown = closing.slice(0, 4);
+  document.getElementById("alert-rows").innerHTML = shown.map(({ item, days }) => `
+    <div class="alert-row">
+      <span class="who">${escapeHtml(item.opportunity.title)}</span>
+      <span class="mono" style="color: var(--muted); font-size: 12px;">
+        &mdash; ${escapeHtml(item.opportunity.deadline || item.deadline)} · ${countdown(days)}
+        · ${escapeHtml(item.fit || "not ranked")} fit, no decision yet
+      </span>
+    </div>
+  `).join("") + (closing.length > shown.length
+    ? `<div class="alert-more">+ ${closing.length - shown.length} more within 14 days</div>` : "");
+}
+
+function stat(label, value, sub, tone) {
+  return `<div class="stat">
+    <div class="eyebrow">${label}</div>
+    <div class="value ${tone || ""}">${value}</div>
+    <div class="sub">${sub}</div>
+  </div>`;
+}
+
+function renderStats() {
+  const eligible = CURRENT.eligible;
+  const closing = closingSoon().length;
+  const undecided = eligible.filter(i => !i.decision).length;
+  const high = eligible.filter(i => i.fit === "high").length;
+  const kept = eligible.filter(i => i.decision === "interested").length;
+  document.getElementById("stats").innerHTML = [
+    stat("Eligible", eligible.length, `${CURRENT.excluded.length} filtered out`),
+    stat("Closing ≤14d", closing, "undecided", closing ? "v-red" : ""),
+    stat("Undecided", undecided, `${kept} kept so far`, undecided ? "v-amber" : "v-green"),
+    stat("High fit", high, "ranked against your profile", high ? "v-green" : ""),
+  ].join("");
+
+  for (const fit of ["high", "medium", "low"]) {
+    document.getElementById(`count-${fit}`).textContent =
+      eligible.filter(i => i.fit === fit).length;
+  }
+  document.getElementById("count-all").textContent = eligible.length;
+  document.getElementById("headline").textContent =
+    `${eligible.length} eligible · ${undecided} undecided · loaded ` +
+    new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
 function render() {
   const items = visibleEligible();
   document.getElementById("eligible").innerHTML =
-    items.map(renderCard).join("") || "<p>No opportunities match these filters.</p>";
+    items.map(renderCard).join("") ||
+    `<div class="empty">Nothing matches these filters.</div>`;
+  document.getElementById("eligible-count").textContent =
+    `${items.length} shown`;
   document.getElementById("excluded").innerHTML =
-    CURRENT.excluded.map(renderExcludedCard).join("") || "<p>No excluded opportunities.</p>";
+    CURRENT.excluded.map(renderExcludedCard).join("") ||
+    `<div class="empty">Nothing has been filtered out.</div>`;
+  renderStats();
+  renderAlert();
 }
 
 async function loadOpportunities() {
   const res = await fetch("/api/opportunities");
   CURRENT = await res.json();
-  const summary = document.getElementById("preference-summary");
+  const panel = document.getElementById("preference-panel");
   if (CURRENT.preference_summary) {
-    summary.textContent = CURRENT.preference_summary;
-    summary.hidden = false;
+    document.getElementById("preference-summary").textContent = CURRENT.preference_summary;
+    panel.hidden = false;
   } else {
-    summary.hidden = true;
+    panel.hidden = true;
   }
+  if (!CURRENT.eligible.length && !CURRENT.excluded.length) {
+    document.getElementById("eligible").innerHTML =
+      `<div class="empty">No opportunities stored yet. Run <code>sf poll --seeds seeds.toml</code> to fill this in.</div>`;
+    document.getElementById("foot-status").textContent = "store empty";
+    renderStats();
+    return;
+  }
+  document.getElementById("foot-status").textContent =
+    `${CURRENT.eligible.length + CURRENT.excluded.length} stored`;
   render();
 }
 
@@ -216,6 +698,20 @@ async function loadProfile() {
   form.field_of_study.value = profile.field_of_study || "";
   form.tags.value = (profile.tags || []).join(", ");
   form.bio.value = profile.bio || "";
+  renderRailProfile(profile);
+}
+
+function renderRailProfile(profile) {
+  const rows = [
+    ["rail-region", profile.region, "no region set"],
+    ["rail-level", profile.education_level, "no level set"],
+    ["rail-field", profile.field_of_study, "no field set"],
+  ];
+  for (const [id, value, fallback] of rows) {
+    const el = document.getElementById(id);
+    el.querySelector("span:last-child").textContent = value || fallback;
+    el.querySelector(".dot").style.background = value ? "var(--blue)" : "var(--dim)";
+  }
 }
 
 document.getElementById("profile-form").addEventListener("submit", async (e) => {
@@ -228,29 +724,33 @@ document.getElementById("profile-form").addEventListener("submit", async (e) => 
     tags: form.tags.value.split(",").map(t => t.trim()).filter(Boolean),
     bio: form.bio.value || null,
   };
-  await fetch("/api/profile", {
+  const res = await fetch("/api/profile", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
+  renderRailProfile(await res.json());
   document.getElementById("profile-status").textContent = "saved";
   setTimeout(() => document.getElementById("profile-status").textContent = "", 2000);
   await loadOpportunities();
 });
 
 document.getElementById("eligible").addEventListener("click", async (e) => {
-  const refreshId = e.target.dataset.refreshId;
+  const button = e.target.closest("button");
+  if (!button) return;
+  const refreshId = button.dataset.refreshId;
   if (refreshId) {
+    button.textContent = "Refreshing";
     await fetch(`/api/opportunities/${encodeURIComponent(refreshId)}/refresh`, { method: "POST" });
     await loadOpportunities();
     return;
   }
-  const decideId = e.target.dataset.decideId;
+  const decideId = button.dataset.decideId;
   if (!decideId) return;
   await fetch(`/api/opportunities/${encodeURIComponent(decideId)}/decision`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ verdict: e.target.dataset.verdict }),
+    body: JSON.stringify({ verdict: button.dataset.verdict }),
   });
   await loadOpportunities();
 });
@@ -258,6 +758,25 @@ document.getElementById("eligible").addEventListener("click", async (e) => {
 for (const id of ["search", "fit-filter", "sort", "hide-rejected"]) {
   document.getElementById(id).addEventListener("input", render);
 }
+
+// The rail's fit rows drive the same select the filter already reads.
+for (const button of document.querySelectorAll(".rail-item[data-fit]")) {
+  button.addEventListener("click", () => {
+    document.getElementById("fit-filter").value = button.dataset.fit;
+    for (const other of document.querySelectorAll(".rail-item[data-fit]")) {
+      other.setAttribute("aria-pressed", String(other === button));
+    }
+    render();
+  });
+}
+document.getElementById("fit-filter").addEventListener("change", () => {
+  const value = document.getElementById("fit-filter").value;
+  for (const button of document.querySelectorAll(".rail-item[data-fit]")) {
+    button.setAttribute("aria-pressed", String(button.dataset.fit === value));
+  }
+});
+
+document.getElementById("brand-sub").textContent = window.location.host.toUpperCase();
 
 loadOpportunities();
 loadProfile();
