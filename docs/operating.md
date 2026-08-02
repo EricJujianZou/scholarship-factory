@@ -30,6 +30,22 @@ not already running, waits for the port, and opens the browser; if the server is
 already up it just opens the tab. The server runs in the minimized window it
 opens - close that window to stop it.
 
+Everything below can be run from the dashboard instead of the terminal. The
+buttons across the top are the same commands, each with what it does and what it
+costs written next to it, and the output streams into the page while it runs:
+
+| Button | Runs |
+|---|---|
+| Find new opportunities | `sf poll --seeds seeds.toml --page-cap 15 --max-pages 3` |
+| Re-rank everything | `sf rank` |
+| Reload my context | `sf context import context.toml` |
+| What does it ask for? (per row) | `sf requirements <id>` |
+| Refresh facts (per row) | re-fetch and re-extract that one page |
+
+The key has to be set with `setx`, not just exported in a shell: the dashboard
+launches its jobs from the environment it inherits at start-up. Without one, the
+LLM buttons are switched off and the page says so.
+
 ## The daily loop
 
 ```powershell

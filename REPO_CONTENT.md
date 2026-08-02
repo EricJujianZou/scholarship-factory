@@ -292,3 +292,28 @@ Recorded here rather than left to drift:
 **Maturity, honestly:** sourcing and triage work end to end. Drafting does not
 exist. The gap between "it found this for you" and "it applied for you" is
 still most of the remaining work.
+
+## Settled design — the dashboard runs the CLI (owner UX call)
+
+The owner asked for every capability to be reachable from one place, one click,
+with the explanation next to the button. What that settled into:
+
+- **The dashboard does not reimplement anything.** An action shells out to
+  `python -m scholarship_factory.cli ...` (`jobs.py`) and streams the output
+  back for the browser to poll. The CLI stays the single definition of what
+  sourcing, ranking and importing context *do*; a button is a label on one.
+- **One job at a time.** These jobs fetch pages and spend LLM calls, so a second
+  concurrent run would double the cost of a mis-click and interleave writes.
+- **The button copy is the only warning before an expensive run**, so it lives
+  next to the args it runs (`jobs.ACTIONS`) and is asserted by a test. Every
+  action states its cost in LLM calls and rough wall-clock.
+- **Readiness is reported, not assumed.** With no provider key configured, every
+  LLM-spending control is disabled and says why. This was found the honest way:
+  the first click after shipping produced a 25-line traceback, because the key
+  had only ever been set in a shell and never persisted.
+- Job state is in memory and a restart forgets it, which is correct: a job that
+  was running when the server died is not running now.
+
+Still true: the UI never writes a fact about an opportunity. It writes the
+owner's own input (profile, decisions) and it starts commands. Facts come only
+from extraction.

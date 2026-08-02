@@ -23,6 +23,9 @@
   }
 
   * { box-sizing: border-box; }
+  /* A class that sets `display` outranks the UA rule for [hidden], which would
+     leave panels like the deadline alert showing while empty. */
+  [hidden] { display: none !important; }
 
   body {
     margin: 0;
@@ -253,6 +256,73 @@
     color: var(--red); border-color: #472429; background: rgba(255,107,107,0.1);
   }
 
+  /* --- run panel: every action, what it does, what it costs --------------- */
+  .runs {
+    display: grid; gap: 10px; margin-bottom: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  }
+  .run {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px 13px 13px; display: flex; flex-direction: column; gap: 7px;
+  }
+  .run h3 { margin: 0; font-size: 13px; font-weight: 600; }
+  .run p { margin: 0; font-size: 12px; color: var(--muted); }
+  .run .cost {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--dim);
+  }
+  .run button {
+    margin-top: auto; align-self: flex-start;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 6px 12px; border-radius: 6px; cursor: pointer;
+    border: 1px solid #2c6ed5; background: #1c4d97; color: #fff;
+  }
+  .run button:hover:not(:disabled) { background: #2360b8; }
+  .run button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .job {
+    border: 1px solid var(--line); border-radius: 8px; background: var(--panel);
+    margin-bottom: 14px; overflow: hidden;
+  }
+  .job-head {
+    display: flex; align-items: center; gap: 9px;
+    padding: 9px 13px; border-bottom: 1px solid var(--line-soft);
+    font-family: var(--mono); font-size: 11px;
+  }
+  .job-head .name { color: var(--text); letter-spacing: 0.04em; }
+  .job-head .state { margin-left: auto; color: var(--dim); }
+  .job.running .job-head .state { color: var(--blue); }
+  .job.succeeded .job-head .state { color: var(--green); }
+  .job.failed .job-head .state { color: var(--red); }
+  .notice {
+    border: 1px solid #46381c; border-left: 2px solid var(--amber);
+    background: rgba(242,181,68,0.07); color: var(--amber);
+    border-radius: 0 8px 8px 0; padding: 10px 13px; margin-bottom: 14px;
+    font-size: 12px;
+  }
+  .job-error {
+    padding: 9px 13px; border-bottom: 1px solid var(--line-soft);
+    color: var(--red); font-size: 12px;
+  }
+  .job-log {
+    margin: 0; padding: 10px 13px;
+    max-height: 200px; overflow: auto;
+    font-family: var(--mono); font-size: 11px; line-height: 1.6;
+    color: var(--muted); white-space: pre-wrap; word-break: break-word;
+  }
+
+  /* --- requirements disclosure -------------------------------------------- */
+  .reqs {
+    margin-top: 9px; padding: 9px 11px;
+    border: 1px solid var(--line); border-left: 2px solid var(--blue);
+    border-radius: 0 6px 6px 0; background: var(--panel-2);
+  }
+  .reqs .eyebrow { display: block; margin-bottom: 5px; }
+  .reqs ul { margin: 0; padding-left: 16px; }
+  .reqs li { font-size: 12px; margin-bottom: 3px; }
+  .reqs .limit { font-family: var(--mono); font-size: 10px; color: var(--amber); }
+  .reqs .none { font-size: 12px; color: var(--muted); }
+
   .missing { color: var(--dim); font-style: italic; }
   .reasons { color: var(--red); font-size: 12px; margin-top: 4px; }
   .empty { padding: 26px 14px; color: var(--muted); font-size: 13px; }
@@ -377,6 +447,18 @@
     </header>
 
     <main>
+      <div class="notice" id="llm-notice" hidden></div>
+      <section class="runs" id="runs"></section>
+
+      <section class="job" id="job" hidden>
+        <div class="job-head">
+          <span class="name" id="job-name"></span>
+          <span class="state" id="job-state"></span>
+        </div>
+        <div class="job-error" id="job-error" hidden></div>
+        <pre class="job-log" id="job-log"></pre>
+      </section>
+
       <section class="alert" id="deadline-alert" hidden>
         <div class="alert-icon">&#9888;</div>
         <div>
@@ -492,6 +574,29 @@ function urgency(days) {
   return "";
 }
 
+/** What the apply page asks for, once it has been read. */
+function renderRequirements(reqs) {
+  if (!reqs) return "";
+  if (!reqs.is_application_page) {
+    return `<div class="reqs"><span class="eyebrow">Application</span>
+      <div class="none">That link is not an application page, so there is nothing to read yet.
+      ${reqs.notes ? escapeHtml(reqs.notes) : ""}</div></div>`;
+  }
+  const items = [
+    ...reqs.essay_prompts.map(p => `<li>${escapeHtml(p.prompt)}${
+      p.word_limit ? ` <span class="limit">${p.word_limit} words</span>` : ""}</li>`),
+    ...reqs.documents.map(d => `<li>${escapeHtml(d)}</li>`),
+    ...(reqs.referees ? [`<li>${reqs.referees} referee${reqs.referees === 1 ? "" : "s"}</li>`] : []),
+    ...reqs.other_requirements.map(o => `<li>${escapeHtml(o)}</li>`),
+  ];
+  return `<div class="reqs">
+    <span class="eyebrow">This application asks for</span>
+    ${items.length
+      ? `<ul>${items.join("")}</ul>`
+      : `<div class="none">The page states no specific requirements.</div>`}
+  </div>`;
+}
+
 /** Organization when it was extracted, else the host it came from, said as such. */
 function provenanceLine(opp) {
   if (opp.organization) return escapeHtml(opp.organization);
@@ -529,8 +634,13 @@ function renderCard(item) {
                   aria-pressed="${item.decision === "interested"}">Interested</button>
           <button data-decide-id="${escapeHtml(opp.id)}" data-verdict="not_interested"
                   aria-pressed="${rejected}">Not interested</button>
-          <button data-refresh-id="${escapeHtml(opp.id)}">Refresh</button>
+          <button data-refresh-id="${escapeHtml(opp.id)}" ${LLM_READY ? "" : "disabled"}
+                  title="Re-fetch this page and report any fact that changed. One LLM call.">Refresh facts</button>
+          <button data-requirements-id="${escapeHtml(opp.id)}" ${LLM_READY ? "" : "disabled"}
+                  title="Read the apply page for the essay prompts, documents and referees it asks for. One LLM call."
+                  >${item.requirements ? "Re-read application" : "What does it ask for?"}</button>
         </div>
+        ${renderRequirements(item.requirements)}
       </div>
       <div class="cell">${fitBadge(item.fit)}</div>
       <div class="cell">${deadline}</div>
@@ -679,7 +789,7 @@ async function loadOpportunities() {
   }
   if (!CURRENT.eligible.length && !CURRENT.excluded.length) {
     document.getElementById("eligible").innerHTML =
-      `<div class="empty">No opportunities stored yet. Run <code>sf poll --seeds seeds.toml</code> to fill this in.</div>`;
+      `<div class="empty">No opportunities stored yet. Press <code>Find new opportunities</code> above to fill this in.</div>`;
     document.getElementById("foot-status").textContent = "store empty";
     renderStats();
     return;
@@ -735,13 +845,100 @@ document.getElementById("profile-form").addEventListener("submit", async (e) => 
   await loadOpportunities();
 });
 
+/* --- actions: one button each, all in the same place ---------------------- */
+
+let POLLING = null;
+let LLM_READY = true;  // assume until /api/actions says otherwise
+
+async function loadActions() {
+  const { actions, llm } = await (await fetch("/api/actions")).json();
+  LLM_READY = llm.ready;
+  document.getElementById("runs").innerHTML = actions.map(action => {
+    const blocked = action.needs_llm && !llm.ready;
+    return `
+    <div class="run">
+      <h3>${escapeHtml(action.title)}</h3>
+      <p>${escapeHtml(action.description)}</p>
+      <div class="cost">${escapeHtml(action.cost)}</div>
+      <button data-action="${escapeHtml(action.id)}" ${blocked ? "disabled" : ""}>Run</button>
+    </div>`;
+  }).join("");
+  const notice = document.getElementById("llm-notice");
+  notice.hidden = llm.ready;
+  notice.textContent = llm.hint;
+  if (!llm.ready) render();  // the rows' own LLM buttons switch off too
+}
+
+function renderJob(job) {
+  const panel = document.getElementById("job");
+  if (!job) {
+    panel.hidden = true;
+    return;
+  }
+  panel.hidden = false;
+  panel.className = `job ${job.state}`;
+  document.getElementById("job-name").textContent = job.label;
+  document.getElementById("job-state").textContent =
+    job.state === "running" ? "running…"
+      : job.state === "succeeded" ? "done"
+      : `failed (exit ${job.exit_code})`;
+  const log = document.getElementById("job-log");
+  const pinned = log.scrollTop + log.clientHeight >= log.scrollHeight - 4;
+  log.textContent = job.lines.join("\n") || "waiting for output…";
+  if (pinned) log.scrollTop = log.scrollHeight;
+
+  // A Python traceback buries the one useful line at the bottom; lift it out.
+  const error = document.getElementById("job-error");
+  const last = [...job.lines].reverse().find(line => line.trim());
+  error.hidden = job.state !== "failed" || !last;
+  error.textContent = last || "";
+
+  const running = job.state === "running";
+  for (const button of document.querySelectorAll("[data-action], [data-requirements-id]")) {
+    button.disabled = running;
+  }
+  if (running && !POLLING) POLLING = setInterval(pollJob, 1200);
+  if (!running && POLLING) {
+    clearInterval(POLLING);
+    POLLING = null;
+    loadOpportunities();  // a finished job is why the rows would have changed
+  }
+}
+
+async function pollJob() {
+  const { job } = await (await fetch("/api/jobs/current")).json();
+  renderJob(job);
+}
+
+async function startJob(url) {
+  const res = await fetch(url, { method: "POST" });
+  if (res.status === 409) {
+    const { detail } = await res.json();
+    alert(detail);
+    return;
+  }
+  renderJob(await res.json());
+}
+
+document.getElementById("runs").addEventListener("click", (e) => {
+  const button = e.target.closest("[data-action]");
+  if (button) startJob(`/api/actions/${encodeURIComponent(button.dataset.action)}`);
+});
+
 document.getElementById("eligible").addEventListener("click", async (e) => {
   const button = e.target.closest("button");
   if (!button) return;
+  const requirementsId = button.dataset.requirementsId;
+  if (requirementsId) {
+    await startJob(`/api/opportunities/${encodeURIComponent(requirementsId)}/requirements`);
+    return;
+  }
   const refreshId = button.dataset.refreshId;
   if (refreshId) {
     button.textContent = "Refreshing";
-    await fetch(`/api/opportunities/${encodeURIComponent(refreshId)}/refresh`, { method: "POST" });
+    const res = await fetch(
+      `/api/opportunities/${encodeURIComponent(refreshId)}/refresh`, { method: "POST" });
+    if (res.status === 409) alert((await res.json()).detail);
     await loadOpportunities();
     return;
   }
@@ -780,6 +977,7 @@ document.getElementById("brand-sub").textContent = window.location.host.toUpperC
 
 loadOpportunities();
 loadProfile();
+loadActions().then(pollJob);  // a job started before a reload is still running
 </script>
 </body>
 </html>

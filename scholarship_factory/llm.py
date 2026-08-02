@@ -65,6 +65,20 @@ def resolve_provider(provider: str | None, client: Any | None) -> str:
     return provider
 
 
+def provider_configured() -> bool:
+    """Whether a provider can be picked from the environment as it stands.
+
+    The dashboard asks before offering a button that would spend an LLM call:
+    a missing key should read as "not set up yet", not as a traceback after
+    the click.
+    """
+    try:
+        resolve_provider(None, None)
+    except RuntimeError:
+        return False
+    return True
+
+
 def structured_call(
     system: str,
     user: str,
