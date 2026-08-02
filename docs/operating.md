@@ -7,8 +7,17 @@ you spend your attention only on things it flagged.
 
 ```powershell
 uv sync --extra gemini
-setx GEMINI_API_KEY "your-key"        # persists for scheduled runs; reopen the shell
 ```
+
+Put your key in `.env` in the repo folder - it is gitignored, and both the CLI
+and the dashboard read it at start-up:
+
+```
+GEMINI_API_KEY="your-key"
+```
+
+`setx GEMINI_API_KEY "your-key"` works too and takes precedence; a real
+environment variable always wins over the file.
 
 One file holds everything you supply - the ranking profile and your own
 material:
@@ -42,9 +51,11 @@ costs written next to it, and the output streams into the page while it runs:
 | What does it ask for? (per row) | `sf requirements <id>` |
 | Refresh facts (per row) | re-fetch and re-extract that one page |
 
-The key has to be set with `setx`, not just exported in a shell: the dashboard
-launches its jobs from the environment it inherits at start-up. Without one, the
-LLM buttons are switched off and the page says so.
+The key has to be in `.env` or set with `setx`, not just exported in a shell:
+the dashboard launches its jobs from the environment it inherits at start-up.
+Without one, the LLM buttons are switched off and the page says so. Editing
+`.env` takes effect the next time the server starts - close its window and
+double-click `dashboard.bat` again.
 
 ## The daily loop
 

@@ -7,3 +7,4 @@ __pycache__/
 
 # personal data - never commit
 context.toml
+.env
