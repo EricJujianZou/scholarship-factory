@@ -23,6 +23,13 @@ corpus a draft gets written from. The dashboard's profile editor at
 <http://127.0.0.1:8000> edits the same profile - whichever you touch last wins,
 and omitting the section from the file leaves the stored profile alone.
 
+## Opening the dashboard
+
+Double-click `dashboard.bat` in the repo folder. It starts the server if it is
+not already running, waits for the port, and opens the browser; if the server is
+already up it just opens the tab. The server runs in the minimized window it
+opens - close that window to stop it.
+
 ## The daily loop
 
 ```powershell
