@@ -436,3 +436,101 @@ honest, and scarcity for free.
 ~16-20 hrs/week, 1-2 hrs/day plus weekends, agent-parallelized. The binding constraint is
 not hours but **which hours must be his**: choosing which sources are worth having,
 judging whether output is real, filming, and answering DMs. Agents take the rest.
+
+---
+
+## Topic 5 — the gates **CONFIRMED**
+
+### Three different things, one word
+
+The confusion came from using "metric" for all of these:
+
+| | Answers | Cadence | Failing means |
+|---|---|---|---|
+| **Verification metric** | Did I finish the work correctly? | weekly | redo the work |
+| **Decision gate** | Should I keep going down this road? | 4-5 total | **strategy changes** |
+| **Diagnostic** | What is happening? | continuous | nothing — it is information |
+
+Followers, impressions and stars are **diagnostics**. They never decide anything. The
+weekly metrics in `build-plan-august-2026.md` are **verification**. Only the gates below
+fork the plan.
+
+**Thresholds are pre-registered** — written before the data arrives, same discipline as
+the benchmark. A threshold set afterward is a threshold that was moved.
+
+### Gate A — Coverage · Sun Aug 9
+
+**Decides:** whether week 2 starts.
+**Metric:** top 20 against the owner's own profile → **≥10 genuinely applicable** to a
+Waterloo undergrad this cycle, real deadline, working link.
+
+- Pass → build the public surface.
+- Fail → coverage continues, everything shifts a week.
+
+### Gate B — Does anyone want it? · Sat Aug 23
+
+**Decides:** whether tier 2 gets built at all.
+**Metric:** people who **request a personalized list** in the week after the showcase reel.
+
+Funnel math behind the number:
+
+```
+reel does ~5k views       (median ~1k, outliers 20k+)
+x ~0.5-1% act on a CTA  ->  25-50 hands up
+x ~40% send real details ->  10-20 actual deliveries
+```
+
+- **≥20 requests** → strong. Build tier 2, intake capped at 20.
+- **10-19** → proceed, sharpen the offer.
+- **<10** → stop and diagnose, and the diagnosis splits cleanly:
+  - reel underperformed (<2k views) → **audience problem**; the offer is still untested.
+  - reel performed and nobody commented → **offer problem**. The expensive finding, and
+    the one worth catching early.
+
+### Gate C — Is it actually useful? · Sat Aug 30
+
+**Decides:** product or novelty. This is the gate that catches "no users, not useful."
+**Metric — usage, not signups.** Of the 10 hand-delivered lists:
+
+- **≥5 applied to at least one thing** within a week
+- **≥3 asked for another list**
+- **≥1 paid**
+
+- Pass → automate; there is a product.
+- Took the list, did not use it → **novelty**. The reaction was politeness. Fix the
+  product, not the funnel.
+- Used it but will not pay → real value, wrong business model.
+
+Signups measure whether the *pitch* worked. Usage measures whether the *thing* works.
+
+### Gate D — Which feature is the product? · Sat Aug 30
+
+**Decides:** what September builds. A selection, not pass/fail.
+**Metric:** from the per-delivery notes, which part drew the reaction?
+
+- the **list** → better aggregator; coverage and ranking is the roadmap
+- **what the application asks for** → depth per opportunity
+- the **referral path** → build the matcher; highest ceiling
+
+Nothing drew a reaction → Gate C has failed regardless of the numbers.
+
+### Gate E — The internship goal · Sat Aug 23
+
+Separate track, audience and clock.
+**Decides:** whether the experimentalist identity stays on X/LinkedIn.
+**Metric:** **≥2 real inbound conversations** referencing the benchmark — DM, coffee chat,
+or a reply from someone worth knowing. Not impressions.
+
+- Pass → keep it running past the arc.
+- Zero after R1-5 plus HN → the identity is not converting; re-point X/LinkedIn.
+
+### What de-risks all of it
+
+**A product failure is not a content failure.** If B and C both fail, August still ends
+with an audience of students in a proven niche, built from an existing backlog at
+essentially zero marginal cost — worth having on its own, and the substrate for whatever
+comes next.
+
+The honest downside case is "two weeks of build time spent learning the offer was wrong,
+while Instagram grew." That is a cheap month, and knowing it in advance is a reason to
+run the *real* test in week 3 rather than softening the ask.
