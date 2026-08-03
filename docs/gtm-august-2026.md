@@ -534,3 +534,108 @@ comes next.
 The honest downside case is "two weeks of build time spent learning the offer was wrong,
 while Instagram grew." That is a cheap month, and knowing it in advance is a reason to
 run the *real* test in week 3 rather than softening the ask.
+
+---
+
+## Topic 6 — the weekly rhythm **CONFIRMED**
+
+Plans like this fail on the first busy day, not because they are wrong. So the design goal
+is **buffers, not discipline** — a buffer survives a bad day and discipline does not.
+
+- **Batch by type, not by day.** The cost is context-switching between filming, drafting
+  and building. One filming block buys a week.
+- **Decouple production from publishing.** Never film a reel on the day it goes out.
+
+### The template week
+
+| Day | What | Time |
+|---|---|---|
+| **Sun** | `/weekly-plan` → triage inbox to backlog, set the calendar. Then **film 3-5 reels in one block.** | 3h |
+| **Mon** | `/hooks` + `/draft-x` + `/draft-li` for the whole week at once. **Approve in one sitting.** Then build. | 2h |
+| **Tue-Thu** | Publish (pre-approved). Reply by hand. Build 2h/day. | 2.5h each |
+| **Fri** | `/retro` — analytics, update `learnings.md`, rule on open experiments. Build. | 2h |
+| **Sat** | Long build block, or recovery. | 4h |
+
+Daily: post the IG reel from the buffer (2 min), `/capture` whenever an idea hits.
+
+**The honest split: ~12h build, ~6.5h content. Content costs roughly a third of capacity.**
+
+### The two rules that matter most
+
+1. **Always have 3 reels filmed ahead.** The day the buffer hits zero is the day daily
+   posting dies, and it does not come back on its own. The repost backlog is an even
+   cheaper buffer — use it to stay ahead, not only to fill gaps.
+2. **Approval is a scheduled 15 minutes, not a background process.** If flipping
+   `status: approved` happens "whenever," it silently becomes the bottleneck: drafts pile
+   up and nothing publishes while the work is already done.
+
+### Triage order when the week goes bad
+
+Pre-decided, so the call is not made while tired.
+
+| | |
+|---|---|
+| **Never cut** | The IG post (2 min from buffer) and **replies to comments** — an author reply is worth ~150x a like. Cutting replies to save 20 minutes is the worst available trade. |
+| **Cut first** | X craft posts. |
+| **Cut second** | The repurposed LinkedIn slot. |
+| **Cut third** | Build hours. |
+| **Shrink, never skip** | The retro. Without it `learnings.md` stops updating and every later draft is written blind. |
+
+### Week 3 changes shape
+
+Fulfillment adds 30-60 min/day of DMs and list production, taken out of build — so week 3
+has roughly **half** a normal week's build capacity. That is why the build plan says ship
+almost nothing that week; the two docs agree deliberately.
+
+**Calls are the hidden cost.** They are unschedulable by nature. Offer only fixed windows
+(e.g. Tue/Thu evenings), or they fragment build blocks, and a fragmented two-hour block is
+worth far less than a whole one.
+
+### Parallel-agent hazard
+
+Parallelizing builds across sessions is good. But **content files have single ownership** —
+two sessions drafting into `queue/` collide, and the approval state (`status: draft` /
+`approved`) is the safety gate; a second agent writing there can flip something unread.
+Same for `voice/` and `campaigns/`.
+
+**Rule: build agents never touch `content-machine/`.**
+
+---
+
+## Week 1 as actually run — Aug 3-9 **CONFIRMED**
+
+Adjusted on Monday Aug 3: the Sunday plan-and-film block did not happen, `scaffold-bench`
+was not yet public, and no benchmark content existed. Monday was a civic holiday.
+
+**Monday is a production day, not a posting day.** One rushed post with no link target is
+worth less than a filled buffer.
+
+| Day | Content | Build |
+|---|---|---|
+| **Mon Aug 3** | Production only. Film 3-5 reels in one block. Draft + approve the whole week's LinkedIn/X. Post today's IG from backlog. | Repo public. Start ATS adapters. |
+| **Tue Aug 4** | **LinkedIn: "I owe you rounds 2-4."** X: benchmark-gaming thread. | Coverage 2h |
+| **Wed Aug 5** | **LinkedIn: flex slot** — repurposed from the X backlog by default, or R5 news if it grades. | Coverage 2h |
+| **Thu Aug 6** | **LinkedIn: why pre-register.** X: the agent that lied. | Coverage 2h |
+| **Fri Aug 7** | `/retro`, including the overdue ai-edit-vs-native r2 verdict. | Build |
+| **Sat-Sun** | IG from buffer. | Long build block. **Gate A Sunday.** |
+
+**Why Tuesday is "I owe you rounds 2-4" rather than the self-refutation:** the R1 concession
+posted ~Jul 26 leaves a debt outstanding, so continuity is free. Frame it as
+**accountability, not thesis** — *"I said I'd report back. Here's the messy middle: one win,
+one flip I couldn't replicate, one null."* Method content in results clothing, honest about
+weak data, and it sets R5 up as the real test. As a thesis it would spend the results story
+on the weakest rounds.
+
+The infra war story moves to week 2, preserving 2 benchmark + 1 repurposed and leaving a spare.
+
+### The Instagram correction
+
+Old and off-target content had been running. From Aug 3, every reel is exactly one of:
+
+1. **A job / internship / opportunity resource for students** — the proven bucket (the 68k
+   was company→email site; its repost did 20k + 70 follows) *and* the product's ICP. Same
+   people.
+2. **The one benchmark crossover reel** — "I caught an AI lying about its own homework."
+
+Nothing else. Weeks 1-2 of IG are not filler while building — they are the reason week 3's
+offer has anyone to go to. A week of off-target reels is build time that cannot be recovered.
