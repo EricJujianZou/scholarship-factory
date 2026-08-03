@@ -53,9 +53,16 @@ costs written next to it, and the output streams into the page while it runs:
 
 The key has to be in `.env` or set with `setx`, not just exported in a shell:
 the dashboard launches its jobs from the environment it inherits at start-up.
-Without one, the LLM buttons are switched off and the page says so. Editing
-`.env` takes effect the next time the server starts - close its window and
-double-click `dashboard.bat` again.
+Without one, the LLM buttons are switched off and the page says so, next to a
+**Re-read .env** button - press that after saving a key and the buttons come
+back on without a restart.
+
+**A running server is invisible to `dashboard.bat`.** The batch file starts a
+server only when nothing is listening on the port, so double-clicking it while
+an old server is up just opens another tab against that old process - which
+still has the environment it started with hours ago. Closing the browser does
+not stop it; the server lives in its own minimized *scholarship-factory server*
+console window. This is what **Re-read .env** exists to avoid.
 
 ## The daily loop
 

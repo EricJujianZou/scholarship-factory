@@ -75,14 +75,22 @@ the issue title *after* filing — GitHub assigns the number.)
 
 ## Hooks (don't fight them)
 
-`.claude/settings.json` wires three engine hooks **by absolute path** (the path
-contains a space — keep it quoted): a **PreToolUse guard**, a **PostToolUse
-auto-commit** (git-as-memory), and a **Stop clean-tree checklist**. They are not
+`.claude/settings.json` wires engine hooks **by absolute path** (the path
+contains a space — keep it quoted): a **PostToolUse auto-commit**
+(git-as-memory) and a **Stop clean-tree checklist**. Those two are not
 optional — without them, stage runs fail with dirty-tree errors.
 
-The **guard** blocks, among others: push to `main`/`master`, any push while the
-current branch *is* `main`, force-push, `git reset --hard`, rebase/amend/
-filter-branch, `--no-verify`. Know this so you don't burn a turn on a blocked op.
+**The PreToolUse guard is switched off in this repo** (owner decision,
+2026-08-02) so work can go straight to `main` without a PR. The guard script
+still exists in the engine and still applies to every *other* repo on the
+harness; only this repo's `settings.json` drops it. So here, unlike elsewhere:
+push to `main` is allowed, and `git reset --hard`, force-push, rebase/amend and
+`--no-verify` are no longer blocked — which means nothing stops a history
+rewrite from destroying work. Push often; a pushed commit is recoverable.
+
+To restore the gate, put the two `PreToolUse` entries back — the engine path is
+`agentic-sdlc/hooks/pretooluse_guard.py`, matchers `Bash|PowerShell` and
+`Edit|Write|NotebookEdit`.
 
 ## Filing issues / PRs
 
