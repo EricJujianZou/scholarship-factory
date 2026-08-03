@@ -75,12 +75,32 @@ not already decided, then print the digest and mark the run so tomorrow's digest
 only reports what is newer. It never prompts, and a failing source is recorded
 rather than fatal, so it is safe to schedule.
 
-Schedule it for 6am daily:
+### The 6am run is not registered
+
+Nothing schedules itself. As of 2026-08-02 no scheduled task exists - the daily
+pass only happens when you press **Find new opportunities**. Check with:
+
+```powershell
+schtasks /Query /TN "scholarship-factory-poll"
+```
+
+`ERROR: The system cannot find the file specified.` means it is not registered.
+To register it:
 
 ```powershell
 schtasks /Create /SC DAILY /ST 06:00 /TN "scholarship-factory-poll" ^
   /TR "cmd /c cd /d C:\Users\zouju\Coding Projects\scholarship-factory && uv run sf poll --seeds seeds.toml --page-cap 15 --max-pages 3 >> poll.log 2>&1"
 ```
+
+The key reaches a scheduled run through `.env` without any extra setup: the
+loader resolves the file from the package's own location, so it works whatever
+directory the task starts in. Deleting the task is
+`schtasks /Delete /TN "scholarship-factory-poll" /F`.
+
+A different task, `\ADW\ADW-scholarship-factory`, does exist and is
+**Disabled**. That one is the build harness - it writes code against tickets,
+not opportunities - and is unrelated to polling. Do not enable it expecting a
+digest.
 
 Caveats inherited from the machine: Task Scheduler jobs run only while you are
 logged in and stop on battery. The digest lands in `poll.log`; `sf digest`
