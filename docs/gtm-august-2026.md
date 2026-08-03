@@ -316,3 +316,123 @@ For when the page looks bad and the problem is hard to name:
    rather than designed.
 
 One change at a time.
+
+---
+
+## Topic 4 — positioning, and build vs pre-sell vs deliver by hand **CONFIRMED**
+
+### The public database is not a product. It is a content asset.
+
+A website showing the same listings as the community GitHub internship repos has **zero**
+value — those are free, updated daily, and already canonical. Do not try to win there.
+
+The public DB's three jobs:
+
+1. A URL the reels can point to that is not a signup wall.
+2. Proof the sourcing is real — people believe a thing they can look at.
+3. A permanent, visible argument for signing up.
+
+The third is the trick, and it means the page should be **honest about being commodity**:
+*"here is every opportunity I found. The useful part is which ones are for you."* Its own
+uselessness is the pitch. If it takes more than ~2 days to build, the wrong thing got built.
+
+### Where the value actually is
+
+| Layer | Value | Defensible | Who else has it |
+|---|---|---|---|
+| Job listings | high, commodity | **no** | everyone |
+| Eligibility filtering (can *I* apply) | medium | weak | partially |
+| Breadth — internships + scholarships + grants against one profile | medium-high | medium | basically nobody |
+| What the application actually asks for (`sf requirements`) | high | medium-high | **nobody** |
+| **Warm intro path to a human at that company** | **very high** | **high** | badly, expensively |
+
+**The depth play is the warm intro.** Everything above it is table stakes that gets you
+in the door.
+
+### Which warm intro — the distinction that matters
+
+- *"Here's the recruiter's contact"* — Apollo, Hunter and RocketReach all sell this. Value
+  anyone can buy is not a moat. Keep as a fallback, never as the pitch.
+- *"You met this person at an event in March; they now work where you're applying"* —
+  nobody has that data. It exists only because he was in the room, and it is the
+  difference between a cold email and a real one. **This is the product.**
+
+### Demonstrate publicly, deliver privately
+
+The question was whether `sf requirements` belongs in the public DB or only in the
+hand-made lists. Neither:
+
+- On every row → the differentiator is given away and paid for forever.
+- Only in the DM → nobody browsing knows it exists, and friction kills it.
+- **Run it once on ~20-30 rows, show those in full, lock the rest.** Bounded one-time
+  cost, the value is *demonstrated rather than described*, and several hundred locked rows
+  are a standing reason to sign up.
+
+No scarcity theater is needed on the demo. Scarcity applies only to manual fulfillment
+("first 20"), where it is simply the truth.
+
+This is also the answer to the hackathon-project fear. Those die because value was
+*described* on a landing page. A visible, working, obviously useful thing on 30 rows
+cannot be described away.
+
+### The builder trap — where it actually is
+
+Building the three things the customer named (agent-filled profile, referral connections,
+resume rewrite) is not the trap; that is a spec. **The trap would be polishing onboarding
+and a dashboard before knowing whether the referral play lands.**
+
+### Sell the full thing by hand, at full price, on Aug 17
+
+The reframe: **you sell the outcome manually first, and building is only reducing your own
+cost to deliver it.** The test for having a product is not "is it built" — it is *can you
+do it once, by hand, for one person, and get a real reaction.*
+
+Hand the AMD friend 10 internships he is eligible for, what each application demands, and
+for three of them a named person he has a genuine connection path to. If he reacts, there
+is a product, and it can be charged for that day with nothing automated.
+
+**"The full thing" is defined as: personalized opportunity feed + the referral path for
+each one.** Resume rewrite and drafting are later. Listings are table stakes.
+
+| | What |
+|---|---|
+| **Aug 17-23** | Deliver the full experience by hand to ~10 people. Charge the friend. This *is* selling the full thing. |
+| **Aug 24-30** | Automate whichever part hurt most to do manually. |
+| **September** | The automated version is the product; a pricing page makes sense then. |
+
+Too eager would be building onboarding *before* ten hand-deliveries — because those
+deliveries are what tell you what onboarding must collect.
+
+### Manual fulfillment is honest; implied automation is not
+
+Delivering by hand is fine. Implying automation that does not exist is not. *"I ran my
+tool and checked every result myself"* is true, and a better pitch than "it's automated" —
+it says a human verified it.
+
+### The flow, so the sequence is unambiguous
+
+```
+reel showcasing the product  ->  link in comment  ->  public DB (free, browsable)
+                                                          |
+                                    "want yours personalized?" -> DM
+                                                          |
+                                        run their profile -> send the list
+                                                          |
+                              (meanwhile building the automated version)
+```
+
+The hand-made lists are **fulfillment, not content** — they are never posted. One
+exception worth taking: screenshot one list and post it. *"Here's what I sent someone who
+asked"* beats any feature list, and proves the thing works.
+
+### Cap the intake
+
+The risk at scale is not cost, it is **latency**. If 200 people comment and lists take
+four days, the goodwill is gone before the product exists. Cap publicly at **first 20** —
+honest, and scarcity for free.
+
+### Capacity
+
+~16-20 hrs/week, 1-2 hrs/day plus weekends, agent-parallelized. The binding constraint is
+not hours but **which hours must be his**: choosing which sources are worth having,
+judging whether output is real, filming, and answering DMs. Agents take the rest.
