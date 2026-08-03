@@ -86,3 +86,80 @@ deliberately, not incidentally.
 - Where the free/paid line sits (see `onboarding-plan-DRAFT.md`).
 - Scholarships-first vs internships-first is **decided** (internships), which unblocks
   the onboarding draft.
+
+---
+
+## Topic 2 — what each content type is for **CONFIRMED**
+
+### The four types
+
+| Type | What it's for | Platform | Metric | Needs |
+|---|---|---|---|---|
+| **1. Resource** | Buying attention from the ICP with something free and useful | IG, daily | Follows + **sends** (the #1 IG signal per `learnings.md`) | Nothing — product-independent |
+| **2. Proof-of-work / research** | Credibility with people who hire or would cover you | LinkedIn, X | Inbound DMs; 600+ impressions is the bar | An artifact |
+| **3. Build-in-public** | Anticipation, and being interesting to builders | X mainly | Replies from people worth knowing | A decision or a shipped thing |
+| **4. Launch** | Converting accumulated audience into users, once | IG + LinkedIn + X | Signups | Something a stranger can use unaided |
+
+### Why they are sequential, not parallel
+
+```
+resource content  ->  audience
+proof-of-work     ->  credibility
+build-in-public   ->  anticipation   (consumes audience)
+launch            ->  conversion     (consumes all three)
+```
+
+Types 3 and 4 spend what types 1 and 2 produce. Launching before there is an audience is
+not a smaller launch — it is shouting in a room of 40, and there is roughly one good
+launch per product per platform. The problem was never volume of work; it was order.
+
+### Build-in-public reaches builders, not buyers
+
+The buyers are 19-year-olds hunting internships. They will never read a post about the
+extraction pipeline. So build-in-public serves the internship/network goal and barely
+touches the product-users goal.
+
+| Type | Goal A: inbound internships | Goal B: product users |
+|---|---|---|
+| Resource (IG) | — | **primary** |
+| Proof-of-work (LI/X) | **primary** | — |
+| Build-in-public (X) | secondary | barely |
+| Launch | — | **primary** |
+
+Goal A and Goal B share almost no content. That is the actual source of the
+spread-thin feeling: two campaigns for two audiences, treated as one. They do not have
+to compete — A owns X + LinkedIn in weeks 1-2, B owns Instagram throughout and takes
+X + LinkedIn in weeks 3-4.
+
+### Platform rules
+
+- **Instagram** — type 1 only, always; plus type 4 at launch, because that is where the
+  buyers are. Never build-in-public.
+- **LinkedIn** — type 2 primarily. Type 3 only when the post carries a shipped artifact
+  plus an image; "day 4 of building" with no artifact is a reflection post in a hoodie,
+  and reflection posts do ~500 impressions.
+- **X** — types 2 and 3. The only place raw build-in-public works.
+
+### Build-in-public: decision posts vs progress posts
+
+- **Decision posts** need no product and are safe now. The pivot itself is one: *"I built
+  a scholarship finder. My only paying signal wants internships. So I'm rebuilding it."*
+  Same DNA as the benchmark — publishing the thing that did not go your way.
+- **Progress posts** imply a product exists. Every person who goes looking and cannot use
+  it is a person who cannot be re-activated at launch. Hold until the public DB is live.
+
+### On the raised MVP bar
+
+The bar moved on **polish**, not scope. When anyone can ship a landing page in an hour,
+rough reads as lazy rather than scrappy. So the standard is **narrow and finished**: a
+browsable public database plus one genuinely good personalized list is a finished
+product. "Coming soon" on five features is not.
+
+### Two-week content map
+
+| | Type 1 (IG) | Type 2 (LI/X) | Type 3 (X) | Type 4 |
+|---|---|---|---|---|
+| **Aug 3-9** | daily, from backlog | benchmark x2 LI + X craft | — | — |
+| **Aug 10-16** | daily + 1-2 scholarship trials | benchmark finale + HN | 1 decision post (the pivot) | — |
+| **Aug 17-23** | daily + soft offer | 1 repurposed | progress posts begin | — |
+| **Aug 24-30** | launch support | launch post | — | **launch, once** |
