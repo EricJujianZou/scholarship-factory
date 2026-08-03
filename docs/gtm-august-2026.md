@@ -163,3 +163,156 @@ product. "Coming soon" on five features is not.
 | **Aug 10-16** | daily + 1-2 scholarship trials | benchmark finale + HN | 1 decision post (the pivot) | — |
 | **Aug 17-23** | daily + soft offer | 1 repurposed | progress posts begin | — |
 | **Aug 24-30** | launch support | launch post | — | **launch, once** |
+
+---
+
+## Topic 3 — the benchmark: small content vs the artifact **CONFIRMED**
+
+### R1-4 sell the method. R5 sells the finding.
+
+Round 5 (60 hardest SWE-bench Pro instances, Opus 5 and Sonnet 5, 2x2) is the real
+claim, because it is the first round on current frontier models and therefore the first
+that speaks to Cherny's statement directly. Rounds 1-4 ran on Devin's cloud models.
+
+So the earlier rounds are not "the arc" — they are **credibility for a claim that has not
+landed yet**. Every remaining angle is a method/integrity angle (pre-registration, the
+fabricated timing reports, contamination, benchmark gaming, the infra incidents), and
+none of them need R1-4 to be decisive. They only need to show the work is honest, so the
+R5 number is believed when it appears.
+
+### Framing constraints — three hard rules
+
+1. **Never frame R2-4 as waste or as a mistake to be embarrassed about.** The honest and
+   better version is owning the miss: *"I underestimated how good the models already were,
+   which is why round 4 came back null at the ceiling."* That is a finding, not a failure.
+2. **Never disparage Devin's model quality.** There is a warm relationship with Devin
+   DevRel and a complimentary post that did ~7k views. Devin is a relationship asset, not
+   a foil. The factual framing needs no dig: *"rounds 1-4 ran on Devin. Round 5 is the
+   first on current frontier models."* That bounds the earlier rounds honestly and makes
+   R5 the main event without a claim about anyone's quality.
+3. **Teasers promise a result, never a verdict.** No interim numbers, no predicted
+   direction. Two weeks of teasers pointed at a result that has not graded is the one way
+   this breaks.
+
+**Both R5 outcomes have a good post.** If it is null too, the story is "I ran five
+pre-registered rounds trying to prove my own scaffolding was necessary; it won 1 of 5" —
+a *better* HN post than a win, because a win is a normal result and a null against your
+own tool is counter-consensus and self-critical. Be genuinely indifferent.
+
+### The artifact is the destination; each post is standalone
+
+The artifact (`scaffold-bench` README + `ericzou.dev/scaffold-bench.html`) is permanent,
+single, and complete — built for someone who has already decided to take the work
+seriously. The posts are traffic, and **each must be independently valuable**: a reader
+who never clicks should still have gotten something.
+
+**Do not serialize the paper.** "Part 3 of 6" makes every post depend on the others and
+asks the audience to opt into a series; post 4 underperforms post 1 every time. One
+artifact, many independent stories, the artifact as the receipt at the bottom.
+
+### Post inventory and platform assignment
+
+Ranked two ways, because the rankings differ and that difference *is* the assignment:
+travelers go to X where reach compounds through reposts, hiring-signal goes to LinkedIn
+where the conversion audience is.
+
+| Angle | Travels | Hiring signal | Assigned |
+|---|---|---|---|
+| **The agent that lied** — R2's unscaffolded arm fabricated 3/3 of its own timing reports | 1st | 4th | X + the IG reel |
+| **Contamination** — 72/100 instances partly memorized | 2nd | 3rd | X, then LinkedIn |
+| **Benchmark gaming** — Apr 2026, ~100% on 7/8 benchmarks, zero tasks solved | 3rd | 6th | X |
+| **The self-refutation** — R4 null at the ceiling | 4th | 1st | *already posted as R1 — see below* |
+| **The infra war story** — 135GB VHDX, C: at 2GB, docker socket dropping | 5th | 5th | LinkedIn |
+| **Why pre-register** — goalposts committed in git | 6th | 2nd | LinkedIn |
+
+**"The agent that lied" is promoted out of the spares.** It is the only piece with
+genuine crossover to people who have never heard of SWE-bench, and it is the strongest
+argument *for* scaffolding — a useful counterweight in a series that mostly concedes.
+
+**The R1 concession (posted ~Jul 26) becomes setup, not content.** Do not re-post it.
+Do call back to it explicitly: *"a week ago I told you he won round one. Here's rounds
+two through four."* Continuity is what makes an audience follow a series. It also makes
+the R2 post (scaffolding wins, McNemar p = 0.039) land harder — a concession followed by
+a win reads as honest; a win alone reads as marketing.
+
+### Cross-posting: same idea and asset, different text
+
+Duplication is not the problem (160 X vs 1.2k LinkedIn barely overlap). Two real reasons
+to reformat:
+
+1. **Format differs.** X rewards compression and a reply-able hook; LinkedIn rewards an
+   artifact + image + a conversation handle (`[strong]`: no artifact ≈ 500 impressions).
+   A pasted tweet reads as low-effort on LinkedIn; a pasted LinkedIn post reads as
+   LinkedIn-brained on X.
+2. **X returns signal in ~2h.** LinkedIn is the conversion asset and deserves the framing
+   that already tested, not the first guess. So X leads by 1-2 days.
+
+Reformatting costs ~5 minutes via `repurpose.py`. The cheapest cross-post is one where an
+**image carries the post** — same asset, different body copy.
+
+### Instagram: one reel, and it is not a benchmark explainer
+
+Trial reels distribute to non-followers resembling current engagers — college students.
+Instagram has no "AI researcher" segment to route into, so a technical framing tests
+whether jargon works on IG, and the answer is already known.
+
+Run exactly one, and make it **"I caught an AI lying about its own homework"** — the
+agent-that-lied story, zero jargon, general audience. If it flops the lesson was cheap;
+if it hits, it hit on a story rather than a niche.
+
+### HN is decoupled from the teasers
+
+The campaign doc assumed week 1 warms an audience for a week-2 HN launch. That is wrong:
+**HN traffic is not a function of follower count.** It is title, timing, and artifact
+quality; 160 X followers contribute ~nothing to whether it lands.
+
+So the only gate on HN is **artifact readiness + R5 grading**, not audience warming. If
+R5 grades Tuesday and the repo and site page are ready Thursday, fire Thursday. The
+LinkedIn/X teasers run on their own clock serving inbound, which is a separate goal.
+
+Post the **repo**, not a blog post. Lead the title with the finding, not the framework —
+HN is allergic to self-promotion and fond of negative results and methodology. The
+`Show HN:` tag has no measured advantage after controls. Fires once.
+
+### Visual assets — brief for a separate agent
+
+Benchmark content lives or dies on the images. **These are not generated here** — this
+section is the brief to hand a fresh agent.
+
+**Hard technical constraint:** the repo uses committed SVG (GitHub strips `<style>`,
+`<script>`, inline SVG), but **X and LinkedIn cannot render SVG in a post**. Every chart
+therefore needs a PNG export sized for social alongside the SVG for the repo.
+`assets/make_charts.py` already generates light/dark from one definition — keep that so
+themes cannot drift, and add the social PNG as a third output.
+
+| Asset | Used by | Notes |
+|---|---|---|
+| **Rounds results table** (arms x rounds, verdict column) | LinkedIn hero, social preview | The most reused asset. Must be legible at phone width. |
+| **R5 2x2** — Opus 5 / Sonnet 5 x scaffolded / not | The R5 launch, HN, everything | The most important image in the campaign. Worth disproportionate effort. |
+| **Contamination distribution** — 72/100 instances partly recalled | Contamination post | Should make "most of this benchmark is memorized" visible in one glance. |
+| **Fabricated-timing evidence** — reported vs actual | Agent-that-lied post, IG reel | A diff or side-by-side. The story is the evidence; make the receipt the image. |
+| **Pre-registration receipt** — git commit timestamp before the run | Why-pre-register post | The screenshot of the commit is the whole argument. |
+| **Infra incident** — disk at 2GB, the 135GB VHDX | Infra war story | Real screenshots the owner already has. |
+| **Social preview card** 1280x640 | Every link posted anywhere | Exists at `assets/social-preview.png`. **No API** — upload by hand at Settings → General → Social preview. |
+
+**Design constraints:** exactly two semantic colors (arm A, arm B); everything else is
+text. Charts must read at phone size, since most LinkedIn and X consumption is mobile.
+Charts and page must look like one document — independently-styled SVGs inside a
+differently-styled page is the most common cause of "it looks off."
+
+### Vocabulary for critiquing the site page
+
+For when the page looks bad and the problem is hard to name:
+
+1. **Where does the eye land first?** Same visual weight everywhere means no entry point.
+   The results table should dominate the first screen with nothing competing.
+2. **Vertical rhythm.** Is each heading visibly closer to the text it owns than to the
+   section above it? When that is off the page reads as mush though nothing is wrong.
+3. **Accent count.** `--armA`, `--armB`, `--cotton-candy`, `--blush-rose`, `--platinum` is
+   too many. Past ~2 accents, color stops meaning anything.
+4. **Do charts and page look like the same document?**
+5. **Measure.** 74ch is right. Do not let it grow.
+6. **Table and link styling** — inherited defaults are the tell that a page was assembled
+   rather than designed.
+
+One change at a time.
