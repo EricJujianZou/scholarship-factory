@@ -3,6 +3,9 @@
 # type = "url"      -> fetched as-is (listing or detail page)
 # type = "reddit"   -> r/<name>, via reddit's public listing JSON
 # type = "devpost"  -> a devpost URL, fetched as-is
+# type = "simplify" -> a SimplifyJobs listings.json URL, parsed deterministically
+#                      (no LLM calls, ~1,500 live intern rows; deadline stays empty
+#                      because Simplify does not publish one)
 # type = "instagram" / "x" -> accepted but skipped (auth wall, not yet supported)
 #
 # Every fetched page costs one LLM call, and a listing page can traverse up to
@@ -13,6 +16,11 @@
 #   scholarshipscanada.com, scholarshipportal.com  -> 403 bot wall
 #   scholartree.ca                                 -> robots.txt disallow
 #   reddit.com/r/*/new.json                        -> robots.txt disallow
+
+[[seeds]]
+type = "simplify"
+value = "https://raw.githubusercontent.com/SimplifyJobs/Summer2026-Internships/dev/.github/scripts/listings.json"
+label = "Simplify internships (community board, all terms)"
 
 [[seeds]]
 type = "url"

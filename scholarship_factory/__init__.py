@@ -22,6 +22,7 @@ from .profile import ApplicantProfile, ProfileStore
 from .relevance import RelevanceStore, ScoredOpportunity, distil_preferences, score
 from .refresh import FieldChange, RefreshOutcome, RefreshStatus, refresh_opportunity
 from .seeds import Seed, SeedType, load_seeds
+from .simplify import parse_simplify
 from .store import OpportunityStore
 from .traverse import TRAVERSE_PAGE_CAP, LinkOutcome, TraverseReport, TraverseResult, traverse
 from .urls import normalize_apply_url
@@ -54,6 +55,7 @@ __all__ = [
     "Seed",
     "SeedType",
     "load_seeds",
+    "parse_simplify",
     "FetchTarget",
     "AdapterPlan",
     "SkipReason",

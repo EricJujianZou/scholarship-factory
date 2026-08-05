@@ -17,7 +17,8 @@ from .identity import merge_into
 from .jsonld import extract_jsonld
 from .models import Opportunity
 from .paginate import DEFAULT_MAX_PAGES, next_page_url
-from .seeds import Seed
+from .seeds import Seed, SeedType
+from .simplify import parse_simplify
 from .store import OpportunityStore
 from .traverse import TRAVERSE_PAGE_CAP, TraverseReport, TraverseResult, traverse
 from .urls import normalize_apply_url
@@ -111,6 +112,9 @@ def run_sourcing(
     outcomes: list[TargetOutcome] = []
 
     for target in plan.targets:
+        if target.seed_type == SeedType.SIMPLIFY:
+            outcomes.append(_process_simplify(target.url, store, fetch_fn=fetch_fn))
+            continue
         page_url: str | None = target.url
         for _ in range(max(1, max_pages)):
             if page_url is None:
@@ -126,6 +130,39 @@ def run_sourcing(
             outcomes.append(outcome)
 
     return SourcingReport(outcomes=outcomes, skipped=plan.skipped)
+
+
+def _process_simplify(
+    url: str, store: OpportunityStore, *, fetch_fn: FetchFn
+) -> TargetOutcome:
+    """One deterministic pass over a Simplify listings.json target: fetch,
+    parse, store. No JSON-LD, no LLM extract, no traversal, no pagination —
+    the file already is the whole listing."""
+    result = fetch_fn(url)
+    if not result.ok:
+        return TargetOutcome(
+            url=url, ok=False, status_code=result.status_code, error=result.error
+        )
+
+    try:
+        opportunities = parse_simplify(result.body, result.final_url)
+    except Exception as exc:
+        return TargetOutcome(
+            url=url,
+            ok=False,
+            status_code=result.status_code,
+            error=f"simplify parse failed: {type(exc).__name__}: {exc}",
+        )
+
+    for opportunity in opportunities:
+        store.insert(opportunity)
+
+    return TargetOutcome(
+        url=url,
+        ok=True,
+        status_code=result.status_code,
+        opportunities_stored=len(opportunities),
+    )
 
 
 def _process_page(

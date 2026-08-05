@@ -26,6 +26,9 @@ from .profile import ApplicantProfile
 
 #: decisions quoted verbatim into the prompt; beyond this the summary carries the load
 FEW_SHOT_LIMIT = 12
+#: opportunities judged per LLM call; a bulk import (Simplify is ~1,500 rows)
+#: cannot fit one prompt or one 8k-token reply, so `score` batches transparently
+SCORE_BATCH_SIZE = 80
 #: re-distil the summary once this many decisions have accumulated since the last one
 SUMMARY_REFRESH_EVERY = 5
 
@@ -131,19 +134,43 @@ def score(
     model: str | None = None,
     provider: str | None = None,
 ) -> list[ScoredOpportunity]:
-    """Order opportunities by fit. One LLM call for the whole batch."""
+    """Order opportunities by fit. One LLM call per `SCORE_BATCH_SIZE` batch."""
     if not opportunities:
         return []
 
     titles = {opp.id: opp.title for opp in opportunities}
-    sections = [f"APPLICANT PROFILE:\n{_profile_block(profile)}"]
+    context_sections = [f"APPLICANT PROFILE:\n{_profile_block(profile)}"]
     if preference_summary:
-        sections.append(f"WHAT THEY TEND TO WANT:\n{preference_summary}")
+        context_sections.append(f"WHAT THEY TEND TO WANT:\n{preference_summary}")
     examples = _examples_block(decisions or [], titles)
     if examples:
-        sections.append(f"THEIR PAST DECISIONS:\n{examples}")
-    listing = "\n".join(_describe(i, opp) for i, opp in enumerate(opportunities))
-    sections.append(f"OPPORTUNITIES:\n{listing}")
+        context_sections.append(f"THEIR PAST DECISIONS:\n{examples}")
+
+    scored: list[ScoredOpportunity] = []
+    for start in range(0, len(opportunities), SCORE_BATCH_SIZE):
+        scored.extend(
+            _score_batch(
+                opportunities[start : start + SCORE_BATCH_SIZE],
+                context_sections,
+                client=client,
+                model=model,
+                provider=provider,
+            )
+        )
+    scored.sort(key=lambda s: (_FIT_ORDER.get(s.fit, 1), s.opportunity.title))
+    return scored
+
+
+def _score_batch(
+    batch: list[Opportunity],
+    context_sections: list[str],
+    *,
+    client,
+    model: str | None,
+    provider: str | None,
+) -> list[ScoredOpportunity]:
+    listing = "\n".join(_describe(i, opp) for i, opp in enumerate(batch))
+    sections = [*context_sections, f"OPPORTUNITIES:\n{listing}"]
 
     result = structured_call(
         _RANK_SYSTEM_PROMPT,
@@ -156,18 +183,16 @@ def score(
         max_tokens=8192,
     )
 
-    by_index = {f.index: f for f in result.fits if 0 <= f.index < len(opportunities)}
-    scored = [
+    by_index = {f.index: f for f in result.fits if 0 <= f.index < len(batch)}
+    return [
         ScoredOpportunity(
             opportunity=opp,
             # an opportunity the model skipped is unjudged, not a bad fit
             fit=(by_index[i].fit.lower() if i in by_index else "medium"),
             reason=(by_index[i].reason if i in by_index else "not judged by the ranker"),
         )
-        for i, opp in enumerate(opportunities)
+        for i, opp in enumerate(batch)
     ]
-    scored.sort(key=lambda s: (_FIT_ORDER.get(s.fit, 1), s.opportunity.title))
-    return scored
 
 
 def distil_preferences(

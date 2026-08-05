@@ -1,4 +1,7 @@
-# Your material, for drafting applications later.
+# Your material, for matching and drafting later. Internship-flavored: the
+# corpus now leans intern listings (Simplify + co.), so this template asks for
+# what internship applications and recruiters actually check. Scholarships
+# still match off the same file — keep any award/essay entries you have.
 #
 #   cp context.example.toml context.toml     # context.toml is gitignored
 #   uv run sf context import context.toml    # re-run any time; matches on title
@@ -21,34 +24,37 @@
 # Anything unrecognised is treated as unstated, which excludes nothing.
 #
 # `field_of_study`, `tags` and `bio` are free text - they go to the LLM relevance
-# ranker, which is what decides *how well* something fits. Write the bio the way
-# you would describe yourself to someone deciding whether to fund you.
+# ranker, which is what decides *how well* something fits. For internships the
+# ranker leans hardest on target roles, work authorization, and which terms you
+# can actually work - say those plainly in the bio.
 [profile]
 region = "Canada"
 education_level = "undergraduate"
 field_of_study = "computer science"
-tags = ["software", "research", "entrepreneurship"]
+tags = ["software engineering intern", "machine learning", "backend"]
 bio = """
-Two or three sentences: what you study, what you work on, what you are trying to
-fund. Concrete beats flattering - the ranker matches on specifics.
+Two or three sentences, the way you'd answer "tell me about yourself" to a
+recruiter: what you study, what roles you're hunting (SWE / ML / data / hardware),
+which terms you're available (e.g. Summer 2027, Fall 2026 co-op), and where you
+can work. Work authorization matters most - many US listings can't sponsor.
 """
 
-# Plain answers to the questions eligibility forms ask.
+# Plain answers to the questions applications and recruiters ask.
 [[fact]]
 title = "citizenship"
 body = "Canadian citizen"
 
 [[fact]]
-title = "residency"
-body = "Ontario, Canada"
+title = "work authorization"
+body = "Authorized to work in Canada. US: requires sponsorship (or: eligible for J-1/co-op work permit - state what's actually true)."
 
 [[fact]]
-title = "date of birth"
-body = "YYYY-MM-DD"
+title = "location"
+body = "Waterloo, ON. Open to relocation / remote."
 
 [[fact]]
-title = "financial need"
-body = "Describe your situation, or delete this entry."
+title = "availability"
+body = "Co-op terms available: e.g. Summer 2027 (May-Aug), Fall 2027. Earliest start: YYYY-MM."
 
 [[education]]
 title = "BASc Computer Science, University of Waterloo"
@@ -57,14 +63,10 @@ started = "20XX-09"
 ended = "20XX-04"
 tags = ["current"]
 
-[[award]]
-title = "Example Entrance Scholarship"
-body = "What it was for, how competitive, what it recognized."
-started = "20XX"
-
+# Internships, jobs, research positions - what recruiters read first.
 [[experience]]
 title = "Software Engineering Intern, Example Corp"
-body = "What you built, the scale of it, and what changed because you were there."
+body = "What you built, the stack, the scale, and what changed because you were there. Numbers beat adjectives."
 started = "20XX-05"
 ended = "20XX-08"
 tags = ["internship", "backend"]
@@ -75,19 +77,30 @@ body = "What it does, why you built it, what you learned, any users or results."
 url = "https://github.com/you/example"
 tags = ["side-project"]
 
-# Past answers. The point is reuse: a new prompt close to an old one starts here
-# rather than from nothing. Paste the real text, not a summary.
+[[award]]
+title = "Example Hackathon Win / Entrance Scholarship"
+body = "What it was for, how competitive, what it recognized."
+started = "20XX"
+
+# Past written answers - cover letters, "why us" paragraphs, scholarship essays.
+# The point is reuse: a new prompt close to an old one starts here rather than
+# from nothing. Paste the real text, not a summary.
 [[essay]]
-title = "Why this field - 500 words"
+title = "Why Example Corp - cover letter"
 body = """
-Paste the full essay text here.
+Paste the full text here.
 """
-tags = ["motivation", "500-words"]
+tags = ["cover-letter"]
 
 [[reference]]
-title = "Prof. Example Name"
-body = "Professor, School of Computer Science. Supervised my research on X. Agreed to act as a referee."
-url = "mailto:referee@example.edu"
+title = "Jane Example, Engineering Manager"
+body = "Manager during my 20XX internship at Example Corp. Agreed to be a reference."
+url = "mailto:reference@example.com"
+
+[[document]]
+title = "Resume"
+body = "The current master copy, and which variant (SWE/ML) it is."
+url = "file:///C:/path/to/resume.pdf"
 
 [[document]]
 title = "Official transcript"

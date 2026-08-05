@@ -19,6 +19,7 @@ class SeedType(str, Enum):
     URL = "url"
     REDDIT = "reddit"
     DEVPOST = "devpost"
+    SIMPLIFY = "simplify"  # SimplifyJobs listings.json — deterministic, no LLM
     INSTAGRAM = "instagram"  # auth-walled — deferred to its own session
     X = "x"  # auth-walled — deferred to its own session
 

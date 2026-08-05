@@ -121,3 +121,32 @@ def test_relevance_store_round_trip_and_update(tmp_path):
     store.replace([ScoredOpportunity(opportunity=opp, fit="high", reason="second")])
     assert store.all()[opp.id] == ("high", "second")
     assert len(store.all()) == 1
+
+
+class BatchingStubClient:
+    """Returns a fits payload sized to each request, recording every call."""
+
+    def __init__(self):
+        self.messages = self
+        self.calls = []
+
+    def create(self, **kwargs):
+        self.calls.append(kwargs)
+        text = kwargs["messages"][0]["content"]
+        count = text.count("\n[")  # every "[i] Title" line, including the first
+        fits = [{"index": i, "fit": "medium", "reason": "r"} for i in range(count)]
+        block = type("Block", (), {"type": "tool_use", "input": {"fits": fits}})()
+        return type("Message", (), {"content": [block]})()
+
+
+def test_bulk_scoring_batches_instead_of_one_giant_call():
+    from scholarship_factory.relevance import SCORE_BATCH_SIZE
+
+    opps = [_opp(f"Opp {i:04d}") for i in range(SCORE_BATCH_SIZE * 2 + 5)]
+    client = BatchingStubClient()
+
+    result = score(opps, ApplicantProfile(), client=client)
+
+    assert len(client.calls) == 3
+    assert len(result) == len(opps)  # every opportunity judged exactly once
+    assert {s.opportunity.title for s in result} == {o.title for o in opps}
