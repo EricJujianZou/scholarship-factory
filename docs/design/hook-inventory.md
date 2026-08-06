@@ -4,7 +4,8 @@ Researched 2026-08-06. Ranked by evidence strength × funnel relevance.
 Funnel stages: (1) IG reel attention, (2) DM conversation, (3) free site first
 visit, (4) email/return visits, (5) paid conversion, (6) weekly retention.
 
-Status: **awaiting owner veto** before phase-3 teardowns.
+Status: owner reviewed 2026-08-06, no vetoes — all 9 proceed to phase-3
+teardowns. Prediction/betting apps stay cut (mechanisms off-limits).
 
 ---
 

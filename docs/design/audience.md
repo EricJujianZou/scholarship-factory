@@ -7,7 +7,11 @@ direct Reddit crawl is blocked to our tooling, so exact-thread citations are thi
 treat [T2] phrasing as strongly attested but re-verify before quoting in ad copy),
 **[T3]** = published research (source named), **[inference]** = our reasoning.
 
-Researched 2026-08-06 (audience-hook-research phase 1). Status: **awaiting owner review.**
+Researched 2026-08-06 (audience-hook-research phase 1). Status: **owner-reviewed 2026-08-06.**
+Owner corrections: no DM sales conversations have happened yet — §1's who-pays
+claims describe the *designed* funnel and are untested against real buyers
+[owner]. Owner's working assumption: college students can spare ~$20/mo, so
+budget is not the binding constraint; trust is [owner assumption, untested].
 
 ## 1. Who decides and pays
 
