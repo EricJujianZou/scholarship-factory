@@ -1,0 +1,848 @@
+<!-- INTERNAL DESIGN MOCKUP - sample listing data -->
+<!doctype html>
+<html lang="en-CA">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A free field guide to 1,427 open internships, mostly in Canada.">
+  <title>UGMI Internship Field Guide</title>
+  <style>
+    :root {
+      --paper: #f3edda;
+      --paper-deep: #e7ddc2;
+      --card: #fffdf5;
+      --ink: #173a2a;
+      --soft-ink: #3f5d4b;
+      --moss: #607848;
+      --amber: #f0d589;
+      --amber-ink: #5b4400;
+      --line: #979674;
+      --closed: #5f665d;
+      --closed-paper: #e5e2d6;
+      --serif: Georgia, "Times New Roman", serif;
+      --sans: "Arial Narrow", "Aptos Narrow", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      -webkit-text-size-adjust: 100%;
+      background: var(--paper);
+    }
+
+    body {
+      min-width: 0;
+      margin: 0;
+      overflow-x: hidden;
+      color: var(--ink);
+      background:
+        repeating-linear-gradient(0deg, rgba(23, 58, 42, .022) 0 1px, transparent 1px 5px),
+        var(--paper);
+      font-family: var(--serif);
+      line-height: 1.42;
+    }
+
+    button { font: inherit; }
+    [hidden] { display: none !important; }
+
+    :focus-visible {
+      outline: 3px solid var(--ink);
+      outline-offset: 3px;
+    }
+
+    .skip-link {
+      position: fixed;
+      z-index: 10;
+      top: 8px;
+      left: 8px;
+      min-height: 44px;
+      padding: 10px 14px;
+      color: var(--card);
+      background: var(--ink);
+      transform: translateY(-160%);
+    }
+
+    .skip-link:focus { transform: translateY(0); }
+
+    .wrap {
+      width: min(calc(100% - 28px), 760px);
+      margin-inline: auto;
+    }
+
+    .masthead {
+      border-bottom: 2px solid var(--ink);
+    }
+
+    .masthead .wrap {
+      display: flex;
+      min-height: 58px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .brand {
+      font-family: var(--sans);
+      font-size: 1rem;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .botanical {
+      width: 72px;
+      height: 48px;
+      flex: 0 0 auto;
+      color: var(--ink);
+    }
+
+    .hero { padding: 18px 0 14px; }
+
+    h1, h2, h3, p { overflow-wrap: break-word; }
+
+    h1 {
+      max-width: 690px;
+      margin: 0;
+      font-size: clamp(1.55rem, 6.5vw, 2.7rem);
+      font-weight: 600;
+      letter-spacing: -.035em;
+      line-height: 1.04;
+    }
+
+    .sub {
+      margin: 7px 0 0;
+      color: var(--soft-ink);
+      font-family: var(--sans);
+      font-size: .96rem;
+      font-weight: 700;
+    }
+
+    .pulse {
+      margin: 12px 0 0;
+      padding-top: 9px;
+      border-top: 1px dotted var(--line);
+      color: var(--soft-ink);
+      font-family: var(--sans);
+      font-size: .76rem;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.45;
+    }
+
+    .key {
+      padding: 13px 0 10px;
+      border-block: 1px solid var(--line);
+      background: rgba(255, 253, 245, .34);
+    }
+
+    .key-title {
+      margin: 0 0 8px;
+      font-family: var(--sans);
+      font-size: .68rem;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .filter-row {
+      display: grid;
+      grid-template-columns: 68px minmax(0, 1fr);
+      gap: 8px;
+      align-items: start;
+      margin-top: 7px;
+    }
+
+    .taxon {
+      padding-top: 5px;
+      font-family: var(--sans);
+      line-height: 1.05;
+    }
+
+    .taxon small {
+      display: block;
+      color: var(--moss);
+      font-size: .58rem;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .taxon strong {
+      display: block;
+      margin-top: 3px;
+      font-size: .78rem;
+    }
+
+    .pills {
+      display: flex;
+      min-width: 0;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .pill,
+    .text-button {
+      min-height: 44px;
+      border: 1px solid var(--ink);
+      color: var(--ink);
+      background: var(--card);
+      cursor: pointer;
+      font-family: var(--sans);
+      font-weight: 800;
+    }
+
+    .pill {
+      min-width: 44px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      box-shadow: 0 2px 0 var(--paper-deep);
+      font-size: .76rem;
+    }
+
+    .pill[aria-pressed="true"] {
+      color: var(--card);
+      background: var(--ink);
+      box-shadow: none;
+    }
+
+    .filter-status {
+      min-height: 46px;
+      margin-top: 8px;
+      font-family: var(--sans);
+    }
+
+    .result-line {
+      margin: 0;
+      font-size: .96rem;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .filter-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 12px;
+      align-items: center;
+    }
+
+    .zero-note {
+      margin: 0;
+      color: var(--soft-ink);
+      font-size: .82rem;
+      font-weight: 700;
+    }
+
+    .text-button {
+      padding: 6px 3px;
+      border: 0;
+      background: transparent;
+      font-size: .78rem;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .specimens { padding: 12px 0 26px; }
+
+    .specimen {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px 12px;
+      margin-bottom: 9px;
+      padding: 12px;
+      border: 1px solid var(--ink);
+      background: var(--card);
+      box-shadow: 3px 3px 0 var(--paper-deep);
+    }
+
+    .specimen[hidden] { display: none; }
+
+    .plate-label,
+    .company,
+    .time-label,
+    .status-label,
+    .example-label {
+      font-family: var(--sans);
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .plate-label {
+      display: inline-block;
+      margin-bottom: 4px;
+      color: var(--moss);
+      font-size: .57rem;
+    }
+
+    .specimen h3 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+      line-height: 1.16;
+    }
+
+    .company {
+      margin: 4px 0 0;
+      color: var(--soft-ink);
+      font-size: .65rem;
+    }
+
+    .meta {
+      margin: 3px 0 0;
+      color: var(--soft-ink);
+      font-family: var(--sans);
+      font-size: .78rem;
+    }
+
+    .specimen-time {
+      display: flex;
+      min-width: 92px;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 5px;
+      text-align: right;
+    }
+
+    .time-label,
+    .status-label {
+      font-size: .59rem;
+    }
+
+    .deadline {
+      display: inline-block;
+      padding: 4px 7px;
+      border-radius: 2px;
+      color: var(--amber-ink);
+      background: var(--amber);
+      font-family: var(--sans);
+      font-size: .73rem;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .added {
+      color: var(--soft-ink);
+      font-family: var(--sans);
+      font-size: .71rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .new {
+      display: inline-block;
+      margin-left: 5px;
+      padding: 2px 5px;
+      color: var(--card);
+      background: var(--moss);
+      font-family: var(--sans);
+      font-size: .55rem;
+      font-weight: 900;
+      letter-spacing: .08em;
+      vertical-align: 2px;
+    }
+
+    .specimen.closed {
+      color: var(--closed);
+      border-color: #7d827b;
+      background: var(--closed-paper);
+      box-shadow: none;
+    }
+
+    .closed .company,
+    .closed .meta,
+    .closed .plate-label,
+    .closed .added { color: var(--closed); }
+
+    .closed .status-label {
+      padding: 4px 7px;
+      border: 1px solid #7d827b;
+    }
+
+    .empty {
+      margin: 4px 0 12px;
+      padding: 18px 12px;
+      border: 1px dashed var(--ink);
+      font-family: var(--sans);
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .pitch {
+      padding: 28px 0 12px;
+      border-top: 2px solid var(--ink);
+    }
+
+    .closings {
+      margin: 0 0 22px;
+      color: var(--soft-ink);
+      font-family: var(--sans);
+      font-size: .9rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: clamp(1.55rem, 7vw, 2.4rem);
+      font-weight: 600;
+      letter-spacing: -.025em;
+      line-height: 1.05;
+    }
+
+    .lede {
+      margin: 7px 0 15px;
+      font-family: var(--sans);
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .example {
+      padding: 14px;
+      border: 1px solid var(--ink);
+      background: var(--paper-deep);
+    }
+
+    .example-label {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--moss);
+      font-size: .6rem;
+    }
+
+    .example-main,
+    .why { margin: 0; }
+
+    .example-main {
+      font-family: var(--sans);
+      font-size: .88rem;
+      font-weight: 800;
+    }
+
+    .why {
+      margin-top: 7px;
+      color: var(--soft-ink);
+      font-size: .86rem;
+      font-style: italic;
+    }
+
+    .checkout {
+      padding: 44px 0 52px;
+      background: var(--card);
+    }
+
+    .checkout-card {
+      max-width: 560px;
+      margin-inline: auto;
+      padding: 2px 0;
+    }
+
+    .checkout h2 {
+      margin-bottom: 18px;
+      font-size: 1.35rem;
+    }
+
+    .fees {
+      margin: 0 0 19px;
+      border-top: 1px solid #d7d3c7;
+    }
+
+    .fee-row {
+      display: grid;
+      grid-template-columns: minmax(96px, .7fr) minmax(0, 1.3fr);
+      gap: 14px;
+      padding: 10px 0;
+      border-bottom: 1px solid #e4e0d5;
+      font-family: var(--sans);
+      font-size: .88rem;
+    }
+
+    .fee-row dt { color: var(--soft-ink); }
+    .fee-row dd { margin: 0; font-weight: 800; text-align: right; }
+
+    .stripe-note {
+      margin: 0 0 13px;
+      color: var(--soft-ink);
+      font-family: var(--sans);
+      font-size: .84rem;
+    }
+
+    .cta {
+      width: 100%;
+      min-height: 48px;
+      padding: 12px 18px;
+      border: 0;
+      color: var(--card);
+      background: var(--ink);
+      cursor: pointer;
+      font-family: var(--sans);
+      font-weight: 900;
+    }
+
+    .blemish {
+      margin: 14px 0 0;
+      color: var(--soft-ink);
+      font-size: .88rem;
+    }
+
+    footer {
+      padding: 22px 0 38px;
+      border-top: 1px solid var(--line);
+      color: var(--soft-ink);
+      font-family: var(--sans);
+      font-size: .8rem;
+    }
+
+    footer p { margin: 0; }
+
+    @media (min-width: 640px) {
+      .hero { padding-top: 24px; }
+      .filter-row { grid-template-columns: 92px minmax(0, 1fr); }
+      .specimen { padding: 14px 16px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#specimens">Skip to specimens</a>
+
+  <header class="masthead">
+    <div class="wrap">
+      <span class="brand">UGMI Field Guide</span>
+      <svg class="botanical" viewBox="0 0 90 58" role="img" aria-label="Line drawing of a small trillium">
+        <path d="M44 54 C43 39 47 27 44 15 M44 36 C31 25 19 28 14 36 C24 43 34 43 44 36 M45 31 C56 20 68 23 74 30 C65 38 55 38 45 31" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M44 17 C35 13 33 5 37 2 C44 4 48 9 44 17 M46 17 C52 8 60 7 63 11 C59 18 53 21 46 17 M43 18 C41 26 34 29 29 25 C31 19 36 16 43 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+        <circle cx="44.5" cy="17" r="2.5" fill="currentColor"/>
+      </svg>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="page-title">
+      <div class="wrap">
+        <h1 id="page-title">Every internship we can find, in one searchable list.</h1>
+        <p class="sub">Free, no account, no email.</p>
+        <p class="pulse">Last checked Wed Aug 6, 7:04am ET · 1,427 open · 31 added this week · 23 closed this week · hand-checked, never invented</p>
+      </div>
+    </section>
+
+    <section class="key" aria-labelledby="key-title">
+      <div class="wrap">
+        <p class="key-title" id="key-title">Habitat key</p>
+
+        <div class="filter-row">
+          <div class="taxon"><small>Range</small><strong id="work-label">Work in</strong></div>
+          <div class="pills" role="group" aria-labelledby="work-label" data-group="work">
+            <button class="pill" type="button" data-value="ca" aria-pressed="false">Canada</button>
+            <button class="pill" type="button" data-value="us" aria-pressed="false">US</button>
+            <button class="pill" type="button" data-value="both" aria-pressed="false">both</button>
+          </div>
+        </div>
+
+        <div class="filter-row">
+          <div class="taxon"><small>Season</small><strong id="term-label">Term</strong></div>
+          <div class="pills" role="group" aria-labelledby="term-label" data-group="term">
+            <button class="pill" type="button" data-value="s27" aria-pressed="false">Summer 2027</button>
+            <button class="pill" type="button" data-value="f26" aria-pressed="false">Fall 2026</button>
+            <button class="pill" type="button" data-value="w27" aria-pressed="false">Winter 2027</button>
+            <button class="pill" type="button" data-value="any" aria-pressed="false">any</button>
+          </div>
+        </div>
+
+        <div class="filter-row">
+          <div class="taxon"><small>Habitat</small><strong id="location-label">Location</strong></div>
+          <div class="pills" role="group" aria-labelledby="location-label" data-group="location">
+            <button class="pill" type="button" data-value="remote" aria-pressed="false">remote ok</button>
+            <button class="pill" type="button" data-value="toronto" aria-pressed="false">Toronto/GTA</button>
+            <button class="pill" type="button" data-value="vancouver" aria-pressed="false">Vancouver</button>
+            <button class="pill" type="button" data-value="anywhere" aria-pressed="false">anywhere</button>
+          </div>
+        </div>
+
+        <div class="filter-status" aria-live="polite">
+          <p class="result-line" id="result-line" hidden></p>
+          <div class="filter-actions">
+            <p class="zero-note" id="zero-note" hidden>No specimens match these habitat marks.</p>
+            <button class="text-button" id="undo" type="button" hidden>Undo last answer</button>
+            <button class="text-button" id="reset" type="button" hidden>Reset</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="specimens" id="specimens" aria-label="Internship specimens">
+      <div class="wrap" id="specimen-list">
+        <article class="specimen" data-status="open" data-country="ca" data-term="s27" data-location="remote">
+          <div>
+            <span class="plate-label">Open specimen A.01</span>
+            <h3>Software Engineering Intern <span class="new">NEW</span></h3>
+            <p class="company">Shopify</p>
+            <p class="meta">Remote, Canada · Summer 2027 · $34/hr CAD</p>
+          </div>
+          <div class="specimen-time">
+            <span class="deadline">closes in 3d</span>
+            <span class="added"><span class="time-label">Added</span> 2d</span>
+          </div>
+        </article>
+
+        <article class="specimen" data-status="open" data-country="ca" data-term="f26" data-location="toronto">
+          <div>
+            <span class="plate-label">Open specimen A.02</span>
+            <h3>Amplify Developer Intern <span class="new">NEW</span></h3>
+            <p class="company">RBC</p>
+            <p class="meta">Toronto · Fall 2026 · $31/hr CAD</p>
+          </div>
+          <div class="specimen-time">
+            <span class="deadline">closes in 6d</span>
+            <span class="added"><span class="time-label">Added</span> today</span>
+          </div>
+        </article>
+
+        <article class="specimen" data-status="open" data-country="ca" data-term="s27" data-location="vancouver">
+          <div>
+            <span class="plate-label">Open specimen B.01</span>
+            <h3>SDE Intern</h3>
+            <p class="company">Amazon</p>
+            <p class="meta">Vancouver · Summer 2027 · $41/hr CAD</p>
+          </div>
+          <div class="specimen-time">
+            <span class="deadline">closes in 5d</span>
+            <span class="added"><span class="time-label">Added</span> 2w+</span>
+          </div>
+        </article>
+
+        <article class="specimen" data-status="open" data-country="us" data-term="s27" data-location="remote">
+          <div>
+            <span class="plate-label">Open specimen B.02</span>
+            <h3>Software Engineer Intern</h3>
+            <p class="company">Stripe</p>
+            <p class="meta">Remote, US · Summer 2027 · pay not listed</p>
+          </div>
+          <div class="specimen-time">
+            <span class="deadline">closes in 9d</span>
+            <span class="added"><span class="time-label">Added</span> 5d</span>
+          </div>
+        </article>
+
+        <article class="specimen" data-status="open" data-country="ca" data-term="w27" data-location="waterloo">
+          <div>
+            <span class="plate-label">Open specimen C.01</span>
+            <h3>Software Developer Co-op</h3>
+            <p class="company">OpenText</p>
+            <p class="meta">Waterloo · Winter 2027 · $30/hr CAD</p>
+          </div>
+          <div class="specimen-time">
+            <span class="deadline">closes in 13d</span>
+            <span class="added"><span class="time-label">Added</span> 1w</span>
+          </div>
+        </article>
+
+        <article class="specimen" data-status="open" data-country="ca" data-term="s27" data-location="toronto">
+          <div>
+            <span class="plate-label">Open specimen C.02</span>
+            <h3>Data Science Intern</h3>
+            <p class="company">Wealthsimple</p>
+            <p class="meta">Toronto · Summer 2027 · pay not listed</p>
+          </div>
+          <div class="specimen-time">
+            <span class="deadline">closes in 11d</span>
+            <span class="added"><span class="time-label">Added</span> 4d</span>
+          </div>
+        </article>
+
+        <article class="specimen closed" data-status="closed" data-country="ca" data-term="f26" data-location="toronto">
+          <div>
+            <span class="plate-label">Closed specimen D.01</span>
+            <h3>Product Management Intern</h3>
+            <p class="company">ecobee</p>
+            <p class="meta">Toronto · Fall 2026 · $29/hr CAD</p>
+          </div>
+          <div class="specimen-time">
+            <span class="status-label">Closed</span>
+            <span class="added"><span class="time-label">Added</span> 2w+</span>
+          </div>
+        </article>
+
+        <article class="specimen closed" data-status="closed" data-country="ca" data-term="s27" data-location="vancouver">
+          <div>
+            <span class="plate-label">Closed specimen D.02</span>
+            <h3>Network Engineering Co-op</h3>
+            <p class="company">TELUS</p>
+            <p class="meta">Vancouver · Summer 2027 · $28/hr CAD</p>
+          </div>
+          <div class="specimen-time">
+            <span class="status-label">Closed</span>
+            <span class="added"><span class="time-label">Added</span> 6d</span>
+          </div>
+        </article>
+
+        <p class="empty" id="empty" hidden>No open specimens under these marks.</p>
+      </div>
+    </section>
+
+    <section class="pitch" aria-labelledby="pitch-title">
+      <div class="wrap">
+        <p class="closings">23 internships closed in the last 7 days.</p>
+        <h2 id="pitch-title">The UGMI 10</h2>
+        <p class="lede">10 per week, each with a named contact. I read the 1,427 so you read 10.</p>
+        <div class="example">
+          <span class="example-label">Example</span>
+          <p class="example-main">PitchBook, Software Engineering Intern · Toronto · $38/hr CAD · closes Fri · contact: Sarah Chen, campus recruiting</p>
+          <p class="why">Why this one: Toronto, software, and a deadline before next Monday.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="checkout" aria-labelledby="checkout-title">
+      <div class="wrap">
+        <div class="checkout-card">
+          <h2 id="checkout-title">Your first list</h2>
+          <dl class="fees">
+            <div class="fee-row"><dt>You get</dt><dd>4 Monday lists, 10 picks each, a named contact per pick</dd></div>
+            <div class="fee-row"><dt>Monthly</dt><dd>$15 CAD</dd></div>
+            <div class="fee-row"><dt>Sign-up fee</dt><dd>$0</dd></div>
+            <div class="fee-row"><dt>Cancellation</dt><dd>anytime from Stripe receipt email</dd></div>
+            <div class="fee-row"><dt>Card</dt><dd>handled by Stripe</dd></div>
+          </dl>
+          <p class="stripe-note">You'll be taken to Stripe to pay.</p>
+          <button class="cta" type="button">Get my first list</button>
+          <p class="blemish">I'm one Waterloo student, not a company.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <p>Dead link? Wrong deadline? DM @sleppyeric, fixed within a day.</p>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const storageKey = 'ugmi-field-guide-filters-v1';
+      const state = { work: '', term: '', location: '' };
+      const history = [];
+      const groups = Array.from(document.querySelectorAll('[data-group]'));
+      const specimens = Array.from(document.querySelectorAll('.specimen'));
+      const openSpecimens = specimens.filter(function (item) {
+        return item.dataset.status === 'open';
+      });
+      const resultLine = document.getElementById('result-line');
+      const zeroNote = document.getElementById('zero-note');
+      const undoButton = document.getElementById('undo');
+      const resetButton = document.getElementById('reset');
+      const empty = document.getElementById('empty');
+
+      function hasAnswers() {
+        return Boolean(state.work || state.term || state.location);
+      }
+
+      function save() {
+        try {
+          if (hasAnswers()) {
+            localStorage.setItem(storageKey, JSON.stringify(state));
+          } else {
+            localStorage.removeItem(storageKey);
+          }
+        } catch (error) {
+          return;
+        }
+      }
+
+      function matches(item) {
+        const workMatch = !state.work || state.work === 'both' || item.dataset.country === state.work;
+        const termMatch = !state.term || state.term === 'any' || item.dataset.term === state.term;
+        const locationMatch = !state.location || state.location === 'anywhere' || item.dataset.location === state.location;
+        return workMatch && termMatch && locationMatch;
+      }
+
+      function render() {
+        const active = hasAnswers();
+        let visibleOpen = 0;
+
+        openSpecimens.forEach(function (item) {
+          if (matches(item)) visibleOpen += 1;
+        });
+
+        specimens.forEach(function (item) {
+          item.hidden = active && (visibleOpen === 0 || !matches(item));
+        });
+
+        groups.forEach(function (group) {
+          const key = group.dataset.group;
+          group.querySelectorAll('.pill').forEach(function (button) {
+            button.setAttribute('aria-pressed', String(state[key] === button.dataset.value));
+          });
+        });
+
+        if (active) {
+          const scaled = Math.round((visibleOpen / openSpecimens.length) * 1427);
+          resultLine.textContent = "Showing " + scaled.toLocaleString('en-CA') + " of 1,427 you're actually eligible for.";
+          resultLine.hidden = false;
+        } else {
+          resultLine.hidden = true;
+        }
+
+        const isZero = active && visibleOpen === 0;
+        zeroNote.hidden = !isZero;
+        undoButton.hidden = !isZero;
+        resetButton.hidden = !active;
+        empty.hidden = !isZero;
+      }
+
+      function setAnswer(key, value) {
+        history.push({ key: key, value: state[key] });
+        state[key] = state[key] === value ? '' : value;
+        save();
+        render();
+      }
+
+      groups.forEach(function (group) {
+        group.addEventListener('click', function (event) {
+          const button = event.target.closest('.pill');
+          if (!button) return;
+          setAnswer(group.dataset.group, button.dataset.value);
+        });
+      });
+
+      undoButton.addEventListener('click', function () {
+        const previous = history.pop();
+        if (previous) {
+          state[previous.key] = previous.value;
+        } else {
+          const key = ['location', 'term', 'work'].find(function (name) { return state[name]; });
+          if (key) state[key] = '';
+        }
+        save();
+        render();
+      });
+
+      resetButton.addEventListener('click', function () {
+        state.work = '';
+        state.term = '';
+        state.location = '';
+        history.length = 0;
+        save();
+        render();
+      });
+
+      try {
+        const saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
+        ['work', 'term', 'location'].forEach(function (key) {
+          if (typeof saved[key] === 'string') state[key] = saved[key];
+        });
+      } catch (error) {
+        try { localStorage.removeItem(storageKey); } catch (storageError) { }
+      }
+
+      render();
+    }());
+  </script>
+</body>
+</html>

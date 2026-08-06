@@ -1,0 +1,650 @@
+<!-- INTERNAL DESIGN MOCKUP - sample listing data -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>UGMI Mission Roster</title>
+  <style>
+    :root {
+      --cream: #f7f0d8;
+      --paper: #fffaf0;
+      --navy: #102f4a;
+      --blue: #2e6e83;
+      --sky: #b9d9d6;
+      --line: #78949a;
+      --muted: #51666a;
+      --closed: #e1dfd4;
+      --closed-ink: #626b6c;
+      --amber: #8a5a00;
+      --focus: #0c6174;
+      --max: 1040px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      overflow-x: hidden;
+      background:
+        radial-gradient(circle at 10px 10px, rgba(16,47,74,.055) 1px, transparent 1.2px) 0 0 / 20px 20px,
+        var(--cream);
+      color: var(--navy);
+      font-family: "Avenir Next", Avenir, "Segoe UI", Arial, system-ui, sans-serif;
+      line-height: 1.45;
+    }
+    button, a { font: inherit; }
+    button { color: inherit; }
+    [hidden] { display: none !important; }
+    :focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 3px;
+      box-shadow: 0 0 0 2px var(--paper);
+    }
+    .shell { width: min(calc(100% - 32px), var(--max)); margin-inline: auto; }
+    .skip {
+      position: fixed;
+      z-index: 100;
+      top: 8px;
+      left: 8px;
+      padding: 12px 16px;
+      background: var(--navy);
+      color: var(--paper);
+      transform: translateY(-150%);
+    }
+    .skip:focus { transform: none; }
+
+    header {
+      border-bottom: 2px solid var(--navy);
+      background: rgba(247,240,216,.96);
+    }
+    .masthead {
+      min-height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      color: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 44px;
+      text-decoration: none;
+      font-weight: 900;
+      letter-spacing: .12em;
+    }
+    .brand-mark { width: 36px; height: 36px; }
+    .masthead-note {
+      color: var(--muted);
+      font-size: .68rem;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .hero {
+      position: relative;
+      min-height: 188px;
+      overflow: hidden;
+      border-bottom: 2px solid var(--navy);
+      background: linear-gradient(135deg, rgba(255,250,240,.9), rgba(185,217,214,.62));
+    }
+    .hero-inner { position: relative; padding: 28px 0 24px; }
+    .hero-copy { position: relative; z-index: 2; max-width: 760px; }
+    h1 {
+      margin: 0;
+      max-width: 820px;
+      font-family: Impact, "Arial Narrow", "Franklin Gothic Condensed", sans-serif;
+      font-size: 1.72rem;
+      font-weight: 900;
+      line-height: .98;
+      letter-spacing: .01em;
+      text-transform: uppercase;
+    }
+    h1 span { display: block; white-space: nowrap; }
+    .sub {
+      margin: 13px 0 0;
+      font-size: .92rem;
+      font-weight: 800;
+      letter-spacing: .055em;
+    }
+    .orbit-art {
+      position: absolute;
+      width: 230px;
+      height: 230px;
+      right: -118px;
+      top: -20px;
+      opacity: .46;
+      pointer-events: none;
+    }
+
+    .pulse {
+      border-bottom: 2px solid var(--navy);
+      background: var(--navy);
+      color: var(--paper);
+    }
+    .pulse p {
+      margin: 0;
+      padding: 11px 0;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .025em;
+      text-align: center;
+    }
+
+    .eligibility {
+      padding: 14px 0 9px;
+      border-bottom: 2px solid var(--navy);
+      background: rgba(255,250,240,.72);
+    }
+    .eligibility h2,
+    .pitch h2 {
+      margin: 0;
+      font-family: Impact, "Arial Narrow", "Franklin Gothic Condensed", sans-serif;
+      text-transform: uppercase;
+      letter-spacing: .045em;
+    }
+    .eligibility h2 { font-size: 1.08rem; }
+    .filter-row {
+      display: grid;
+      grid-template-columns: 66px 1fr;
+      align-items: center;
+      gap: 7px;
+      margin-top: 7px;
+    }
+    .filter-label {
+      color: var(--muted);
+      font-size: .67rem;
+      font-weight: 900;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+    .pills { display: flex; flex-wrap: wrap; gap: 6px; padding: 2px 2px 3px; }
+    .pill,
+    .quiet-action,
+    .checkout-button {
+      min-height: 44px;
+      border: 2px solid var(--navy);
+      cursor: pointer;
+      font-weight: 800;
+    }
+    .pill {
+      flex: 0 0 auto;
+      min-width: 44px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--paper);
+      font-size: .75rem;
+    }
+    .pill[aria-pressed="true"] { background: var(--navy); color: var(--paper); }
+    .filter-status {
+      min-height: 30px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+      font-size: .81rem;
+      font-weight: 750;
+    }
+    .filter-status p { margin: 0; }
+    .quiet-action {
+      padding: 7px 10px;
+      border-width: 0 0 2px;
+      background: transparent;
+      font-size: .75rem;
+    }
+    #resetButton { margin-left: auto; }
+
+    .roster { padding: 10px 0 0; }
+    .roster-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 5px 0 9px;
+    }
+    .roster-head h2 {
+      margin: 0;
+      font-size: .72rem;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+    .roster-head svg { width: 44px; height: 26px; }
+    .listing {
+      display: grid;
+      grid-template-columns: 44px minmax(0, 1fr);
+      gap: 11px;
+      padding: 13px 0;
+      border-top: 1px solid var(--line);
+    }
+    .patch { width: 44px; height: 50px; align-self: start; }
+    .listing-top { display: flex; justify-content: space-between; align-items: start; gap: 8px; }
+    .listing h3 { margin: 0; font-size: 1rem; line-height: 1.2; }
+    .role { margin: 2px 0 0; color: var(--muted); font-size: .78rem; font-weight: 650; }
+    .facts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px 16px;
+      margin: 8px 0 0;
+      font-size: .73rem;
+    }
+    .facts div { display: flex; gap: 5px; }
+    .facts dt { color: var(--muted); font-weight: 750; }
+    .facts dd { margin: 0; font-weight: 800; }
+    .deadline { color: var(--amber); }
+    .tag {
+      flex: 0 0 auto;
+      padding: 3px 7px;
+      border: 1px solid currentColor;
+      border-radius: 999px;
+      font-size: .62rem;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .tag.new { color: var(--blue); }
+    .listing.closed { color: var(--closed-ink); background: var(--closed); margin-inline: -16px; padding-inline: 16px; }
+    .listing.closed .role,
+    .listing.closed dt { color: var(--closed-ink); }
+    .listing.closed .patch { opacity: .55; filter: grayscale(1); }
+    .zero-state {
+      margin: 6px 0 12px;
+      padding: 18px;
+      border: 2px dashed var(--navy);
+      background: var(--paper);
+      text-align: center;
+    }
+    .zero-state p { margin: 0 0 8px; }
+    .zero-actions { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+
+    .bridge {
+      margin: 0;
+      padding: 18px 0;
+      border-top: 2px solid var(--navy);
+      text-align: center;
+      font-weight: 900;
+    }
+    .pitch {
+      position: relative;
+      overflow: hidden;
+      padding: 42px 0;
+      background: var(--sky);
+      border-block: 2px solid var(--navy);
+    }
+    .pitch::before,
+    .pitch::after {
+      content: "";
+      position: absolute;
+      width: 360px;
+      height: 120px;
+      border: 2px solid rgba(16,47,74,.28);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .pitch::before { left: -220px; top: 18px; transform: rotate(18deg); }
+    .pitch::after { right: -240px; bottom: 20px; transform: rotate(-16deg); }
+    .pitch-inner { position: relative; z-index: 1; max-width: 720px; }
+    .pitch h2 { font-size: clamp(2.15rem, 10vw, 4.7rem); line-height: .92; }
+    .lede { margin: 12px 0 24px; max-width: 520px; font-size: 1rem; font-weight: 800; }
+    .example {
+      max-width: 650px;
+      padding: 18px;
+      border: 2px solid var(--navy);
+      border-radius: 20px 20px 20px 4px;
+      background: var(--paper);
+      box-shadow: 5px 5px 0 var(--navy);
+    }
+    .example-label {
+      margin: 0 0 7px;
+      color: var(--blue);
+      font-size: .67rem;
+      font-weight: 900;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+    .example-main { margin: 0; font-weight: 900; }
+    .example-why { margin: 8px 0 0; font-size: .86rem; }
+
+    .checkout {
+      padding: 50px 0;
+      background: var(--paper);
+    }
+    .checkout-card { max-width: 620px; margin-inline: auto; }
+    .checkout-card h2 { margin: 0 0 18px; font-size: 1.25rem; font-weight: 800; }
+    .fee-grid { margin: 0; border-top: 1px solid #aeb5b1; }
+    .fee-grid div {
+      display: grid;
+      grid-template-columns: minmax(96px, .7fr) minmax(0, 1.3fr);
+      gap: 14px;
+      padding: 10px 0;
+      border-bottom: 1px solid #aeb5b1;
+    }
+    .fee-grid dt { color: var(--muted); }
+    .fee-grid dd { margin: 0; font-weight: 750; text-align: right; }
+    .stripe-note { margin: 16px 0 12px; color: var(--muted); font-size: .84rem; }
+    .checkout-button {
+      width: 100%;
+      padding: 11px 16px;
+      border-radius: 4px;
+      background: var(--navy);
+      color: var(--paper);
+    }
+    .blemish { margin: 13px 0 0; color: var(--muted); font-family: Georgia, serif; font-style: italic; text-align: center; }
+
+    footer { padding: 24px 0; background: var(--navy); color: var(--paper); }
+    footer p { margin: 0; text-align: center; font-size: .82rem; }
+
+    @media (min-width: 640px) {
+      .hero { min-height: 252px; }
+      .hero-inner { padding: 45px 0 38px; }
+      h1 { font-size: clamp(2.8rem, 7.5vw, 5.4rem); }
+      .sub { font-size: 1.05rem; }
+      .orbit-art { width: 430px; height: 430px; right: -90px; top: -92px; opacity: .62; }
+      .pulse p { font-size: .78rem; }
+      .eligibility { padding: 20px 0 14px; }
+      .filter-row { grid-template-columns: 90px 1fr; }
+      .listing { grid-template-columns: 56px minmax(0, 1fr); gap: 15px; padding: 17px 0; }
+      .patch { width: 54px; height: 60px; }
+      .listing-body { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(260px, .8fr); align-items: center; gap: 18px; }
+      .facts { margin: 0; justify-content: flex-end; }
+      .listing.closed { margin-inline: -18px; padding-inline: 18px; }
+      .checkout-button { width: auto; min-width: 220px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#listings">Skip to listings</a>
+
+  <header>
+    <div class="shell masthead">
+      <a class="brand" href="#top" aria-label="UGMI home">
+        <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+          <circle cx="20" cy="20" r="17" fill="#fffaf0" stroke="#102f4a" stroke-width="2"/>
+          <ellipse cx="20" cy="20" rx="18" ry="7" fill="none" stroke="#2e6e83" stroke-width="2" transform="rotate(-18 20 20)"/>
+          <path d="M20 9l3 8 8 .3-6.4 5 2.2 8-6.8-4.5-6.8 4.5 2.2-8-6.4-5 8-.3z" fill="#102f4a"/>
+        </svg>
+        UGMI / CAN
+      </a>
+      <span class="masthead-note">Internship roster</span>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="shell hero-inner">
+        <div class="hero-copy">
+          <h1 id="hero-title"><span>Every internship we can find,</span> <span>in one searchable list.</span></h1>
+          <p class="sub">Free, no account, no email.</p>
+        </div>
+        <svg class="orbit-art" viewBox="0 0 400 400" aria-hidden="true">
+          <circle cx="200" cy="200" r="58" fill="#f7f0d8" stroke="#102f4a" stroke-width="5"/>
+          <ellipse cx="200" cy="200" rx="174" ry="68" fill="none" stroke="#2e6e83" stroke-width="3" transform="rotate(-21 200 200)"/>
+          <ellipse cx="200" cy="200" rx="88" ry="176" fill="none" stroke="#102f4a" stroke-width="2" transform="rotate(29 200 200)"/>
+          <circle cx="341" cy="106" r="12" fill="#b9d9d6" stroke="#102f4a" stroke-width="4"/>
+          <circle cx="76" cy="279" r="8" fill="#fffaf0" stroke="#102f4a" stroke-width="3"/>
+        </svg>
+      </div>
+    </section>
+
+    <div class="pulse" aria-label="Roster facts">
+      <p class="shell">Last checked Wed Aug 6, 7:04am ET · 1,427 open · 31 added this week · 23 closed this week · hand-checked, never invented</p>
+    </div>
+
+    <section class="eligibility" aria-labelledby="filter-title">
+      <div class="shell">
+        <h2 id="filter-title">Set your orbit</h2>
+        <div class="filter-row">
+          <span class="filter-label" id="work-label">Work in</span>
+          <div class="pills" role="group" aria-labelledby="work-label" data-group="work">
+            <button class="pill" type="button" data-value="ca" aria-pressed="false">Canada</button>
+            <button class="pill" type="button" data-value="us" aria-pressed="false">US</button>
+            <button class="pill" type="button" data-value="both" aria-pressed="false">Both</button>
+          </div>
+        </div>
+        <div class="filter-row">
+          <span class="filter-label" id="term-label">Term</span>
+          <div class="pills" role="group" aria-labelledby="term-label" data-group="term">
+            <button class="pill" type="button" data-value="s27" aria-pressed="false">Summer 2027</button>
+            <button class="pill" type="button" data-value="f26" aria-pressed="false">Fall 2026</button>
+            <button class="pill" type="button" data-value="w27" aria-pressed="false">Winter 2027</button>
+            <button class="pill" type="button" data-value="any" aria-pressed="false">Any</button>
+          </div>
+        </div>
+        <div class="filter-row">
+          <span class="filter-label" id="location-label">Location</span>
+          <div class="pills" role="group" aria-labelledby="location-label" data-group="location">
+            <button class="pill" type="button" data-value="remote" aria-pressed="false">Remote OK</button>
+            <button class="pill" type="button" data-value="toronto" aria-pressed="false">Toronto/GTA</button>
+            <button class="pill" type="button" data-value="vancouver" aria-pressed="false">Vancouver</button>
+            <button class="pill" type="button" data-value="anywhere" aria-pressed="false">Anywhere</button>
+          </div>
+        </div>
+        <div class="filter-status" aria-live="polite">
+          <p id="resultLine"></p>
+          <button class="quiet-action" id="resetButton" type="button" hidden>Reset</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="roster" id="listings" aria-labelledby="roster-title">
+      <div class="shell">
+        <div class="roster-head">
+          <h2 id="roster-title">Launch candidates</h2>
+          <svg viewBox="0 0 60 34" aria-hidden="true"><ellipse cx="30" cy="17" rx="27" ry="9" fill="none" stroke="#2e6e83" stroke-width="2" transform="rotate(-12 30 17)"/><circle cx="30" cy="17" r="5" fill="#102f4a"/></svg>
+        </div>
+        <div id="jobList">
+          <article class="listing" data-open="true" data-work="ca" data-term="s27" data-location="remote">
+            <svg class="patch" viewBox="0 0 50 58" aria-hidden="true"><path d="M25 2C40 7 48 18 46 34 44 46 37 53 25 56 13 53 6 46 4 34 2 18 10 7 25 2Z" fill="#2e6e83" stroke="#102f4a" stroke-width="2"/><circle cx="25" cy="27" r="9" fill="#f7f0d8"/><ellipse cx="25" cy="27" rx="17" ry="6" fill="none" stroke="#fffaf0" stroke-width="2" transform="rotate(-15 25 27)"/></svg>
+            <div class="listing-body"><div><div class="listing-top"><div><h3>Shopify</h3><p class="role">Software Engineering Intern · Remote, Canada · Summer 2027</p></div><span class="tag new">NEW</span></div></div><dl class="facts"><div><dt>Pay</dt><dd>$34/hr CAD</dd></div><div><dt>Closes</dt><dd class="deadline">in 3d</dd></div><div><dt>Added</dt><dd>2d ago</dd></div></dl></div>
+          </article>
+
+          <article class="listing" data-open="true" data-work="ca" data-term="s27" data-location="vancouver">
+            <svg class="patch" viewBox="0 0 50 58" aria-hidden="true"><path d="M25 3 46 17 39 47 25 56 11 47 4 17Z" fill="#b9d9d6" stroke="#102f4a" stroke-width="2"/><path d="m25 13 4 10 11 1-8 7 2 11-9-6-9 6 2-11-8-7 11-1z" fill="#102f4a"/></svg>
+            <div class="listing-body"><div><h3>Amazon</h3><p class="role">SDE Intern · Vancouver · Summer 2027</p></div><dl class="facts"><div><dt>Pay</dt><dd>$41/hr CAD</dd></div><div><dt>Closes</dt><dd class="deadline">in 5d</dd></div><div><dt>Added</dt><dd>2w ago</dd></div></dl></div>
+          </article>
+
+          <article class="listing" data-open="true" data-work="ca" data-term="f26" data-location="toronto">
+            <svg class="patch" viewBox="0 0 50 58" aria-hidden="true"><circle cx="25" cy="29" r="23" fill="#fffaf0" stroke="#102f4a" stroke-width="2"/><ellipse cx="25" cy="29" rx="18" ry="7" fill="none" stroke="#2e6e83" stroke-width="3" transform="rotate(18 25 29)"/><circle cx="25" cy="29" r="5" fill="#102f4a"/></svg>
+            <div class="listing-body"><div><div class="listing-top"><div><h3>RBC</h3><p class="role">Amplify Developer Intern · Toronto · Fall 2026</p></div><span class="tag new">NEW</span></div></div><dl class="facts"><div><dt>Pay</dt><dd>$31/hr CAD</dd></div><div><dt>Closes</dt><dd class="deadline">in 6d</dd></div><div><dt>Added</dt><dd>3d ago</dd></div></dl></div>
+          </article>
+
+          <article class="listing" data-open="true" data-work="both" data-term="w27" data-location="toronto">
+            <svg class="patch" viewBox="0 0 50 58" aria-hidden="true"><path d="M25 3C39 8 45 17 44 32 43 45 36 52 25 56 14 52 7 45 6 32 5 17 11 8 25 3Z" fill="#102f4a"/><path d="M14 34 25 13l11 21-11 8z" fill="#b9d9d6" stroke="#fffaf0" stroke-width="2"/></svg>
+            <div class="listing-body"><div><h3>AMD</h3><p class="role">Silicon Design Intern · Markham · Winter 2027</p></div><dl class="facts"><div><dt>Pay</dt><dd>$36/hr CAD</dd></div><div><dt>Closes</dt><dd class="deadline">in 9d</dd></div><div><dt>Added</dt><dd>5d ago</dd></div></dl></div>
+          </article>
+
+          <article class="listing" data-open="true" data-work="us" data-term="s27" data-location="remote">
+            <svg class="patch" viewBox="0 0 50 58" aria-hidden="true"><path d="M25 2 45 14 42 44 25 56 8 44 5 14Z" fill="#2e6e83" stroke="#102f4a" stroke-width="2"/><circle cx="25" cy="28" r="12" fill="#fffaf0"/><path d="M17 31c6-12 12-12 17-6-5 1-9 5-11 11z" fill="#102f4a"/></svg>
+            <div class="listing-body"><div><h3>Stripe</h3><p class="role">Product Engineering Intern · Remote, US · Summer 2027</p></div><dl class="facts"><div><dt>Pay</dt><dd>$59/hr USD</dd></div><div><dt>Closes</dt><dd class="deadline">in 12d</dd></div><div><dt>Added</dt><dd>6d ago</dd></div></dl></div>
+          </article>
+
+          <article class="listing" data-open="true" data-work="ca" data-term="w27" data-location="other">
+            <svg class="patch" viewBox="0 0 50 58" aria-hidden="true"><circle cx="25" cy="29" r="23" fill="#b9d9d6" stroke="#102f4a" stroke-width="2"/><path d="M25 10v38M8 29h34" stroke="#102f4a" stroke-width="2"/><ellipse cx="25" cy="29" rx="10" ry="19" fill="none" stroke="#fffaf0" stroke-width="2"/></svg>
+            <div class="listing-body"><div><h3>BlackBerry</h3><p class="role">Cybersecurity Intern · Waterloo · Winter 2027</p></div><dl class="facts"><div><dt>Pay</dt><dd>$29/hr CAD</dd></div><div><dt>Closes</dt><dd class="deadline">in 16d</dd></div><div><dt>Added</dt><dd>1w ago</dd></div></dl></div>
+          </article>
+
+          <article class="listing" data-open="true" data-work="ca" data-term="s27" data-location="other">
+            <svg class="patch" viewBox="0 0 50 58" aria-hidden="true"><path d="M25 3C40 8 47 18 45 35 43 47 36 53 25 56 14 53 7 47 5 35 3 18 10 8 25 3Z" fill="#fffaf0" stroke="#102f4a" stroke-width="2"/><path d="m25 12 5 11 12 2-9 8 3 12-11-6-11 6 3-12-9-8 12-2z" fill="#2e6e83"/></svg>
+            <div class="listing-body"><div><h3>Ubisoft</h3><p class="role">Gameplay Programmer Intern · Montreal · Summer 2027</p></div><dl class="facts"><div><dt>Pay</dt><dd>$30/hr CAD</dd></div><div><dt>Closes</dt><dd>none listed</dd></div><div><dt>Added</dt><dd>1w ago</dd></div></dl></div>
+          </article>
+
+          <article class="listing" data-open="true" data-work="both" data-term="f26" data-location="vancouver">
+            <svg class="patch" viewBox="0 0 50 58" aria-hidden="true"><path d="M25 2 47 21 39 49 25 56 11 49 3 21Z" fill="#102f4a"/><ellipse cx="25" cy="28" rx="17" ry="6" fill="none" stroke="#b9d9d6" stroke-width="3" transform="rotate(-20 25 28)"/><circle cx="25" cy="28" r="6" fill="#fffaf0"/></svg>
+            <div class="listing-body"><div><h3>Microsoft</h3><p class="role">Explore Intern · Vancouver · Fall 2026</p></div><dl class="facts"><div><dt>Pay</dt><dd>$43/hr CAD</dd></div><div><dt>Closes</dt><dd class="deadline">in 21d</dd></div><div><dt>Added</dt><dd>10d ago</dd></div></dl></div>
+          </article>
+
+          <article class="listing closed" data-open="false" data-work="ca" data-term="s27" data-location="toronto">
+            <svg class="patch" viewBox="0 0 50 58" aria-hidden="true"><circle cx="25" cy="29" r="22" fill="#b9d9d6" stroke="#102f4a" stroke-width="2"/><path d="M13 35c8-18 16-18 24 0" fill="none" stroke="#102f4a" stroke-width="3"/></svg>
+            <div class="listing-body"><div><div class="listing-top"><div><h3>Pinterest</h3><p class="role">Software Engineer Intern · Toronto · Summer 2027</p></div><span class="tag">Closed</span></div></div><dl class="facts"><div><dt>Added</dt><dd>3w ago</dd></div></dl></div>
+          </article>
+
+          <article class="listing closed" data-open="false" data-work="ca" data-term="f26" data-location="toronto">
+            <svg class="patch" viewBox="0 0 50 58" aria-hidden="true"><path d="M25 3 45 15 40 47 25 56 10 47 5 15Z" fill="#b9d9d6" stroke="#102f4a" stroke-width="2"/><path d="M15 19h20v20H15z" fill="none" stroke="#102f4a" stroke-width="3"/></svg>
+            <div class="listing-body"><div><div class="listing-top"><div><h3>Thomson Reuters</h3><p class="role">Data Analyst Intern · Toronto · Fall 2026</p></div><span class="tag">Closed</span></div></div><dl class="facts"><div><dt>Added</dt><dd>4w ago</dd></div></dl></div>
+          </article>
+        </div>
+
+        <div class="zero-state" id="zeroState" hidden>
+          <p>0 of 1,427 match all your filters.</p>
+          <div class="zero-actions">
+            <button class="quiet-action" id="undoButton" type="button">Undo last answer</button>
+            <button class="quiet-action" id="zeroResetButton" type="button">Reset</button>
+          </div>
+        </div>
+        <p class="bridge">23 internships closed in the last 7 days.</p>
+      </div>
+    </section>
+
+    <section class="pitch" aria-labelledby="pitch-title">
+      <div class="shell pitch-inner">
+        <h2 id="pitch-title">The UGMI 10</h2>
+        <p class="lede">10 per week, each with a named contact. I read the 1,427 so you read 10.</p>
+        <article class="example">
+          <p class="example-label">Example</p>
+          <p class="example-main">PitchBook, Software Engineering Intern · Toronto · $38/hr CAD · closes Fri · contact: Sarah Chen, campus recruiting</p>
+          <p class="example-why"><strong>Why this one:</strong> they take first-years, posted 2 days ago, and the recruiter replied to a student DM last month.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="checkout" aria-labelledby="checkout-title">
+      <div class="shell checkout-card">
+        <h2 id="checkout-title">Weekly list</h2>
+        <dl class="fee-grid">
+          <div><dt>You get</dt><dd>4 Monday lists, 10 picks each, a named contact per pick</dd></div>
+          <div><dt>Monthly</dt><dd>$15 CAD</dd></div>
+          <div><dt>Sign-up fee</dt><dd>$0</dd></div>
+          <div><dt>Cancellation</dt><dd>anytime from Stripe receipt email</dd></div>
+          <div><dt>Card</dt><dd>handled by Stripe</dd></div>
+        </dl>
+        <p class="stripe-note">You'll be taken to Stripe to pay.</p>
+        <button class="checkout-button" type="button">Get my first list</button>
+        <p class="blemish">I'm one Waterloo student, not a company.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p class="shell">Dead link? Wrong deadline? DM @sleppyeric, fixed within a day.</p>
+  </footer>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var STORAGE_KEY = "ugmi-orbital-eligibility-v1";
+      var TOTAL = 1427;
+      var state = { work: null, term: null, location: null };
+      var history = [];
+      var groups = Array.prototype.slice.call(document.querySelectorAll("[data-group]"));
+      var listings = Array.prototype.slice.call(document.querySelectorAll(".listing"));
+      var openListings = listings.filter(function (listing) { return listing.dataset.open === "true"; });
+      var resultLine = document.getElementById("resultLine");
+      var resetButton = document.getElementById("resetButton");
+      var zeroState = document.getElementById("zeroState");
+      var undoButton = document.getElementById("undoButton");
+      var zeroResetButton = document.getElementById("zeroResetButton");
+
+      function readSaved() {
+        try {
+          var saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+          if (!saved || typeof saved !== "object") return;
+          var savedState = saved.state && typeof saved.state === "object" ? saved.state : saved;
+          ["work", "term", "location"].forEach(function (key) {
+            if (typeof savedState[key] === "string") state[key] = savedState[key];
+          });
+          if (Array.isArray(saved.history)) history = saved.history;
+        } catch (error) {
+          state = { work: null, term: null, location: null };
+          history = [];
+        }
+      }
+
+      function save() {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ state: state, history: history })); } catch (error) {}
+      }
+
+      function hasFilters() {
+        return Boolean(state.work || state.term || state.location);
+      }
+
+      function matches(listing) {
+        var workMatch = !state.work || state.work === "both" || listing.dataset.work === "both" || listing.dataset.work === state.work;
+        var termMatch = !state.term || state.term === "any" || listing.dataset.term === state.term;
+        var locationMatch = !state.location || state.location === "anywhere" || listing.dataset.location === state.location;
+        return workMatch && termMatch && locationMatch;
+      }
+
+      function paintButtons() {
+        groups.forEach(function (group) {
+          var key = group.dataset.group;
+          Array.prototype.forEach.call(group.querySelectorAll("button"), function (button) {
+            button.setAttribute("aria-pressed", String(state[key] === button.dataset.value));
+          });
+        });
+      }
+
+      function render() {
+        var active = hasFilters();
+        var matchingOpen = 0;
+
+        listings.forEach(function (listing) {
+          var visible = !active || matches(listing);
+          listing.hidden = !visible;
+          if (visible && listing.dataset.open === "true") matchingOpen += 1;
+        });
+
+        if (active) {
+          var estimate = Math.round(TOTAL * matchingOpen / openListings.length);
+          resultLine.textContent = "Showing " + estimate.toLocaleString("en-CA") + " of 1,427 you're actually eligible for.";
+          zeroState.hidden = matchingOpen !== 0;
+        } else {
+          resultLine.textContent = "";
+          zeroState.hidden = true;
+        }
+
+        resetButton.hidden = !active;
+        paintButtons();
+      }
+
+      function reset() {
+        state = { work: null, term: null, location: null };
+        history = [];
+        try { localStorage.removeItem(STORAGE_KEY); } catch (error) {}
+        render();
+      }
+
+      groups.forEach(function (group) {
+        group.addEventListener("click", function (event) {
+          var button = event.target.closest("button[data-value]");
+          if (!button) return;
+          history.push({ work: state.work, term: state.term, location: state.location });
+          state[group.dataset.group] = button.dataset.value;
+          save();
+          render();
+        });
+      });
+
+      resetButton.addEventListener("click", reset);
+      zeroResetButton.addEventListener("click", reset);
+      undoButton.addEventListener("click", function () {
+        state = history.length ? history.pop() : { work: null, term: null, location: null };
+        save();
+        render();
+      });
+
+      readSaved();
+      render();
+    }());
+  </script>
+</body>
+</html>

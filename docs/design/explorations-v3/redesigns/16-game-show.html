@@ -1,0 +1,758 @@
+<!-- INTERNAL DESIGN MOCKUP - sample listing data -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A free, searchable board of internship listings from UGMI.">
+  <title>UGMI | Internship Information Board</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #342218;
+      --brown: #4a2d1c;
+      --brown-deep: #2e1b12;
+      --cream: #fff8e6;
+      --cream-soft: #f7edcf;
+      --gold: #d6a93d;
+      --gold-light: #efd27c;
+      --amber: #805500;
+      --line: #8c6b35;
+      --closed: #ddd8ca;
+      --closed-ink: #585349;
+      --focus: #215c63;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      background: var(--brown-deep);
+      scroll-behavior: auto;
+    }
+
+    body {
+      min-width: 0;
+      margin: 0;
+      overflow-x: hidden;
+      color: var(--ink);
+      background:
+        linear-gradient(90deg, rgba(74, 45, 28, .05) 1px, transparent 1px) 0 0 / 34px 100%,
+        #ead9aa;
+      font-family: ui-rounded, "Arial Rounded MT Bold", "Trebuchet MS", Arial, sans-serif;
+      line-height: 1.42;
+    }
+
+    button { font: inherit; }
+    [hidden] { display: none !important; }
+
+    :focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 3px;
+    }
+
+    .skip-link {
+      position: fixed;
+      z-index: 20;
+      top: 8px;
+      left: 8px;
+      min-height: 44px;
+      padding: 11px 14px;
+      border-radius: 8px;
+      color: var(--cream);
+      background: var(--brown-deep);
+      transform: translateY(-160%);
+    }
+
+    .skip-link:focus { transform: none; }
+
+    .set {
+      width: min(1080px, 100%);
+      margin: 0 auto;
+      background: var(--cream-soft);
+      box-shadow: 0 0 0 5px var(--brown);
+    }
+
+    .set-header {
+      display: flex;
+      min-height: 48px;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 4px solid var(--brown);
+      color: var(--cream);
+      background: var(--brown);
+      letter-spacing: .18em;
+      font-size: .82rem;
+      font-weight: 900;
+    }
+
+    .hero {
+      padding: 14px 14px 10px;
+      text-align: center;
+      background:
+        radial-gradient(circle, var(--gold-light) 0 3px, transparent 3.5px) 8px 8px / 20px 20px,
+        var(--gold);
+      border-bottom: 4px solid var(--brown);
+    }
+
+    .show-sign {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 13px 12px 12px;
+      border: 5px double var(--brown);
+      border-radius: 30px 30px 20px 20px;
+      background: var(--cream);
+      box-shadow: inset 0 0 0 5px var(--gold-light);
+    }
+
+    h1, h2, h3, p { overflow-wrap: anywhere; }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.25rem, 5.1vw, 3.55rem);
+      line-height: 1.04;
+      letter-spacing: -.025em;
+      font-weight: 900;
+    }
+
+    .sub {
+      margin: 7px 0 0;
+      font-size: .9rem;
+      font-weight: 800;
+    }
+
+    .pulse {
+      max-width: 850px;
+      margin: 9px auto 0;
+      padding: 7px 10px;
+      border: 2px solid var(--brown);
+      border-radius: 12px;
+      color: var(--cream);
+      background: var(--brown);
+      font-size: .68rem;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .controls {
+      padding: 9px 14px 7px;
+      border-bottom: 4px solid var(--brown);
+      background: var(--gold-light);
+    }
+
+    .control-inner,
+    .board-inner,
+    .pitch-inner,
+    .checkout-inner {
+      width: min(900px, 100%);
+      margin: 0 auto;
+    }
+
+    .filter-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+      padding: 3px 0;
+    }
+
+    .filter-label {
+      flex: 0 0 58px;
+      color: var(--brown-deep);
+      font-size: .72rem;
+      font-weight: 900;
+    }
+
+    .pills {
+      display: flex;
+      min-width: 0;
+      flex: 1;
+      gap: 5px;
+    }
+
+    .pill,
+    .utility {
+      min-height: 44px;
+      border: 2px solid var(--brown);
+      color: var(--brown-deep);
+      background: var(--cream);
+      cursor: pointer;
+      font-weight: 900;
+    }
+
+    .pill {
+      min-width: 0;
+      flex: 1;
+      padding: 7px 6px;
+      border-radius: 999px;
+      font-size: .68rem;
+      white-space: nowrap;
+    }
+
+    .pill[aria-pressed="true"] {
+      color: var(--cream);
+      background: var(--brown);
+      box-shadow: inset 0 0 0 3px var(--gold-light);
+    }
+
+    .status {
+      min-height: 27px;
+      margin: 4px 0 0 64px;
+      font-size: .76rem;
+      font-weight: 800;
+    }
+
+    .zero-state {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 5px 9px;
+    }
+
+    .zero-state p { margin: 0; }
+
+    .utility {
+      padding: 6px 10px;
+      border-width: 0 0 2px;
+      background: transparent;
+      font-size: .72rem;
+    }
+
+    .board {
+      padding: 12px 10px 19px;
+      color: var(--cream);
+      background:
+        linear-gradient(rgba(255, 248, 230, .035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 248, 230, .035) 1px, transparent 1px),
+        var(--brown);
+      background-size: 18px 18px;
+    }
+
+    .board-frame {
+      padding: 9px;
+      border: 4px solid var(--gold);
+      border-radius: 19px;
+      background: var(--brown-deep);
+      box-shadow: inset 0 0 0 3px #79542a;
+    }
+
+    .board h2 {
+      margin: 0 0 8px;
+      color: var(--gold-light);
+      font-size: 1rem;
+      letter-spacing: .04em;
+      text-align: center;
+    }
+
+    .listings {
+      display: grid;
+      gap: 7px;
+    }
+
+    .listing {
+      display: grid;
+      gap: 7px;
+      padding: 11px;
+      border: 2px solid var(--line);
+      border-radius: 13px;
+      color: var(--ink);
+      background: var(--cream);
+      box-shadow: inset 0 0 0 2px #f2d88f;
+    }
+
+    .listing[hidden] { display: none; }
+
+    .listing.closed {
+      border-color: #777166;
+      color: var(--closed-ink);
+      background: var(--closed);
+      box-shadow: none;
+    }
+
+    .listing-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 9px;
+    }
+
+    .company {
+      margin: 0 0 2px;
+      font-size: .69rem;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .role {
+      margin: 0;
+      font-size: 1rem;
+      line-height: 1.18;
+    }
+
+    .badge {
+      flex: 0 0 auto;
+      padding: 4px 7px;
+      border: 2px solid currentColor;
+      border-radius: 999px;
+      color: var(--brown);
+      font-size: .62rem;
+      font-weight: 900;
+    }
+
+    .closed .badge { color: var(--closed-ink); }
+
+    .details,
+    .timing {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px 11px;
+      margin: 0;
+      font-size: .7rem;
+      font-weight: 700;
+    }
+
+    .timing {
+      justify-content: space-between;
+      padding-top: 7px;
+      border-top: 1px dotted var(--line);
+    }
+
+    .deadline {
+      color: var(--amber);
+      font-weight: 900;
+    }
+
+    .closed .deadline { color: var(--closed-ink); }
+
+    .new {
+      color: var(--amber);
+      font-weight: 900;
+    }
+
+    .pitch {
+      padding: 18px 14px 20px;
+      border-top: 7px solid var(--gold);
+      color: var(--cream);
+      background: var(--brown-deep);
+    }
+
+    .closed-bridge {
+      margin: 0 0 14px;
+      color: var(--gold-light);
+      font-size: .84rem;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .pitch h2 {
+      margin: 0;
+      font-size: clamp(2rem, 10vw, 4rem);
+      line-height: 1;
+      text-align: center;
+    }
+
+    .lede {
+      max-width: 620px;
+      margin: 7px auto 15px;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .example {
+      padding: 13px;
+      border: 3px solid var(--gold);
+      border-radius: 15px;
+      color: var(--ink);
+      background: var(--cream);
+    }
+
+    .example-label {
+      margin: 0 0 5px;
+      color: var(--amber);
+      font-size: .68rem;
+      font-weight: 900;
+    }
+
+    .pick-head,
+    .pick-why { margin: 0; }
+
+    .pick-head { font-size: .84rem; font-weight: 900; }
+    .pick-why { margin-top: 8px; font-size: .78rem; }
+
+    .checkout {
+      padding: 20px 14px 24px;
+      background: #e1c985;
+    }
+
+    .checkout-card {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 16px;
+      border: 1px solid #b9a66f;
+      border-radius: 9px;
+      color: #31271e;
+      background: #fffaf0;
+    }
+
+    .checkout h2 {
+      margin: 0 0 10px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.12rem;
+      font-weight: 700;
+    }
+
+    .fee-grid {
+      margin: 0;
+      border-top: 1px solid #c9bfa8;
+    }
+
+    .fee-row {
+      display: grid;
+      grid-template-columns: minmax(88px, .42fr) minmax(0, 1fr);
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid #c9bfa8;
+    }
+
+    .fee-row dt,
+    .fee-row dd { margin: 0; }
+    .fee-row dt { color: #5c5245; font-size: .75rem; }
+    .fee-row dd { font-size: .8rem; font-weight: 700; }
+
+    .stripe-line,
+    .blemish {
+      margin: 12px 0 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: .8rem;
+    }
+
+    .paid-cta {
+      width: 100%;
+      min-height: 48px;
+      margin-top: 12px;
+      padding: 10px 16px;
+      border: 2px solid var(--brown);
+      border-radius: 7px;
+      color: var(--cream);
+      background: var(--brown);
+      cursor: pointer;
+      font-weight: 900;
+    }
+
+    footer {
+      padding: 18px 14px 22px;
+      color: var(--cream);
+      background: var(--brown-deep);
+      font-size: .76rem;
+      text-align: center;
+    }
+
+    footer p { margin: 0; }
+
+    @media (min-width: 680px) {
+      .hero { padding: 22px 24px 16px; }
+      .controls { padding-inline: 24px; }
+      .filter-label { flex-basis: 76px; }
+      .status { margin-left: 82px; }
+      .listings { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .listing { min-height: 150px; }
+      .board { padding: 18px 24px 27px; }
+      .board-frame { padding: 14px; }
+      .pitch, .checkout { padding-inline: 24px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#listings">Skip to listings</a>
+  <div class="set">
+    <header class="set-header">UGMI</header>
+
+    <main>
+      <section class="hero" aria-labelledby="page-title">
+        <div class="show-sign">
+          <h1 id="page-title">Every internship we can find,<br> in one searchable list.</h1>
+          <p class="sub">Free, no account, no email.</p>
+        </div>
+        <p class="pulse">Last checked Wed Aug 6, 7:04am ET · 1,427 open · 31 added this week · 23 closed this week · hand-checked, never invented</p>
+      </section>
+
+      <section class="controls" aria-label="Eligibility filters">
+        <div class="control-inner">
+          <div class="filter-row">
+            <span class="filter-label" id="work-label">Work in</span>
+            <div class="pills" role="group" aria-labelledby="work-label" data-filter="work">
+              <button class="pill" type="button" data-value="ca" aria-pressed="false">Canada</button>
+              <button class="pill" type="button" data-value="us" aria-pressed="false">US</button>
+              <button class="pill" type="button" data-value="both" aria-pressed="false">Both</button>
+            </div>
+          </div>
+          <div class="filter-row">
+            <span class="filter-label" id="term-label">Term</span>
+            <div class="pills" role="group" aria-labelledby="term-label" data-filter="term">
+              <button class="pill" type="button" data-value="summer" aria-pressed="false">Summer</button>
+              <button class="pill" type="button" data-value="fall" aria-pressed="false">Fall</button>
+              <button class="pill" type="button" data-value="any" aria-pressed="false">Any</button>
+            </div>
+          </div>
+          <div class="filter-row">
+            <span class="filter-label" id="location-label">Location</span>
+            <div class="pills" role="group" aria-labelledby="location-label" data-filter="location">
+              <button class="pill" type="button" data-value="remote" aria-pressed="false">Remote</button>
+              <button class="pill" type="button" data-value="toronto" aria-pressed="false">Toronto</button>
+              <button class="pill" type="button" data-value="anywhere" aria-pressed="false">Anywhere</button>
+            </div>
+          </div>
+          <div class="status" role="status">
+            <p id="result-line" hidden></p>
+            <div class="zero-state" id="zero-state" hidden>
+              <p>0 of 1,427 match all your filters.</p>
+              <button class="utility" id="undo" type="button">Undo last answer</button>
+            </div>
+            <button class="utility" id="reset" type="button" hidden>Reset filters</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="board" aria-labelledby="board-title">
+        <div class="board-inner board-frame">
+          <h2 id="board-title">Open listings</h2>
+          <div class="listings" id="listings">
+            <article class="listing" data-work="ca" data-term="summer" data-location="remote">
+              <div class="listing-head">
+                <div><p class="company">Shopify</p><h3 class="role">Backend Developer Intern</h3></div>
+                <span class="badge">Open</span>
+              </div>
+              <p class="details"><span>Remote, Canada</span><span>Summer 2027</span><span>$34/hr CAD</span></p>
+              <p class="timing"><span class="new">NEW · Added 1d ago</span><span class="deadline">Closes Fri Aug 8</span></p>
+            </article>
+
+            <article class="listing" data-work="ca" data-term="summer" data-location="toronto">
+              <div class="listing-head">
+                <div><p class="company">RBC</p><h3 class="role">Data Analyst, Student</h3></div>
+                <span class="badge">Open</span>
+              </div>
+              <p class="details"><span>Toronto</span><span>Summer 2027</span><span>$27/hr CAD</span></p>
+              <p class="timing"><span class="new">NEW · Added 2d ago</span><span class="deadline">Closes Tue Aug 12</span></p>
+            </article>
+
+            <article class="listing" data-work="both" data-term="summer" data-location="remote">
+              <div class="listing-head">
+                <div><p class="company">Clio</p><h3 class="role">Software Developer Co-op</h3></div>
+                <span class="badge">Open</span>
+              </div>
+              <p class="details"><span>Remote, Canada or US</span><span>Summer 2027</span><span>$32/hr CAD</span></p>
+              <p class="timing"><span>Added 5d ago</span><span class="deadline">Closes Fri Aug 15</span></p>
+            </article>
+
+            <article class="listing" data-work="ca" data-term="fall" data-location="toronto">
+              <div class="listing-head">
+                <div><p class="company">Wattpad</p><h3 class="role">Product Design Intern</h3></div>
+                <span class="badge">Open</span>
+              </div>
+              <p class="details"><span>Toronto, hybrid</span><span>Fall 2026</span><span>$29/hr CAD</span></p>
+              <p class="timing"><span>Added 6d ago</span><span class="deadline">Closes Mon Aug 18</span></p>
+            </article>
+
+            <article class="listing" data-work="us" data-term="summer" data-location="remote">
+              <div class="listing-head">
+                <div><p class="company">Autodesk</p><h3 class="role">UX Research Intern</h3></div>
+                <span class="badge">Open</span>
+              </div>
+              <p class="details"><span>Remote, US</span><span>Summer 2027</span><span>$31/hr USD</span></p>
+              <p class="timing"><span class="new">NEW · Added 3d ago</span><span class="deadline">Closes Wed Aug 20</span></p>
+            </article>
+
+            <article class="listing" data-work="ca" data-term="fall" data-location="remote">
+              <div class="listing-head">
+                <div><p class="company">Wealthsimple</p><h3 class="role">Marketing Co-op</h3></div>
+                <span class="badge">Open</span>
+              </div>
+              <p class="details"><span>Remote, Canada</span><span>Fall 2026</span><span>$26/hr CAD</span></p>
+              <p class="timing"><span>Added 1w ago</span><span class="deadline">Closes Fri Aug 22</span></p>
+            </article>
+
+            <article class="listing closed" data-work="ca" data-term="summer" data-location="toronto">
+              <div class="listing-head">
+                <div><p class="company">Thomson Reuters</p><h3 class="role">Machine Learning Intern</h3></div>
+                <span class="badge">Closed</span>
+              </div>
+              <p class="details"><span>Toronto, hybrid</span><span>Summer 2027</span><span>$33/hr CAD</span></p>
+              <p class="timing"><span>Added 2w ago</span><span class="deadline">Closed Mon Aug 4</span></p>
+            </article>
+
+            <article class="listing closed" data-work="ca" data-term="fall" data-location="remote">
+              <div class="listing-head">
+                <div><p class="company">Arctic Wolf</p><h3 class="role">Security Developer Co-op</h3></div>
+                <span class="badge">Closed</span>
+              </div>
+              <p class="details"><span>Remote, Canada</span><span>Fall 2026</span><span>$30/hr CAD</span></p>
+              <p class="timing"><span>Added 3w ago</span><span class="deadline">Closed Tue Aug 5</span></p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="pitch" aria-labelledby="pitch-title">
+        <div class="pitch-inner">
+          <p class="closed-bridge">23 internships closed in the last 7 days.</p>
+          <h2 id="pitch-title">The UGMI 10</h2>
+          <p class="lede">10 per week, each with a named contact. I read the 1,427 so you read 10.</p>
+          <div class="example">
+            <p class="example-label">Example pick</p>
+            <p class="pick-head">PitchBook, Software Engineering Intern · Toronto · $38/hr CAD · closes Fri · contact: Sarah Chen, campus recruiting</p>
+            <p class="pick-why"><strong>Why this one:</strong> Toronto, software, and a deadline before next Monday.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="checkout" aria-labelledby="checkout-title">
+        <div class="checkout-inner">
+          <div class="checkout-card">
+            <h2 id="checkout-title">What $15 buys</h2>
+            <dl class="fee-grid">
+              <div class="fee-row"><dt>You get</dt><dd>4 Monday lists, 10 picks each, a named contact per pick</dd></div>
+              <div class="fee-row"><dt>Monthly</dt><dd>$15 CAD</dd></div>
+              <div class="fee-row"><dt>Sign-up fee</dt><dd>$0</dd></div>
+              <div class="fee-row"><dt>Cancellation</dt><dd>anytime from Stripe receipt email</dd></div>
+              <div class="fee-row"><dt>Card</dt><dd>handled by Stripe</dd></div>
+            </dl>
+            <p class="stripe-line">You'll be taken to Stripe to pay.</p>
+            <button class="paid-cta" type="button">Get my first list</button>
+            <p class="blemish">I'm one Waterloo student, not a company.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>Dead link? Wrong deadline? DM @sleppyeric, fixed within a day.</p>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var STORAGE_KEY = "ugmi-v3-game-show-eligibility";
+      var TOTAL = 1427;
+      var state = { work: null, term: null, location: null };
+      var history = [];
+      var rows = Array.prototype.slice.call(document.querySelectorAll(".listing"));
+      var openRows = rows.filter(function (row) {
+        return !row.classList.contains("closed");
+      });
+      var groups = Array.prototype.slice.call(document.querySelectorAll(".pills"));
+      var resultLine = document.getElementById("result-line");
+      var zeroState = document.getElementById("zero-state");
+      var undoButton = document.getElementById("undo");
+      var resetButton = document.getElementById("reset");
+
+      function load() {
+        try {
+          var saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+          ["work", "term", "location"].forEach(function (key) {
+            if (saved && typeof saved[key] === "string") {
+              state[key] = saved[key];
+              history.push({ key: key, previous: null });
+            }
+          });
+        } catch (error) {
+          state = { work: null, term: null, location: null };
+        }
+      }
+
+      function save() {
+        try {
+          if (isActive()) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          } else {
+            localStorage.removeItem(STORAGE_KEY);
+          }
+        } catch (error) {
+          return;
+        }
+      }
+
+      function isActive() {
+        return Boolean(state.work || state.term || state.location);
+      }
+
+      function matches(row) {
+        var work = row.getAttribute("data-work");
+        var term = row.getAttribute("data-term");
+        var location = row.getAttribute("data-location");
+
+        if (state.work && state.work !== "both" && work !== state.work && work !== "both") return false;
+        if (state.term && state.term !== "any" && term !== state.term) return false;
+        if (state.location && state.location !== "anywhere" && location !== state.location) return false;
+        return true;
+      }
+
+      function render() {
+        var active = isActive();
+        var visibleOpen = openRows.filter(matches).length;
+        var zero = active && visibleOpen === 0;
+
+        rows.forEach(function (row) {
+          row.hidden = zero || (active && !matches(row));
+        });
+
+        groups.forEach(function (group) {
+          var key = group.getAttribute("data-filter");
+          Array.prototype.forEach.call(group.querySelectorAll(".pill"), function (button) {
+            button.setAttribute("aria-pressed", String(state[key] === button.getAttribute("data-value")));
+          });
+        });
+
+        resultLine.hidden = !active || zero;
+        zeroState.hidden = !zero;
+        resetButton.hidden = !active;
+
+        if (active && !zero) {
+          var scaled = Math.round(TOTAL * visibleOpen / openRows.length);
+          resultLine.textContent = "Showing " + scaled.toLocaleString("en-CA") + " of 1,427 you're actually eligible for.";
+        }
+      }
+
+      groups.forEach(function (group) {
+        group.addEventListener("click", function (event) {
+          var button = event.target.closest(".pill");
+          if (!button) return;
+          var key = group.getAttribute("data-filter");
+          var value = button.getAttribute("data-value");
+          history.push({ key: key, previous: state[key] });
+          state[key] = value;
+          save();
+          render();
+        });
+      });
+
+      undoButton.addEventListener("click", function () {
+        var last = history.pop();
+        if (!last) return;
+        state[last.key] = last.previous;
+        save();
+        render();
+      });
+
+      resetButton.addEventListener("click", function () {
+        state = { work: null, term: null, location: null };
+        history = [];
+        save();
+        render();
+      });
+
+      load();
+      render();
+    }());
+  </script>
+</body>
+</html>
