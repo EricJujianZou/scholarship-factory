@@ -19,6 +19,13 @@ context lives in the linked docs below, read only when its task comes up.
 Live state (current ticket, what's merged) is in `prd.json` + `git log`, not in
 these docs.
 
+## Open deliverables for review
+
+Whenever you produce or update a file the owner should look at — HTML mockups/
+galleries, markdown docs, reports, `.env`/config samples, any review artifact —
+open it immediately after finishing (`Start-Process <path>`; artifacts: give the
+URL). Don't wait to be asked.
+
 ---
 
 Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
