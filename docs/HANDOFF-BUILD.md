@@ -76,6 +76,12 @@ source/ranking code under `scholarship_factory/`.
   ranked list per profile.
 - Add Canadian scholarship/internship sources so the DB has real Canadian
   depth (this also unblocks the content pipeline next door).
+- Add an eligibility/year facet. Checked Aug 6: of 1,364 internship rows,
+  1,083 have requirements text and ZERO match "first year" / "freshman" /
+  "early talent" — yet the commenting audience on IG skews first-year. Extract
+  year-level eligibility where the posting states it, and add sources that
+  carry first-year-friendly postings (early-talent programs, research
+  assistantships). Do not infer eligibility the posting doesn't state.
 
 **Done when:** a second profile can be added in minutes, `poll_once` produces
 a per-profile ranked list, and the deadline series in content-machine
