@@ -104,8 +104,10 @@ def _email_form(config: dict) -> str:
         return ""
     return (
         f'<form class="email" method="post" action="{action}">'
-        '<input type="email" name="email" required placeholder="you@school.edu">'
-        "<button>Get the weekly top 5</button></form>"
+        '<label class="sr-only" for="email">Your school email</label>'
+        '<input id="email" type="email" name="email" required '
+        'placeholder="you@school.edu">'
+        '<button class="btn">Get the weekly top 5</button></form>'
     )
 
 
@@ -142,62 +144,339 @@ def _render(rows: list[dict], sources: list[str], generated: str, config: dict) 
 <title>UGMI: every internship and scholarship we can find, free</title>
 <meta name="description" content="A live database of internships, scholarships, hackathons and grants for students. Free to browse.">
 <style>
-:root {{ color-scheme: light dark; }}
+:root {{
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.1788 0.0047 264.45);
+  --card: oklch(0.9542 0 0);
+  --card-foreground: oklch(0.1788 0.0047 264.45);
+  --primary: oklch(0.2244 0.0039 264.49);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.9619 0 0);
+  --muted: oklch(0.9696 0 0);
+  --muted-foreground: oklch(0.5547 0 0);
+  /* muted text sitting on --card needs to be darker than --muted-foreground
+     to clear 4.5:1 against that lighter gray */
+  --card-muted-foreground: oklch(0.5 0 0);
+  --border: oklch(0.9234 0 0);
+  --ring: oklch(0.2244 0.0039 264.49);
+  --radius: 0.875rem;
+  --radius-sm: 0.5rem;
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-12: 48px;
+  color-scheme: light;
+}}
 * {{ box-sizing: border-box; }}
-body {{ margin: 0; font-family: system-ui, sans-serif; line-height: 1.45; }}
-main {{ max-width: 880px; margin: 0 auto; padding: 1rem; }}
-header h1 {{ margin: 1rem 0 0.25rem; }}
-header p.tag {{ margin: 0 0 1rem; opacity: 0.75; }}
-.pitch {{ border: 1px solid color-mix(in srgb, currentColor 25%, transparent); border-radius: 8px; padding: 0.9rem 1rem; margin: 1rem 0; }}
-.pitch p {{ margin: 0.3rem 0; }}
-.btn {{ display: inline-block; margin-top: 0.5rem; padding: 0.45rem 0.9rem; border-radius: 6px; border: 1px solid currentColor; text-decoration: none; color: inherit; font-weight: 600; }}
-.btn.muted {{ opacity: 0.6; }}
-.email {{ margin-top: 0.6rem; display: flex; gap: 0.4rem; flex-wrap: wrap; }}
-.email input {{ flex: 1 1 200px; padding: 0.45rem; }}
-details {{ margin: 1rem 0; }}
-pre.tpl {{ white-space: pre-wrap; border: 1px dashed color-mix(in srgb, currentColor 30%, transparent); padding: 0.75rem; border-radius: 6px; font-size: 0.85rem; overflow-x: auto; }}
-.controls {{ display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0 0.5rem; }}
-.controls input {{ flex: 1 1 240px; padding: 0.5rem; }}
-.controls select {{ padding: 0.5rem; }}
-#count {{ opacity: 0.7; font-size: 0.9rem; margin: 0.25rem 0 0.75rem; }}
-.opp {{ border-top: 1px solid color-mix(in srgb, currentColor 15%, transparent); padding: 0.7rem 0; }}
-.opp a.t {{ font-weight: 600; text-decoration: none; }}
+html {{ -webkit-text-size-adjust: 100%; }}
+body {{
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}}
+main {{ max-width: 960px; margin: 0 auto; padding: 0 var(--sp-4) var(--sp-12); }}
+a {{ color: var(--foreground); }}
+:focus-visible {{ outline: 2px solid var(--ring); outline-offset: 2px; }}
+.sr-only {{
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}}
+
+/* hero */
+.hero {{ padding: var(--sp-12) 0 var(--sp-8); }}
+.brand {{
+  display: inline-block;
+  margin: 0 0 var(--sp-6);
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}}
+h1 {{
+  margin: 0 0 var(--sp-4);
+  max-width: 17ch;
+  font-size: clamp(2.125rem, 6.5vw, 3.25rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+}}
+.lede {{ margin: 0; max-width: 58ch; font-size: 1.0625rem; color: var(--muted-foreground); }}
+
+/* paid offer */
+.offer {{
+  margin: 0;
+  padding: var(--sp-6);
+  background: var(--card);
+  color: var(--card-foreground);
+  border-radius: var(--radius);
+}}
+.eyebrow {{
+  margin: 0 0 var(--sp-2);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--card-muted-foreground);
+}}
+.offer h2 {{
+  margin: 0 0 var(--sp-3);
+  max-width: 22ch;
+  font-size: 1.5rem;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}}
+.offer p {{ margin: 0 0 var(--sp-3); max-width: 62ch; }}
+.offer p.sub {{ color: var(--card-muted-foreground); }}
+
+/* buttons and inputs */
+.btn {{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 var(--sp-6);
+  border: 1px solid var(--primary);
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: var(--shadow-xs);
+  transition: opacity 0.12s ease;
+}}
+.btn:hover {{ opacity: 0.86; }}
+.btn.muted {{
+  background: var(--secondary);
+  color: var(--card-muted-foreground);
+  border-color: var(--border);
+  box-shadow: none;
+  cursor: default;
+}}
+.btn.muted:hover {{ opacity: 1; }}
+.offer .btn {{ margin-top: var(--sp-2); }}
+input, select {{
+  min-height: 44px;
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--background);
+  color: var(--foreground);
+  font: inherit;
+}}
+::placeholder {{ color: var(--muted-foreground); opacity: 1; }}
+.email {{ display: flex; gap: var(--sp-2); flex-wrap: wrap; margin-top: var(--sp-3); }}
+.email input {{ flex: 1 1 240px; }}
+.email .btn {{ margin-top: 0; padding: 0 var(--sp-4); }}
+
+/* free template */
+.tpl-card {{
+  margin: var(--sp-4) 0 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--background);
+}}
+.tpl-card summary {{
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 44px;
+  padding: var(--sp-3) var(--sp-6);
+  border-radius: var(--radius);
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}}
+.tpl-card summary::-webkit-details-marker {{ display: none; }}
+.tpl-card summary::after {{
+  content: "+";
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--muted-foreground);
+}}
+.tpl-card[open] summary::after {{ content: "-"; }}
+.tpl-card summary .s-title {{ margin-right: auto; }}
+.tpl-card summary .hint {{
+  font-weight: 400;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}}
+.tpl-card[open] summary {{
+  border-bottom: 1px solid var(--border);
+  border-radius: var(--radius) var(--radius) 0 0;
+}}
+pre.tpl {{
+  margin: 0;
+  padding: var(--sp-6);
+  background: var(--muted);
+  border-radius: 0 0 var(--radius) var(--radius);
+  white-space: pre-wrap;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}}
+
+/* sticky search bar */
+.bar {{
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  margin: var(--sp-8) calc(var(--sp-4) * -1) var(--sp-4);
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--background);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-xs);
+}}
+.controls {{ display: flex; gap: var(--sp-2); flex-wrap: wrap; }}
+.controls input {{ flex: 1 1 260px; min-width: 0; }}
+.controls select {{ flex: 0 1 190px; }}
+#count {{
+  margin: var(--sp-2) 0 0;
+  min-height: 1.25rem;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}}
+
+/* listings */
+#list {{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+  gap: var(--sp-3);
+}}
+.opp {{
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding: var(--sp-4);
+  background: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: background-color 0.12s ease, border-color 0.12s ease;
+}}
+.opp:hover {{ background: var(--muted); border-color: var(--foreground); }}
+.opp .badge {{
+  align-self: flex-start;
+  padding: 3px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--background);
+  color: var(--card-muted-foreground);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}}
+.opp a.t {{
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--card-foreground);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}}
 .opp a.t:hover {{ text-decoration: underline; }}
-.opp .meta {{ font-size: 0.85rem; opacity: 0.75; }}
-.opp .deadline {{ font-size: 0.85rem; font-weight: 600; }}
-#more {{ margin: 1rem 0; padding: 0.5rem 1rem; }}
-footer {{ margin: 2rem 0 1rem; font-size: 0.85rem; opacity: 0.75; }}
+.opp .meta {{ font-size: 0.9rem; color: var(--card-muted-foreground); overflow-wrap: anywhere; }}
+.opp .deadline {{
+  align-self: flex-start;
+  margin-top: auto;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--background);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}}
+#more {{
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  margin: var(--sp-6) 0 0;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--background);
+  color: var(--foreground);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.12s ease, border-color 0.12s ease;
+}}
+#more:hover {{ background: var(--muted); border-color: var(--foreground); }}
+
+footer {{
+  max-width: 72ch;
+  margin-top: var(--sp-12);
+  padding-top: var(--sp-6);
+  border-top: 1px solid var(--border);
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}}
+footer p {{ margin: 0 0 var(--sp-2); }}
+
+@media (max-width: 640px) {{
+  .hero {{ padding: var(--sp-8) 0 var(--sp-6); }}
+  h1 {{ max-width: none; }}
+  .offer {{ padding: var(--sp-4); }}
+  .tpl-card summary {{ padding: var(--sp-3) var(--sp-4); }}
+  .tpl-card summary .hint {{ display: none; }}
+  pre.tpl {{ padding: var(--sp-4); }}
+  .controls select {{ flex: 1 1 100%; }}
+}}
+@media (prefers-reduced-motion: reduce) {{
+  * {{ transition: none !important; }}
+}}
 </style>
 </head>
 <body>
 <main>
-<header>
-  <h1>UGMI</h1>
-  <p class="tag">u gon make it. {len(rows)} live internships, scholarships, hackathons and grants. Free. Updated {generated}.</p>
+<header class="hero">
+  <p class="brand">UGMI</p>
+  <h1>Every internship, scholarship, hackathon and grant we can find.</h1>
+  <p class="lede">u gon make it. {len(rows)} listings are live right now and all of them are free to browse. Updated {generated}.</p>
 </header>
 
-<section class="pitch">
-  <p><strong>The list below is everything.</strong> You are probably eligible for a fraction of it, and cold applications get a few percent response.</p>
-  <p><strong>Paid:</strong> send your resume and 3 lines, get your matched shortlist every week, plus the actual person to contact at each company and a working outreach template.</p>
+<section class="offer">
+  <p class="eyebrow">Paid</p>
+  <h2>Get your matched shortlist every week.</h2>
+  <p>The list below is everything. You are probably eligible for a fraction of it, and cold applications get a few percent response.</p>
+  <p class="sub">Send your resume and 3 lines about yourself. Every week you get your matched shortlist, plus the actual person to contact at each company and a working outreach template.</p>
   {_paid_cta(config)}
   {_email_form(config)}
 </section>
 
-<details>
-  <summary><strong>Free: the cold outreach template</strong> (works for referrals and coffee chats)</summary>
+<details class="tpl-card">
+  <summary><span class="s-title">Free: the cold outreach template</span><span class="hint">works for referrals and coffee chats</span></summary>
   <pre class="tpl">{_TEMPLATE_TEXT}</pre>
 </details>
 
-<div class="controls">
-  <input id="q" type="search" placeholder="search: company, role, term, city…">
-  <select id="type"><option value="">all types</option></select>
+<div class="bar">
+  <div class="controls">
+    <label class="sr-only" for="q">Search listings</label>
+    <input id="q" type="search" placeholder="search: company, role, term, city…">
+    <label class="sr-only" for="type">Filter by type</label>
+    <select id="type"><option value="">all types</option></select>
+  </div>
+  <p id="count"></p>
 </div>
-<p id="count"></p>
 <div id="list"></div>
 <button id="more" hidden>Show more</button>
 
 <footer>
-  Sources: {", ".join(sources)}. Facts are extracted from the listed pages, never invented; anything a page didn't state is simply blank. Built by {contact}.
+  <p>Sources: {", ".join(sources)}. Facts are extracted from the listed pages, never invented; anything a page didn't state is simply blank.</p>
+  <p>Built by {contact}.</p>
 </footer>
 </main>
 
@@ -226,6 +505,12 @@ function matches(r, needle) {{
 function card(r) {{
   const d = document.createElement("div");
   d.className = "opp";
+  if (r.type) {{
+    const b = document.createElement("span");
+    b.className = "badge";
+    b.textContent = r.type;
+    d.appendChild(b);
+  }}
   const a = document.createElement("a");
   a.className = "t"; a.href = r.url; a.target = "_blank"; a.rel = "noopener";
   a.textContent = r.title;
@@ -256,7 +541,7 @@ function apply() {{
   filtered = ROWS.filter(r => (!t || r.type === t) && (!needle || matches(r, needle)));
   list.textContent = "";
   shown = 0;
-  count.textContent = filtered.length + " of " + ROWS.length;
+  count.textContent = filtered.length + " of " + ROWS.length + " listings";
   renderMore();
 }}
 
