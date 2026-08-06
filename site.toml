@@ -1,0 +1,11 @@
+# Public site storefront config, read by `sf site`. Nothing here is secret:
+# the IG handle and Stripe payment link are public by nature.
+
+instagram = "sleppyeric"
+price = "$15/mo"
+
+# paste your Stripe payment link here once created, then re-run `sf site`:
+# stripe_url = "https://buy.stripe.com/..."
+
+# email capture stays off until a form backend exists:
+# email_form_action = "https://..."
