@@ -39,6 +39,7 @@ from html import escape
 from pathlib import Path
 from urllib.parse import urlparse
 
+from .logos import OrgLogoStore, normalize_org
 from .store import OpportunityStore
 
 SITE_CONFIG_FILE = "site.toml"
@@ -136,16 +137,21 @@ def _location(desc: str | None) -> str:
     return m.group(1).strip() if m else ""
 
 
-def _row(opp) -> dict | None:
+def _row(opp, logos: dict[str, str] | None = None) -> dict | None:
     if not opp.apply_url.lower().startswith(("http://", "https://")):
         return None
+    norm_type = _norm_type(opp.type)
+    org_key = normalize_org(opp.organization)
     return {
         "title": opp.title,
         "org": opp.organization,
-        "type": _norm_type(opp.type),
+        "type": norm_type,
         "desc": opp.description,
         "req": opp.requirements,
         "deadline": opp.deadline,
+        # pay only means pay on internship rows; a scholarship's reward is not a wage
+        "pay": opp.reward if norm_type == "internship" else None,
+        "logo": (logos or {}).get(org_key) if org_key else None,
         "url": opp.apply_url,
         "src": _source_name(opp.source_url),
         # facets, parsed out of the description the adapter assembled
@@ -156,21 +162,61 @@ def _row(opp) -> dict | None:
     }
 
 
-def build_site(
-    store: OpportunityStore, out_dir: str | Path, *, config: dict | None = None
-) -> Path:
-    config = config or {}
-    rows = [r for r in (_row(o) for o in store.list()) if r is not None]
+def export_rows(store: OpportunityStore) -> list[dict]:
+    """The site's row dicts, newest first, with `due`/`soon` computed."""
+    logos = OrgLogoStore(store.db_path).all()
+    rows = [r for r in (_row(o, logos) for o in store.list()) if r is not None]
     rows.sort(key=lambda r: r["seen"], reverse=True)
-    sources = sorted({r["src"] for r in rows})
     today = datetime.now(timezone.utc).date()
-    generated = today.isoformat()
 
     for r in rows:
         due = _parse_date(r["deadline"])
         r["soon"] = bool(due and 0 <= (due - today).days <= 14)
         # sort key: only deadlines that are real, parseable and not already past
         r["due"] = due.isoformat() if due and due >= today else None
+    return rows
+
+
+def _encode_data(rows: list[dict]) -> str:
+    return json.dumps(rows, ensure_ascii=False).replace("</", "<\\/")
+
+
+_DATA_OPEN = b'<script id="data" type="application/json">'
+_DATA_CLOSE = b"</script>"
+
+
+def splice_site_data(index_path: str | Path, store: OpportunityStore) -> int:
+    """Regenerate ONLY the embedded row-data line inside an existing index.html.
+
+    The live site is a hand-maintained index.html in a separate deploy repo;
+    its row data is one `<script id="data" ...>[...]</script>` line. This
+    replaces the JSON payload between those markers and leaves every other
+    byte of the file untouched (including newline style). Returns the number
+    of rows written; raises ValueError when the marker is missing.
+    """
+    path = Path(index_path)
+    raw = path.read_bytes()
+    open_at = raw.find(_DATA_OPEN)
+    if open_at == -1:
+        raise ValueError(f"no {_DATA_OPEN.decode()} marker in {path}")
+    payload_at = open_at + len(_DATA_OPEN)
+    close_at = raw.find(_DATA_CLOSE, payload_at)
+    if close_at == -1:
+        raise ValueError(f"data script never closes in {path}")
+
+    rows = export_rows(store)
+    payload = _encode_data(rows).encode("utf-8")
+    path.write_bytes(raw[:payload_at] + payload + raw[close_at:])
+    return len(rows)
+
+
+def build_site(
+    store: OpportunityStore, out_dir: str | Path, *, config: dict | None = None
+) -> Path:
+    config = config or {}
+    rows = export_rows(store)
+    sources = sorted({r["src"] for r in rows})
+    generated = datetime.now(timezone.utc).date().isoformat()
 
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
@@ -355,7 +401,7 @@ def _nudge(config: dict) -> str:
 
 
 def _render(rows: list[dict], sources: list[str], generated: str, config: dict) -> str:
-    data = json.dumps(rows, ensure_ascii=False).replace("</", "<\\/")
+    data = _encode_data(rows)
     instagram = config.get("instagram")
     contact = (
         f'<a href="https://instagram.com/{instagram}">@{instagram}</a>'

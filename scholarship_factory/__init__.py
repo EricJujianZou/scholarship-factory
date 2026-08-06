@@ -7,11 +7,13 @@ from .adapters import AdapterPlan, FetchTarget, SkipReason, SkippedSeed, targets
 from .cache import DEFAULT_MAX_AGE, FetchCache, cached_fetch
 from .context import ContextEntry, ContextKind, ContextStore, load_context_file
 from .digest import Digest, RunStore, build_digest
+from .enrich import AtsFacts, AtsRef, EnrichLedger, EnrichReport, ats_facts, ats_ref, enrich_store
 from .extract import ExtractionResult, PageKind, extract
 from .feedback import Decision, DecisionStore, DecisionVerdict, PreferenceStore
 from .fetch import FetchResult, fetch_url
 from .identity import find_duplicate, merge_into
-from .jsonld import extract_jsonld
+from .jsonld import JobPostingFacts, extract_jobposting_facts, extract_jsonld
+from .logos import OrgLogoStore, normalize_org
 from .models import Opportunity, Provenance
 from .paginate import DEFAULT_MAX_PAGES, next_page_url
 from .parse_dates import parse_deadline_dates, typed_deadlines
@@ -97,4 +99,15 @@ __all__ = [
     "Digest",
     "RunStore",
     "build_digest",
+    "AtsFacts",
+    "AtsRef",
+    "EnrichLedger",
+    "EnrichReport",
+    "ats_facts",
+    "ats_ref",
+    "enrich_store",
+    "JobPostingFacts",
+    "extract_jobposting_facts",
+    "OrgLogoStore",
+    "normalize_org",
 ]

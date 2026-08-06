@@ -11,6 +11,8 @@ the existing OpportunityStore (GH-1); `source` runs a sourcing pass and writes t
     sf poll --seeds seeds.toml [--db PATH]      # source + rank + digest, unattended
     sf digest [--since ISO] [--mark] [--db PATH]
     sf refresh <id> [--db PATH]
+    sf enrich [--cap N] [--llm-cap N] [--retry-days N] [--db PATH]
+    sf splice <path-to-index.html> [--db PATH]
 
 db path: `--db`, else $SF_DB_PATH, else ./scholarship_factory.db
 """
@@ -22,9 +24,16 @@ from .application import RequirementsStore, read_requirements
 from .cache import FetchCache, cached_fetch
 from .context import ContextKind, ContextStore, load_context_file
 from .digest import RunStore, build_digest, render
+from .enrich import (
+    DEFAULT_LLM_CAP,
+    DEFAULT_PAGE_CAP,
+    DEFAULT_RETRY_DAYS,
+    enrich_store,
+)
 from .extract import extract
 from .feedback import DecisionStore, PreferenceStore
 from .fetch import fetch_url
+from .llm import provider_configured
 from .pipeline import run_sourcing
 from .paginate import DEFAULT_MAX_PAGES
 from .polite import DEFAULT_MIN_INTERVAL, PoliteFetcher
@@ -32,7 +41,7 @@ from .profile import ApplicantProfile, ProfileStore, load_profile_file, save_pro
 from .refresh import refresh_opportunity
 from .relevance import RelevanceStore, refresh_summary_if_due, score
 from .seeds import load_seeds
-from .site import build_site, load_site_config
+from .site import build_site, load_site_config, splice_site_data
 from .store import OpportunityStore
 from .traverse import TRAVERSE_PAGE_CAP
 
@@ -305,6 +314,57 @@ def _cmd_requirements(store: OpportunityStore, opp_id: str) -> int:
     return 0
 
 
+def _cmd_enrich(
+    store: OpportunityStore,
+    cap: int,
+    llm_cap: int,
+    retry_days: int,
+    min_interval: float,
+) -> int:
+    """Fill pay/deadline/logo for internship rows from their posting pages."""
+    report = enrich_store(
+        store,
+        fetch_fn=_sourcing_fetch_fn(store.db_path, min_interval),
+        extract_fn=extract if provider_configured() else None,
+        page_cap=cap,
+        llm_cap=llm_cap,
+        retry_days=retry_days,
+        log=print,
+    )
+    print(f"rows missing a fact: {report.rows_considered}")
+    print(
+        f"attempted: {report.rows_attempted} "
+        f"(skipped {report.rows_skipped_recent} tried within {retry_days}d)"
+    )
+    print(f"network fetches: {report.fetches}" + (" (cap reached)" if report.cap_reached else ""))
+    for outcome in ("filled", "no_fact", "unreachable"):
+        if report.outcomes.get(outcome):
+            print(f"  {outcome}: {report.outcomes[outcome]}")
+    for stage in ("ats", "jsonld", "llm"):
+        fills = report.fills.get(stage)
+        if fills:
+            facts = ", ".join(f"{fact}={n}" for fact, n in sorted(fills.items()))
+            print(f"  stage {stage}: {facts}")
+    print(
+        f"filled totals: pay={report.filled('pay')} "
+        f"deadline={report.filled('deadline')} logo={report.filled('logo')}"
+    )
+    if report.llm_calls:
+        print(f"llm calls: {report.llm_calls}")
+    return 0
+
+
+def _cmd_splice(store: OpportunityStore, path: str) -> int:
+    """Regenerate only the embedded data line inside a hand-maintained index.html."""
+    try:
+        count = splice_site_data(path, store)
+    except (OSError, ValueError) as exc:
+        print(f"splice failed: {exc}", file=sys.stderr)
+        return 1
+    print(f"spliced {count} rows into {path} (everything else untouched)")
+    return 0
+
+
 def _cmd_site(store: OpportunityStore, out_dir: str) -> int:
     """Export the public static site: one self-contained index.html."""
     index = build_site(store, out_dir, config=load_site_config())
@@ -403,6 +463,31 @@ def main(argv: list[str] | None = None) -> int:
         "site", parents=[common], help="export the public static site (ugmi.com)"
     )
     p_site.add_argument("--out", default="site", help="output directory (default: site)")
+    p_enrich = sub.add_parser(
+        "enrich", parents=[common],
+        help="fill pay/deadline/logo for internship rows from their posting pages",
+    )
+    p_enrich.add_argument(
+        "--cap", type=int, default=DEFAULT_PAGE_CAP,
+        help=f"max network fetches per run (default: {DEFAULT_PAGE_CAP})",
+    )
+    p_enrich.add_argument(
+        "--llm-cap", type=int, default=DEFAULT_LLM_CAP,
+        help=f"max LLM page extracts per run (default: {DEFAULT_LLM_CAP})",
+    )
+    p_enrich.add_argument(
+        "--retry-days", type=int, default=DEFAULT_RETRY_DAYS,
+        help=f"days before re-trying an attempted row (default: {DEFAULT_RETRY_DAYS})",
+    )
+    p_enrich.add_argument(
+        "--min-interval", type=float, default=DEFAULT_MIN_INTERVAL,
+        help=f"min seconds between requests to one host (default: {DEFAULT_MIN_INTERVAL})",
+    )
+    p_splice = sub.add_parser(
+        "splice", parents=[common],
+        help="rewrite only the embedded row-data line inside an existing index.html",
+    )
+    p_splice.add_argument("path", help="path to the index.html to splice data into")
 
     args = parser.parse_args(argv)
     if args.command == "serve":
@@ -429,6 +514,12 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_requirements(store, args.id)
     if args.command == "site":
         return _cmd_site(store, args.out)
+    if args.command == "enrich":
+        return _cmd_enrich(
+            store, args.cap, args.llm_cap, args.retry_days, args.min_interval
+        )
+    if args.command == "splice":
+        return _cmd_splice(store, args.path)
     if args.command == "digest":
         return _cmd_digest(store, args.since, args.mark)
     if args.command == "refresh":

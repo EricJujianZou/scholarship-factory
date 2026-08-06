@@ -1,5 +1,11 @@
-from scholarship_factory.models import Opportunity
-from scholarship_factory.site import KNOWN_TYPES, build_site, load_site_config
+from scholarship_factory.logos import OrgLogoStore
+from scholarship_factory.models import Opportunity, Provenance
+from scholarship_factory.site import (
+    KNOWN_TYPES,
+    build_site,
+    load_site_config,
+    splice_site_data,
+)
 from scholarship_factory.store import OpportunityStore
 
 
@@ -214,6 +220,99 @@ def test_facts_separate_build_date_from_newest_listing(tmp_path):
     assert "newest listing" in html
     newest = max(r["seen"] for r in _rows_of(html))
     assert newest in html
+
+
+def test_rows_carry_pay_for_internships_and_logo_from_the_org_table(tmp_path):
+    store = _store_with(
+        tmp_path,
+        _opp(
+            "SWE Intern",
+            type="internship",
+            organization="Acme Robotics",
+            reward="$34–$41 CAD/hr",
+            reward_provenance=Provenance.QUOTED,
+            reward_source="$34–$41 CAD/hr",
+        ),
+        _opp(
+            "Award",
+            apply_url="https://uw.ca/award",
+            type="scholarship",
+            organization="UW",
+            reward="$5,000",
+            reward_provenance=Provenance.QUOTED,
+            reward_source="$5,000",
+        ),
+        _opp("No facts", apply_url="https://x.ca/b", type="internship"),
+    )
+    OrgLogoStore(store.db_path).set("Acme Robotics", "https://acme.example/logo.png")
+
+    rows = {r["title"]: r for r in _rows_of(
+        build_site(store, tmp_path / "site").read_text(encoding="utf-8")
+    )}
+
+    assert rows["SWE Intern"]["pay"] == "$34–$41 CAD/hr"
+    assert rows["SWE Intern"]["logo"] == "https://acme.example/logo.png"
+    # a scholarship's reward is not a wage; the pay pill stays off
+    assert rows["Award"]["pay"] is None
+    assert rows["No facts"]["pay"] is None
+    assert rows["No facts"]["logo"] is None
+
+
+def _deploy_fixture(tmp_path, data=b"[]"):
+    # a hand-maintained page: CRLF lines, bespoke markup, one data line
+    raw = (
+        b"<!doctype html>\r\n<html>\r\n<head><title>UGMI</title></head>\r\n"
+        b"<body>\r\n<p>hand-crafted \xe2\x80\x94 do not regenerate</p>\r\n"
+        b'<script id="data" type="application/json">' + data + b"</script>\r\n"
+        b"<script>const ROWS = JSON.parse(document.getElementById('data').textContent);</script>\r\n"
+        b"</body>\r\n</html>\r\n"
+    )
+    path = tmp_path / "index.html"
+    path.write_bytes(raw)
+    return path, raw
+
+
+def test_splice_replaces_only_the_data_line(tmp_path):
+    import json
+
+    store = _store_with(
+        tmp_path,
+        _opp(
+            "SWE Intern",
+            type="internship",
+            organization="Acme",
+            reward="$40/hr",
+            reward_provenance=Provenance.QUOTED,
+            reward_source="$40/hr",
+        ),
+    )
+    path, before = _deploy_fixture(tmp_path, data=b'[{"title": "old"}]')
+
+    count = splice_site_data(path, store)
+
+    after = path.read_bytes()
+    open_marker = b'<script id="data" type="application/json">'
+    prefix_end = before.index(open_marker) + len(open_marker)
+    # every byte outside the payload is untouched, CRLFs included
+    assert after[:prefix_end] == before[:prefix_end]
+    assert after[after.index(b"</script>", prefix_end):] == before[before.index(b"</script>", prefix_end):]
+    payload = after[prefix_end:after.index(b"</script>", prefix_end)]
+    [row] = json.loads(payload.decode("utf-8"))
+    assert count == 1
+    assert row["title"] == "SWE Intern"
+    assert row["pay"] == "$40/hr"
+    assert "soon" in row and "due" in row
+
+
+def test_splice_refuses_a_file_without_the_marker(tmp_path):
+    import pytest
+
+    store = _store_with(tmp_path, _opp("A"))
+    rogue = tmp_path / "other.html"
+    rogue.write_text("<html><body>no data line</body></html>", encoding="utf-8")
+
+    with pytest.raises(ValueError):
+        splice_site_data(rogue, store)
 
 
 def test_dm_path_uses_the_message_deep_link(tmp_path):
