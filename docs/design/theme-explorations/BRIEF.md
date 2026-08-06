@@ -76,3 +76,50 @@ all; only the visual world differs.
 4. Closings line → paid pitch (the UGMI 10)
 5. Calm checkout
 6. About/blemish ("one Waterloo student...") + footer (report line, IG)
+
+## V2 synthesis (owner review, Aug 6 2026) — `tactile-calm-v2.html`
+
+Owner's taste call: tactile + calm merged; **data-brutal vetoed permanently,
+terminal-dark vetoed** (black/gray/white reads depressing, accent too late).
+V2 deltas against this brief:
+
+- Hero and filter sections compressed hard; first card lands at/near the
+  first 390px fold. Filters are three tight label+pill rows; once answered
+  they echo into a sticky summary bar over the list (count + edit + reset).
+- Cards over table (owner call: more inviting). Card = tactile press
+  grammar on calm's bone paper; serif kept for blemish/about only.
+- **The contact wedge**: every open card carries "who to contact" next to
+  Apply. It opens a sheet with the referral pitch, one real free sample
+  pick (contact visible, weekly, for everyone), two cited stats, and the
+  single paid CTA. The Apply link itself is never intercepted or gated.
+- Stats are real, scoped, linked, and never derived into outcome promises:
+  NY Fed (Brown/Setren/Topa): referrals 6% of applications / 27% of offers,
+  job boards 60% / 24%. Handshake: 2025 sent 24% more applications than
+  2024. Banned: "our plan cuts X to Y" / "saves you N hours" arithmetic.
+- Free block after checkout ("Free either way"): the outreach template
+  on-page + copy button, ungated (email-gating it would regress the
+  "no email" trust copy), and the Monday email signup as the decline path
+  (what opened/closed + the week's free pick, one email, one-click out).
+- One paid CTA intent page-wide ("Get my first list"), reachable from the
+  pitch, the checkout, and the contact sheet.
+- Analytics hooks stubbed as `track()` events: filter_answered,
+  apply_click, contact_open, sheet_cta_click, template_copy, email_submit.
+  See `../analytics-plan.md`. (Owner: design first, analytics later.)
+
+### The text budget (owner: "way too much text", Aug 6)
+
+Researched against wealthsimple.com and levels.fyi: Wealthsimple runs
+heading + at most one sub-line per section with body prose exactly once on
+the whole homepage; levels.fyi has almost no prose at all, the data is the
+interface. The teardown already said it: one claim per screen, processing
+fluency reads as trustworthiness. Rules now in force for every iteration:
+
+1. Heading + max ONE sentence per section. If a section needs two, it's
+   two sections or it's disclosure.
+2. Numbers render as data (grids, chips, tables), never as sentences.
+   The sheet's referral stat is a 3-row grid, not a paragraph.
+3. Explanation lives behind progressive disclosure (the contact sheet,
+   `<details>` for the template), never inline.
+4. Duplicated reassurance is deleted: the fee grid says Stripe once, so
+   the blemish line doesn't say it again.
+5. Page prose outside listing data stays under ~150 words.

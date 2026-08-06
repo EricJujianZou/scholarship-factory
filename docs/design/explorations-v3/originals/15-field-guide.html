@@ -1,0 +1,1370 @@
+<!-- INTERNAL DESIGN MOCKUP - sample listing data -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="UGMI is a free field guide to 1,427 mostly Canadian internships, with optional hand-picked Monday field notes.">
+  <title>UGMI Field Guide to Internships</title>
+  <style>
+    :root {
+      --paper: #f3edda;
+      --paper-deep: #e7ddc2;
+      --ink: #173a2a;
+      --ink-soft: #365744;
+      --moss: #567143;
+      --fern: #78915d;
+      --blaze: #d6532f;
+      --sun: #e7b849;
+      --line: #9d9b78;
+      --white: #fffdf5;
+      --shadow: rgba(23, 58, 42, .14);
+      --radius: 3px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--paper);
+    }
+
+    body {
+      margin: 0;
+      min-width: 0;
+      overflow-x: hidden;
+      color: var(--ink);
+      background:
+        linear-gradient(90deg, transparent 0 27px, rgba(214,83,47,.18) 27px 28px, transparent 28px),
+        repeating-linear-gradient(0deg, rgba(23,58,42,.025) 0 1px, transparent 1px 5px),
+        var(--paper);
+      font-family: Georgia, "Times New Roman", serif;
+      line-height: 1.45;
+    }
+
+    button, input, select { font: inherit; }
+    button, select { cursor: pointer; }
+    a { color: inherit; }
+    img, svg { display: block; max-width: 100%; }
+
+    :focus-visible {
+      outline: 3px solid var(--blaze);
+      outline-offset: 3px;
+    }
+
+    .skip-link {
+      position: fixed;
+      left: 12px;
+      top: 8px;
+      z-index: 50;
+      padding: 8px 12px;
+      color: var(--white);
+      background: var(--ink);
+      transform: translateY(-160%);
+    }
+
+    .skip-link:focus { transform: translateY(0); }
+
+    .shell {
+      width: min(100% - 32px, 1120px);
+      margin-inline: auto;
+    }
+
+    .eyebrow,
+    .kicker,
+    .tag,
+    .field-label,
+    .plate-number,
+    .meta dt,
+    .result-count,
+    .guide-mark {
+      font-family: "Arial Narrow", "Aptos Narrow", Arial, sans-serif;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .site-header {
+      position: relative;
+      border-bottom: 2px solid var(--ink);
+      background: rgba(243,237,218,.95);
+    }
+
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      min-height: 72px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      font-family: "Arial Narrow", Arial, sans-serif;
+      font-size: 1.25rem;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-decoration: none;
+    }
+
+    .brand-mark {
+      position: relative;
+      width: 27px;
+      height: 34px;
+      border: 2px solid var(--ink);
+      background: var(--blaze);
+      clip-path: polygon(50% 0, 100% 18%, 88% 72%, 50% 100%, 12% 72%, 0 18%);
+    }
+
+    .brand-mark::after {
+      content: "";
+      position: absolute;
+      left: 11px;
+      top: 6px;
+      width: 2px;
+      height: 21px;
+      background: var(--paper);
+      transform: rotate(18deg);
+    }
+
+    .header-note {
+      margin: 0;
+      color: var(--ink-soft);
+      font-family: "Arial Narrow", Arial, sans-serif;
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-align: right;
+      text-transform: uppercase;
+    }
+
+    .hero {
+      position: relative;
+      padding: 52px 0 34px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hero-grid {
+      display: grid;
+      gap: 32px;
+    }
+
+    .kicker {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 14px;
+      color: var(--blaze);
+      font-size: .76rem;
+    }
+
+    .kicker::before {
+      content: "";
+      width: 30px;
+      height: 5px;
+      background: var(--blaze);
+    }
+
+    h1, h2, h3, p { overflow-wrap: break-word; }
+
+    h1 {
+      max-width: 760px;
+      margin: 0;
+      font-size: clamp(2.8rem, 12vw, 6.6rem);
+      font-weight: 600;
+      letter-spacing: -.06em;
+      line-height: .88;
+    }
+
+    h1 span {
+      display: block;
+      margin-top: 10px;
+      color: var(--blaze);
+      font-size: .5em;
+      font-style: italic;
+      letter-spacing: -.035em;
+    }
+
+    .lede {
+      max-width: 650px;
+      margin: 24px 0 0;
+      font-size: clamp(1.05rem, 3vw, 1.3rem);
+      line-height: 1.48;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 26px;
+    }
+
+    .button {
+      display: inline-flex;
+      min-height: 48px;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      padding: 11px 16px;
+      border: 2px solid var(--ink);
+      border-radius: var(--radius);
+      color: var(--white);
+      background: var(--ink);
+      box-shadow: 4px 4px 0 var(--sun);
+      font-family: "Arial Narrow", Arial, sans-serif;
+      font-size: .84rem;
+      font-weight: 900;
+      letter-spacing: .07em;
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: transform .16s ease, box-shadow .16s ease;
+    }
+
+    .button:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 6px 0 var(--sun);
+    }
+
+    .button.secondary {
+      color: var(--ink);
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .guide-cover {
+      position: relative;
+      min-height: 280px;
+      padding: 18px;
+      border: 2px solid var(--ink);
+      background: var(--paper-deep);
+      box-shadow: 8px 8px 0 var(--ink);
+      transform: rotate(1deg);
+    }
+
+    .guide-cover::before,
+    .guide-cover::after {
+      content: "";
+      position: absolute;
+      pointer-events: none;
+    }
+
+    .guide-cover::before {
+      inset: 8px;
+      border: 1px solid var(--ink);
+    }
+
+    .guide-cover::after {
+      right: 28px;
+      top: 28px;
+      width: 52px;
+      height: 70px;
+      border: 2px solid var(--blaze);
+      background: linear-gradient(135deg, transparent 47%, var(--blaze) 48% 52%, transparent 53%);
+    }
+
+    .cover-top,
+    .cover-bottom {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      font-family: "Arial Narrow", Arial, sans-serif;
+      font-size: .7rem;
+      font-weight: 800;
+      letter-spacing: .11em;
+      text-transform: uppercase;
+    }
+
+    .cover-art {
+      width: 100%;
+      height: 175px;
+      margin: 12px auto 4px;
+      color: var(--ink);
+    }
+
+    .cover-bottom { align-items: end; }
+    .cover-number { color: var(--blaze); font-size: 1.8rem; line-height: 1; }
+
+    .taxon-strip {
+      border-bottom: 2px solid var(--ink);
+      background: var(--ink);
+      color: var(--white);
+    }
+
+    .taxon-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .taxon {
+      min-width: 0;
+      padding: 16px 12px;
+      border-right: 1px solid rgba(255,255,255,.35);
+    }
+
+    .taxon:nth-child(2n) { border-right: 0; }
+    .taxon:nth-child(n+3) { border-top: 1px solid rgba(255,255,255,.35); }
+
+    .taxon b {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--sun);
+      font-family: "Arial Narrow", Arial, sans-serif;
+      font-size: .66rem;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+
+    .taxon span { font-size: .94rem; }
+
+    .trail-section { padding: 52px 0; }
+
+    .section-head {
+      display: grid;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .trail-sign {
+      display: inline-flex;
+      width: fit-content;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+      padding: 5px 8px;
+      color: var(--white);
+      background: var(--blaze);
+      font-family: "Arial Narrow", Arial, sans-serif;
+      font-size: .7rem;
+      font-weight: 900;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      transform: rotate(-1deg);
+    }
+
+    .section-head h2,
+    .notes-copy h2 {
+      margin: 0;
+      font-size: clamp(2rem, 8vw, 4.4rem);
+      font-weight: 500;
+      letter-spacing: -.045em;
+      line-height: .98;
+    }
+
+    .section-head > p {
+      max-width: 620px;
+      margin: 0;
+      color: var(--ink-soft);
+      font-size: 1rem;
+    }
+
+    .filter-box {
+      margin-bottom: 28px;
+      border: 2px solid var(--ink);
+      background: rgba(255,253,245,.46);
+      box-shadow: 5px 5px 0 var(--paper-deep);
+    }
+
+    .filter-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 9px 12px;
+      color: var(--white);
+      background: var(--ink);
+    }
+
+    .filter-title h3 {
+      margin: 0;
+      font-family: "Arial Narrow", Arial, sans-serif;
+      font-size: .78rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .result-count {
+      color: var(--sun);
+      font-size: .68rem;
+    }
+
+    .filter-grid {
+      display: grid;
+      gap: 14px;
+      padding: 16px;
+    }
+
+    .field { min-width: 0; }
+
+    .field-label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: .67rem;
+    }
+
+    select,
+    input[type="search"] {
+      width: 100%;
+      min-height: 45px;
+      padding: 9px 35px 9px 11px;
+      border: 1.5px solid var(--ink);
+      border-radius: 0;
+      color: var(--ink);
+      background-color: var(--white);
+    }
+
+    input[type="search"] { padding-right: 11px; }
+
+    .reset-button {
+      min-height: 45px;
+      align-self: end;
+      padding: 9px 12px;
+      border: 1.5px solid var(--ink);
+      border-radius: 0;
+      color: var(--ink);
+      background: var(--sun);
+      font-family: "Arial Narrow", Arial, sans-serif;
+      font-size: .72rem;
+      font-weight: 900;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+
+    .trail {
+      position: relative;
+      display: grid;
+      gap: 22px;
+      padding-left: 17px;
+    }
+
+    .trail::before {
+      content: "";
+      position: absolute;
+      left: 2px;
+      top: 18px;
+      bottom: 18px;
+      border-left: 3px dotted var(--moss);
+    }
+
+    .listing {
+      position: relative;
+      min-width: 0;
+      border: 1.5px solid var(--ink);
+      background: var(--white);
+      box-shadow: 5px 5px 0 var(--shadow);
+    }
+
+    .listing::before {
+      content: "";
+      position: absolute;
+      left: -23px;
+      top: 24px;
+      width: 11px;
+      height: 11px;
+      border: 3px solid var(--paper);
+      border-radius: 50%;
+      background: var(--blaze);
+      box-shadow: 0 0 0 2px var(--ink);
+    }
+
+    .listing[hidden] { display: none; }
+
+    .plate {
+      position: relative;
+      min-height: 176px;
+      overflow: hidden;
+      border-bottom: 1.5px solid var(--ink);
+      background:
+        linear-gradient(rgba(23,58,42,.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(23,58,42,.06) 1px, transparent 1px),
+        var(--paper-deep);
+      background-size: 18px 18px;
+    }
+
+    .plate-number {
+      position: absolute;
+      z-index: 2;
+      left: 10px;
+      top: 9px;
+      padding: 3px 6px;
+      color: var(--white);
+      background: var(--ink);
+      font-size: .61rem;
+    }
+
+    .specimen-svg {
+      width: 100%;
+      height: 176px;
+      color: var(--ink);
+    }
+
+    .specimen-svg .wash { fill: var(--sun); opacity: .55; }
+    .specimen-svg .leaf { fill: var(--fern); stroke: var(--ink); stroke-width: 2; }
+    .specimen-svg .stem { fill: none; stroke: var(--ink); stroke-width: 3; stroke-linecap: round; }
+    .specimen-svg .accent { fill: var(--blaze); stroke: var(--ink); stroke-width: 2; }
+    .specimen-svg .pale { fill: var(--paper); stroke: var(--ink); stroke-width: 2; }
+    .specimen-svg .fine { fill: none; stroke: var(--ink); stroke-width: 1.3; }
+
+    .annotation {
+      position: absolute;
+      z-index: 2;
+      right: 10px;
+      bottom: 8px;
+      max-width: 116px;
+      padding-left: 24px;
+      color: var(--ink-soft);
+      font-family: "Arial Narrow", Arial, sans-serif;
+      font-size: .59rem;
+      font-weight: 800;
+      letter-spacing: .04em;
+      line-height: 1.2;
+      text-transform: uppercase;
+    }
+
+    .annotation::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 6px;
+      width: 19px;
+      border-top: 1px solid var(--ink);
+      transform: rotate(-15deg);
+    }
+
+    .listing-body { padding: 17px 16px 16px; }
+
+    .company-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .company {
+      margin: 0;
+      color: var(--blaze);
+      font-family: "Arial Narrow", Arial, sans-serif;
+      font-size: .72rem;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .season-dot {
+      flex: 0 0 auto;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--moss);
+      box-shadow: 0 0 0 2px var(--paper), 0 0 0 3px var(--moss);
+    }
+
+    .listing h3 {
+      margin: 7px 0 13px;
+      font-size: 1.37rem;
+      font-weight: 600;
+      line-height: 1.12;
+    }
+
+    .meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 12px;
+      margin: 0 0 15px;
+    }
+
+    .meta div { min-width: 0; }
+    .meta dt { margin: 0 0 2px; color: var(--moss); font-size: .59rem; }
+    .meta dd { margin: 0; font-size: .85rem; line-height: 1.25; }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 15px;
+    }
+
+    .tag {
+      padding: 4px 6px;
+      border: 1px solid var(--line);
+      color: var(--ink-soft);
+      background: var(--paper);
+      font-size: .56rem;
+    }
+
+    .detail-button {
+      width: 100%;
+      min-height: 42px;
+      border: 1.5px solid var(--ink);
+      border-radius: 0;
+      color: var(--ink);
+      background: transparent;
+      font-family: "Arial Narrow", Arial, sans-serif;
+      font-size: .7rem;
+      font-weight: 900;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+
+    .detail-button:hover { color: var(--white); background: var(--ink); }
+
+    .empty-state {
+      display: none;
+      padding: 30px 18px;
+      border: 2px dashed var(--ink);
+      text-align: center;
+    }
+
+    .empty-state.is-visible { display: block; }
+    .empty-state h3 { margin: 0 0 6px; font-size: 1.35rem; }
+    .empty-state p { margin: 0; }
+
+    .field-notes {
+      padding: 58px 0;
+      color: var(--white);
+      background:
+        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px),
+        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+        var(--ink);
+      background-size: 24px 24px;
+    }
+
+    .notes-grid { display: grid; gap: 30px; }
+
+    .notes-copy .trail-sign { color: var(--ink); background: var(--sun); }
+    .notes-copy h2 { margin-top: 15px; }
+    .notes-copy > p { max-width: 590px; color: #dbe3d8; }
+
+    .price-line {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 8px;
+      margin: 20px 0 4px;
+    }
+
+    .price {
+      color: var(--sun);
+      font-size: 3.1rem;
+      font-weight: 600;
+      letter-spacing: -.05em;
+      line-height: 1;
+    }
+
+    .cad {
+      font-family: "Arial Narrow", Arial, sans-serif;
+      font-size: .74rem;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .notes-list {
+      display: grid;
+      gap: 10px;
+      margin: 22px 0 26px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .notes-list li {
+      position: relative;
+      padding-left: 25px;
+    }
+
+    .notes-list li::before {
+      content: "";
+      position: absolute;
+      left: 1px;
+      top: .35em;
+      width: 10px;
+      height: 6px;
+      border-left: 3px solid var(--sun);
+      border-bottom: 3px solid var(--sun);
+      transform: rotate(-45deg);
+    }
+
+    .notes-copy .button {
+      color: var(--ink);
+      background: var(--sun);
+      box-shadow: 4px 4px 0 var(--blaze);
+    }
+
+    .field-card {
+      position: relative;
+      padding: 24px 20px 21px;
+      color: var(--ink);
+      background: var(--paper);
+      box-shadow: 9px 9px 0 var(--blaze);
+      transform: rotate(-1deg);
+    }
+
+    .field-card::before {
+      content: "";
+      position: absolute;
+      inset: 8px;
+      border: 1px solid var(--line);
+      pointer-events: none;
+    }
+
+    .field-card > * { position: relative; }
+
+    .field-card h3 {
+      margin: 0 0 18px;
+      padding-bottom: 9px;
+      border-bottom: 2px solid var(--ink);
+      font-family: "Arial Narrow", Arial, sans-serif;
+      font-size: .78rem;
+      letter-spacing: .11em;
+      text-transform: uppercase;
+    }
+
+    .sample-match {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 12px 0;
+      border-bottom: 1px dotted var(--line);
+    }
+
+    .match-number {
+      display: grid;
+      height: 34px;
+      place-items: center;
+      border: 1px solid var(--ink);
+      border-radius: 50%;
+      font-family: "Arial Narrow", Arial, sans-serif;
+      font-size: .64rem;
+      font-weight: 900;
+    }
+
+    .sample-match b { display: block; font-size: .94rem; }
+    .sample-match span { display: block; color: var(--ink-soft); font-size: .8rem; }
+
+    .card-foot {
+      margin: 16px 0 0;
+      font-family: "Arial Narrow", Arial, sans-serif;
+      font-size: .68rem;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .provenance {
+      padding: 46px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .provenance-grid { display: grid; gap: 24px; }
+
+    .portrait-mark {
+      width: 105px;
+      height: 105px;
+      padding: 10px;
+      border: 2px solid var(--ink);
+      border-radius: 50%;
+      background: var(--sun);
+    }
+
+    .provenance h2 {
+      margin: 0 0 10px;
+      font-size: clamp(1.9rem, 7vw, 3.3rem);
+      font-weight: 500;
+      letter-spacing: -.035em;
+      line-height: 1;
+    }
+
+    .provenance p { max-width: 660px; margin: 0; color: var(--ink-soft); }
+    .provenance a { text-decoration-thickness: 2px; text-underline-offset: 3px; }
+
+    footer {
+      padding: 25px 0 40px;
+      font-family: "Arial Narrow", Arial, sans-serif;
+      font-size: .71rem;
+      font-weight: 800;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+    }
+
+    .footer-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 12px 24px;
+    }
+
+    dialog {
+      width: min(calc(100% - 28px), 620px);
+      max-height: min(84vh, 720px);
+      padding: 0;
+      overflow: auto;
+      border: 2px solid var(--ink);
+      border-radius: 0;
+      color: var(--ink);
+      background: var(--paper);
+      box-shadow: 10px 10px 0 var(--blaze);
+    }
+
+    dialog::backdrop { background: rgba(12,31,22,.72); }
+
+    .dialog-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 14px;
+      color: var(--white);
+      background: var(--ink);
+    }
+
+    .dialog-head p {
+      margin: 0;
+      font-family: "Arial Narrow", Arial, sans-serif;
+      font-size: .69rem;
+      font-weight: 900;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .close-dialog {
+      min-width: 38px;
+      min-height: 38px;
+      border: 1px solid var(--white);
+      color: var(--white);
+      background: transparent;
+      font-family: Arial, sans-serif;
+      font-size: 1.25rem;
+      line-height: 1;
+    }
+
+    .dialog-body { padding: 22px 18px 24px; }
+    .dialog-body h2 { margin: 0 0 5px; font-size: 1.85rem; line-height: 1.08; }
+    .dialog-company { margin: 0 0 18px; color: var(--blaze); font-weight: 700; }
+
+    .observation {
+      margin: 18px 0;
+      padding: 14px;
+      border-left: 5px solid var(--sun);
+      background: var(--paper-deep);
+    }
+
+    .observation b {
+      display: block;
+      margin-bottom: 4px;
+      font-family: "Arial Narrow", Arial, sans-serif;
+      font-size: .67rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .dialog-facts {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .dialog-facts li {
+      padding: 8px 0;
+      border-bottom: 1px dotted var(--line);
+    }
+
+    .dialog-disclaimer {
+      margin: 18px 0 0;
+      color: var(--ink-soft);
+      font-size: .78rem;
+    }
+
+    @media (min-width: 620px) {
+      .taxon-grid { grid-template-columns: repeat(4, 1fr); }
+      .taxon:nth-child(n) { border-top: 0; border-right: 1px solid rgba(255,255,255,.35); }
+      .taxon:last-child { border-right: 0; }
+      .filter-grid { grid-template-columns: 1fr 1fr; }
+      .reset-button { grid-column: 1 / -1; }
+      .trail { grid-template-columns: 1fr 1fr; padding-left: 20px; }
+      .listing::before { left: -26px; }
+      .listing:nth-of-type(even) { margin-top: 44px; margin-bottom: -44px; }
+      .empty-state { grid-column: 1 / -1; }
+      .provenance-grid { grid-template-columns: auto 1fr; align-items: center; }
+    }
+
+    @media (min-width: 850px) {
+      .hero { padding: 72px 0 52px; }
+      .hero-grid { grid-template-columns: minmax(0, 1.7fr) minmax(280px, .8fr); align-items: center; }
+      .filter-grid { grid-template-columns: 1.1fr 1fr 1fr auto; }
+      .reset-button { grid-column: auto; }
+      .trail { grid-template-columns: repeat(4, 1fr); gap: 16px; padding-left: 0; }
+      .trail::before { left: 0; right: 0; top: -12px; bottom: auto; border-left: 0; border-top: 3px dotted var(--moss); }
+      .listing::before { left: 20px; top: -20px; }
+      .listing:nth-of-type(even) { margin-top: 54px; margin-bottom: 0; }
+      .listing:nth-of-type(4n+3) { margin-top: 26px; }
+      .notes-grid { grid-template-columns: minmax(0, 1.2fr) minmax(320px, .8fr); align-items: center; }
+      .section-head { grid-template-columns: 1fr .7fr; align-items: end; }
+      .section-head .trail-sign { grid-column: 1 / -1; }
+      .section-head > p { justify-self: end; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .001ms !important;
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#openings">Skip to internship guide</a>
+
+  <header class="site-header">
+    <div class="shell header-row">
+      <a class="brand" href="#top" aria-label="UGMI home">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>UGMI</span>
+      </a>
+      <p class="header-note">Canadian Internship Survey<br>Student edition · 2025</p>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="shell hero-grid">
+        <div>
+          <p class="kicker">Field guide no. 1427</p>
+          <h1 id="hero-title">Find your next habitat.<span>A living guide to Canadian internships.</span></h1>
+          <p class="lede">Search 1,427 open internships, mostly across Canada. No account. No email gate. No paywall. Just useful sightings, clearly marked.</p>
+          <div class="hero-actions">
+            <a class="button" href="#openings">Browse the trail <span aria-hidden="true">↓</span></a>
+            <a class="button secondary" href="#field-notes">Get Monday field notes</a>
+          </div>
+        </div>
+
+        <aside class="guide-cover" aria-label="Illustrated UGMI field guide cover">
+          <div class="cover-top"><span>UGMI Survey</span><span>CA / 2025</span></div>
+          <svg class="cover-art" viewBox="0 0 260 180" role="img" aria-label="Botanical illustration of a trillium beside a trail marker">
+            <path d="M132 157 C128 120 137 93 128 53" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+            <path d="M129 111 C102 89 76 92 64 105 C85 119 107 121 129 111Z" fill="#78915d" stroke="currentColor" stroke-width="2"/>
+            <path d="M131 93 C155 69 181 72 195 84 C174 101 153 104 131 93Z" fill="#78915d" stroke="currentColor" stroke-width="2"/>
+            <path d="M127 62 C105 51 96 31 105 18 C124 23 137 38 127 62Z" fill="#f3edda" stroke="currentColor" stroke-width="2"/>
+            <path d="M131 61 C145 40 165 31 178 40 C169 59 151 69 131 61Z" fill="#f3edda" stroke="currentColor" stroke-width="2"/>
+            <path d="M129 64 C122 84 105 96 91 91 C92 72 107 59 129 64Z" fill="#f3edda" stroke="currentColor" stroke-width="2"/>
+            <circle cx="129" cy="61" r="8" fill="#d6532f" stroke="currentColor" stroke-width="2"/>
+            <path d="M35 150 L52 103 L69 150Z" fill="#d6532f" stroke="currentColor" stroke-width="3"/>
+            <path d="M44 135 L60 135" stroke="#f3edda" stroke-width="4"/>
+            <path d="M185 153 C198 128 215 119 231 121 M195 144 C208 141 219 143 229 150" fill="none" stroke="currentColor" stroke-width="2"/>
+          </svg>
+          <div class="cover-bottom"><span>Range · Mostly Canada<br>Season · Open now</span><span class="cover-number">1,427</span></div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="taxon-strip" aria-label="Guide taxonomy">
+      <div class="shell taxon-grid">
+        <div class="taxon"><b>Range</b><span>Mostly Canada</span></div>
+        <div class="taxon"><b>Season</b><span>Open now</span></div>
+        <div class="taxon"><b>Population</b><span>1,427 roles</span></div>
+        <div class="taxon"><b>Access</b><span>Free, no sign-in</span></div>
+      </div>
+    </section>
+
+    <section class="trail-section" id="openings" aria-labelledby="openings-title">
+      <div class="shell">
+        <div class="section-head">
+          <p class="trail-sign">Trail 01 · Active sightings</p>
+          <h2 id="openings-title">Internship specimens</h2>
+          <p>Use the guide marks to narrow the range. Every card is a sample sighting from the larger searchable collection.</p>
+        </div>
+
+        <form class="filter-box" id="filters" aria-label="Filter internship specimens">
+          <div class="filter-title">
+            <h3>Range and type key</h3>
+            <output class="result-count" id="result-count" aria-live="polite">8 specimens</output>
+          </div>
+          <div class="filter-grid">
+            <label class="field">
+              <span class="field-label">Search the guide</span>
+              <input id="search-filter" type="search" placeholder="Company or role" autocomplete="off">
+            </label>
+            <label class="field">
+              <span class="field-label">Habitat / location</span>
+              <select id="location-filter">
+                <option value="all">All habitats</option>
+                <option value="toronto">Toronto, ON</option>
+                <option value="waterloo">Waterloo, ON</option>
+                <option value="vancouver">Vancouver, BC</option>
+                <option value="ottawa">Ottawa, ON</option>
+                <option value="remote">Remote in Canada</option>
+              </select>
+            </label>
+            <label class="field">
+              <span class="field-label">Discipline</span>
+              <select id="discipline-filter">
+                <option value="all">All disciplines</option>
+                <option value="engineering">Engineering</option>
+                <option value="product">Product and design</option>
+                <option value="data">Data and analytics</option>
+                <option value="business">Business and operations</option>
+                <option value="environment">Environment and energy</option>
+              </select>
+            </label>
+            <button class="reset-button" type="reset">Clear marks</button>
+          </div>
+        </form>
+
+        <div class="trail" id="listing-grid">
+          <article class="listing" data-location="toronto" data-discipline="engineering" data-search="shopify backend developer intern toronto engineering">
+            <div class="plate">
+              <span class="plate-number">Plate A.01</span>
+              <svg class="specimen-svg" viewBox="0 0 280 176" aria-hidden="true">
+                <circle class="wash" cx="139" cy="88" r="56"/>
+                <path class="stem" d="M139 151 C136 118 140 87 139 45"/>
+                <path class="leaf" d="M138 112 C105 83 80 91 68 110 C88 129 113 128 138 112Z"/>
+                <path class="leaf" d="M141 93 C168 64 194 69 209 84 C191 105 165 108 141 93Z"/>
+                <path class="accent" d="M139 49 L153 69 L139 86 L125 69Z"/>
+                <path class="fine" d="M139 112 L86 107 M141 93 L194 82"/>
+              </svg>
+              <span class="annotation">Strong server-side growth</span>
+            </div>
+            <div class="listing-body">
+              <div class="company-row"><p class="company">Shopify</p><span class="season-dot" title="Open now"></span></div>
+              <h3>Backend Developer Intern</h3>
+              <dl class="meta"><div><dt>Habitat</dt><dd>Toronto, ON</dd></div><div><dt>Season</dt><dd>Fall 2025</dd></div><div><dt>Pattern</dt><dd>Hybrid</dd></div><div><dt>Term</dt><dd>4 months</dd></div></dl>
+              <div class="tags"><span class="tag">Engineering</span><span class="tag">Ruby</span><span class="tag">Systems</span></div>
+              <button class="detail-button" type="button" data-title="Backend Developer Intern" data-company="Shopify" data-location="Toronto, ON" data-season="Fall 2025" data-note="A strong sighting for students who can describe one service they improved, not just the language they used." data-signals="APIs and distributed systems|Ruby or comparable backend experience|Clear written collaboration">Open field note</button>
+            </div>
+          </article>
+
+          <article class="listing" data-location="vancouver" data-discipline="engineering" data-search="amazon software development engineer intern vancouver engineering cloud">
+            <div class="plate">
+              <span class="plate-number">Plate A.02</span>
+              <svg class="specimen-svg" viewBox="0 0 280 176" aria-hidden="true">
+                <ellipse class="wash" cx="140" cy="95" rx="78" ry="47"/>
+                <path class="stem" d="M57 132 C93 116 119 83 143 38 M143 38 C159 74 190 102 225 124"/>
+                <path class="pale" d="M143 38 L163 74 L143 91 L123 74Z"/>
+                <path class="leaf" d="M112 85 C79 64 60 77 53 94 C72 109 92 104 112 85Z"/>
+                <path class="leaf" d="M174 88 C201 64 221 75 230 91 C214 108 192 107 174 88Z"/>
+                <path class="accent" d="M132 117 L148 97 L162 118 L147 139Z"/>
+              </svg>
+              <span class="annotation">Cloud canopy species</span>
+            </div>
+            <div class="listing-body">
+              <div class="company-row"><p class="company">Amazon</p><span class="season-dot" title="Open now"></span></div>
+              <h3>Software Development Engineer Intern</h3>
+              <dl class="meta"><div><dt>Habitat</dt><dd>Vancouver, BC</dd></div><div><dt>Season</dt><dd>Summer 2026</dd></div><div><dt>Pattern</dt><dd>On-site</dd></div><div><dt>Term</dt><dd>12 to 16 weeks</dd></div></dl>
+              <div class="tags"><span class="tag">Engineering</span><span class="tag">Cloud</span><span class="tag">Algorithms</span></div>
+              <button class="detail-button" type="button" data-title="Software Development Engineer Intern" data-company="Amazon" data-location="Vancouver, BC" data-season="Summer 2026" data-note="Best approached with two concise project stories that show scale, tradeoffs, and what changed after your work." data-signals="Data structures and algorithms|One production-minded project|Evidence of ownership">Open field note</button>
+            </div>
+          </article>
+
+          <article class="listing" data-location="toronto" data-discipline="data" data-search="rbc data analyst co-op toronto banking analytics data">
+            <div class="plate">
+              <span class="plate-number">Plate B.01</span>
+              <svg class="specimen-svg" viewBox="0 0 280 176" aria-hidden="true">
+                <circle class="wash" cx="141" cy="86" r="57"/>
+                <path class="stem" d="M141 146 L141 48 M101 125 L141 92 L183 121"/>
+                <circle class="pale" cx="141" cy="47" r="17"/>
+                <circle class="leaf" cx="98" cy="126" r="18"/>
+                <circle class="leaf" cx="185" cy="123" r="18"/>
+                <circle class="accent" cx="141" cy="93" r="13"/>
+                <path class="fine" d="M86 126 H111 M173 123 H198 M141 34 V60"/>
+              </svg>
+              <span class="annotation">Quantitative branching</span>
+            </div>
+            <div class="listing-body">
+              <div class="company-row"><p class="company">RBC</p><span class="season-dot" title="Open now"></span></div>
+              <h3>Data Analyst Co-op</h3>
+              <dl class="meta"><div><dt>Habitat</dt><dd>Toronto, ON</dd></div><div><dt>Season</dt><dd>Winter 2026</dd></div><div><dt>Pattern</dt><dd>Hybrid</dd></div><div><dt>Term</dt><dd>4 months</dd></div></dl>
+              <div class="tags"><span class="tag">Data</span><span class="tag">SQL</span><span class="tag">Dashboards</span></div>
+              <button class="detail-button" type="button" data-title="Data Analyst Co-op" data-company="RBC" data-location="Toronto, ON" data-season="Winter 2026" data-note="Show how your analysis changed a decision. A clean one-page project summary can be more useful than another tool in a skills list." data-signals="SQL and spreadsheet fluency|A decision-focused portfolio example|Comfort explaining findings">Open field note</button>
+            </div>
+          </article>
+
+          <article class="listing" data-location="remote" data-discipline="product" data-search="stripe product design intern remote canada product design fintech">
+            <div class="plate">
+              <span class="plate-number">Plate B.02</span>
+              <svg class="specimen-svg" viewBox="0 0 280 176" aria-hidden="true">
+                <path class="wash" d="M72 32 H210 V143 H72Z"/>
+                <path class="pale" d="M91 49 H192 V128 H91Z"/>
+                <path class="fine" d="M105 67 H175 M105 80 H158 M105 107 C123 84 147 126 177 94"/>
+                <circle class="accent" cx="105" cy="107" r="7"/>
+                <circle class="leaf" cx="177" cy="94" r="7"/>
+                <path class="stem" d="M59 139 C72 119 80 99 87 77"/>
+                <path class="leaf" d="M68 113 C51 102 42 110 40 120 C52 128 62 124 68 113Z"/>
+              </svg>
+              <span class="annotation">Clear interface markings</span>
+            </div>
+            <div class="listing-body">
+              <div class="company-row"><p class="company">Stripe</p><span class="season-dot" title="Open now"></span></div>
+              <h3>Product Design Intern</h3>
+              <dl class="meta"><div><dt>Habitat</dt><dd>Remote, Canada</dd></div><div><dt>Season</dt><dd>Summer 2026</dd></div><div><dt>Pattern</dt><dd>Remote</dd></div><div><dt>Term</dt><dd>12 weeks</dd></div></dl>
+              <div class="tags"><span class="tag">Product</span><span class="tag">Design</span><span class="tag">Fintech</span></div>
+              <button class="detail-button" type="button" data-title="Product Design Intern" data-company="Stripe" data-location="Remote, Canada" data-season="Summer 2026" data-note="Case studies should make the reasoning visible. Include constraints, discarded routes, and a specific product outcome." data-signals="Two detailed case studies|Strong systems thinking|Comfort with product critique">Open field note</button>
+            </div>
+          </article>
+
+          <article class="listing" data-location="waterloo" data-discipline="engineering" data-search="opentext software engineering intern waterloo cybersecurity engineering">
+            <div class="plate">
+              <span class="plate-number">Plate C.01</span>
+              <svg class="specimen-svg" viewBox="0 0 280 176" aria-hidden="true">
+                <circle class="wash" cx="139" cy="91" r="61"/>
+                <path class="stem" d="M139 147 V52 M139 80 L106 63 M139 100 L174 78 M139 121 L104 111"/>
+                <path class="leaf" d="M106 63 C84 43 67 53 64 68 C81 79 94 74 106 63Z"/>
+                <path class="leaf" d="M174 78 C195 58 214 67 218 82 C200 94 186 89 174 78Z"/>
+                <path class="leaf" d="M104 111 C84 96 69 105 68 119 C84 128 96 123 104 111Z"/>
+                <path class="accent" d="M139 38 L154 50 L148 70 H130 L124 50Z"/>
+              </svg>
+              <span class="annotation">Secure woodland variety</span>
+            </div>
+            <div class="listing-body">
+              <div class="company-row"><p class="company">OpenText</p><span class="season-dot" title="Open now"></span></div>
+              <h3>Software Engineering Intern</h3>
+              <dl class="meta"><div><dt>Habitat</dt><dd>Waterloo, ON</dd></div><div><dt>Season</dt><dd>Winter 2026</dd></div><div><dt>Pattern</dt><dd>Hybrid</dd></div><div><dt>Term</dt><dd>4 months</dd></div></dl>
+              <div class="tags"><span class="tag">Engineering</span><span class="tag">Security</span><span class="tag">Java</span></div>
+              <button class="detail-button" type="button" data-title="Software Engineering Intern" data-company="OpenText" data-location="Waterloo, ON" data-season="Winter 2026" data-note="A practical security or systems project will travel well here. Explain how you tested it and where it can fail." data-signals="Java or C++ foundations|Testing discipline|Interest in application security">Open field note</button>
+            </div>
+          </article>
+
+          <article class="listing" data-location="toronto" data-discipline="product" data-search="ecobee product management intern toronto smart home product climate">
+            <div class="plate">
+              <span class="plate-number">Plate C.02</span>
+              <svg class="specimen-svg" viewBox="0 0 280 176" aria-hidden="true">
+                <circle class="wash" cx="140" cy="88" r="59"/>
+                <circle class="pale" cx="140" cy="88" r="42"/>
+                <path class="fine" d="M140 56 V88 L161 102"/>
+                <circle class="accent" cx="140" cy="88" r="7"/>
+                <path class="stem" d="M86 146 C105 127 116 111 123 99"/>
+                <path class="leaf" d="M100 126 C77 113 64 124 64 138 C81 145 93 138 100 126Z"/>
+                <path class="stem" d="M190 144 C176 125 168 110 158 99"/>
+                <path class="leaf" d="M181 126 C203 112 216 122 217 136 C201 144 189 138 181 126Z"/>
+              </svg>
+              <span class="annotation">Home climate indicator</span>
+            </div>
+            <div class="listing-body">
+              <div class="company-row"><p class="company">ecobee</p><span class="season-dot" title="Open now"></span></div>
+              <h3>Product Management Intern</h3>
+              <dl class="meta"><div><dt>Habitat</dt><dd>Toronto, ON</dd></div><div><dt>Season</dt><dd>Fall 2025</dd></div><div><dt>Pattern</dt><dd>Hybrid</dd></div><div><dt>Term</dt><dd>4 months</dd></div></dl>
+              <div class="tags"><span class="tag">Product</span><span class="tag">Climate</span><span class="tag">Smart home</span></div>
+              <button class="detail-button" type="button" data-title="Product Management Intern" data-company="ecobee" data-location="Toronto, ON" data-season="Fall 2025" data-note="Highlight a time you turned ambiguous user evidence into a prioritized next step. Small products count." data-signals="User research exposure|Structured product judgment|Concise stakeholder writing">Open field note</button>
+            </div>
+          </article>
+
+          <article class="listing" data-location="ottawa" data-discipline="business" data-search="telus strategy operations intern ottawa business telecom operations">
+            <div class="plate">
+              <span class="plate-number">Plate D.01</span>
+              <svg class="specimen-svg" viewBox="0 0 280 176" aria-hidden="true">
+                <ellipse class="wash" cx="140" cy="93" rx="67" ry="56"/>
+                <path class="stem" d="M58 137 C101 131 119 103 141 57 C159 94 188 122 225 133"/>
+                <path class="fine" d="M87 129 C109 109 126 87 141 57 M194 124 C171 105 155 81 141 57"/>
+                <circle class="accent" cx="141" cy="57" r="11"/>
+                <circle class="leaf" cx="58" cy="137" r="9"/>
+                <circle class="leaf" cx="225" cy="133" r="9"/>
+                <path class="pale" d="M126 113 L140 91 L155 113 L140 133Z"/>
+              </svg>
+              <span class="annotation">Networked range pattern</span>
+            </div>
+            <div class="listing-body">
+              <div class="company-row"><p class="company">TELUS</p><span class="season-dot" title="Open now"></span></div>
+              <h3>Strategy &amp; Operations Intern</h3>
+              <dl class="meta"><div><dt>Habitat</dt><dd>Ottawa, ON</dd></div><div><dt>Season</dt><dd>Winter 2026</dd></div><div><dt>Pattern</dt><dd>Hybrid</dd></div><div><dt>Term</dt><dd>4 months</dd></div></dl>
+              <div class="tags"><span class="tag">Business</span><span class="tag">Strategy</span><span class="tag">Telecom</span></div>
+              <button class="detail-button" type="button" data-title="Strategy &amp; Operations Intern" data-company="TELUS" data-location="Ottawa, ON" data-season="Winter 2026" data-note="Use numbers to show the size of a problem and the effect of your recommendation. Campus and volunteer operations are valid evidence." data-signals="Structured problem solving|Spreadsheet modelling|Clear recommendations">Open field note</button>
+            </div>
+          </article>
+
+          <article class="listing" data-location="vancouver" data-discipline="environment" data-search="bc hydro environmental planning co-op vancouver environment energy sustainability">
+            <div class="plate">
+              <span class="plate-number">Plate D.02</span>
+              <svg class="specimen-svg" viewBox="0 0 280 176" aria-hidden="true">
+                <circle class="wash" cx="141" cy="86" r="59"/>
+                <path class="stem" d="M139 148 C141 121 137 89 143 51"/>
+                <path class="leaf" d="M141 112 C111 91 87 98 78 115 C99 129 119 126 141 112Z"/>
+                <path class="leaf" d="M141 91 C162 66 188 67 202 82 C186 101 164 105 141 91Z"/>
+                <path class="fine" d="M78 115 C104 111 121 111 141 112 M141 91 C163 87 181 84 202 82"/>
+                <path class="accent" d="M116 55 C127 36 147 31 165 39 C156 62 136 73 116 55Z"/>
+                <path class="fine" d="M124 56 C137 52 148 47 159 41"/>
+              </svg>
+              <span class="annotation">Watershed specialist</span>
+            </div>
+            <div class="listing-body">
+              <div class="company-row"><p class="company">BC Hydro</p><span class="season-dot" title="Open now"></span></div>
+              <h3>Environmental Planning Co-op</h3>
+              <dl class="meta"><div><dt>Habitat</dt><dd>Vancouver, BC</dd></div><div><dt>Season</dt><dd>Spring 2026</dd></div><div><dt>Pattern</dt><dd>Field and office</dd></div><div><dt>Term</dt><dd>8 months</dd></div></dl>
+              <div class="tags"><span class="tag">Environment</span><span class="tag">Energy</span><span class="tag">Planning</span></div>
+              <button class="detail-button" type="button" data-title="Environmental Planning Co-op" data-company="BC Hydro" data-location="Vancouver, BC" data-season="Spring 2026" data-note="Connect field methods to clear documentation. Mention safety training, GIS exposure, and any work with environmental regulations." data-signals="Environmental studies background|GIS or field data exposure|Careful technical writing">Open field note</button>
+            </div>
+          </article>
+
+          <div class="empty-state" id="empty-state" role="status">
+            <h3>No specimens under these marks.</h3>
+            <p>Clear the filters and try a wider range.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="field-notes" id="field-notes" aria-labelledby="notes-title">
+      <div class="shell notes-grid">
+        <div class="notes-copy">
+          <p class="trail-sign">Trail 02 · Guided route</p>
+          <h2 id="notes-title">Ten hand-picked matches. Every Monday.</h2>
+          <p>The free guide stays free. Field Notes is for students who want a short, human-curated route through it, matched to their goals.</p>
+          <div class="price-line"><span class="price">$15</span><span class="cad">CAD / month</span></div>
+          <ul class="notes-list">
+            <li>10 relevant internships selected for you</li>
+            <li>Delivered every Monday</li>
+            <li>Named contacts where available</li>
+            <li>Paid securely with Stripe</li>
+          </ul>
+          <button class="button" type="button" id="subscribe-button">Start Field Notes</button>
+        </div>
+
+        <aside class="field-card" aria-label="Sample Monday field note">
+          <h3>Monday route card · Sample</h3>
+          <div class="sample-match"><span class="match-number">01</span><div><b>Backend Developer · Shopify</b><span>92% route fit · Contact: Maya Chen, Campus Talent</span></div></div>
+          <div class="sample-match"><span class="match-number">02</span><div><b>Product Intern · ecobee</b><span>88% route fit · Contact: Liam Wong, Early Careers</span></div></div>
+          <div class="sample-match"><span class="match-number">03</span><div><b>Data Analyst · RBC</b><span>84% route fit · Contact: Priya Shah, Student Programs</span></div></div>
+          <p class="card-foot">Plus 7 more matched sightings · Sent Monday</p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="provenance" aria-labelledby="provenance-title">
+      <div class="shell provenance-grid">
+        <svg class="portrait-mark" viewBox="0 0 100 100" role="img" aria-label="Illustrated single maker mark">
+          <circle cx="50" cy="50" r="39" fill="#f3edda" stroke="#173a2a" stroke-width="3"/>
+          <circle cx="50" cy="39" r="14" fill="none" stroke="#173a2a" stroke-width="3"/>
+          <path d="M23 79 C27 61 39 56 50 56 C62 56 74 62 78 79" fill="#78915d" stroke="#173a2a" stroke-width="3"/>
+          <path d="M31 30 C39 17 62 18 69 32 C60 26 42 25 31 30Z" fill="#d6532f" stroke="#173a2a" stroke-width="3"/>
+        </svg>
+        <div>
+          <p class="eyebrow">Collected and maintained by one person</p>
+          <h2 id="provenance-title">Built by a Waterloo student who needed this guide too.</h2>
+          <p>UGMI is built and run by one University of Waterloo student. Questions, odd sightings, or internship tips? Find Eric at @sleppyeric.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell footer-row">
+      <span>UGMI · Field guide for students</span>
+      <span>1,427 open roles · Mostly Canada · Always free to search</span>
+    </div>
+  </footer>
+
+  <dialog id="detail-dialog" aria-labelledby="dialog-title">
+    <div class="dialog-head">
+      <p>UGMI observation record</p>
+      <button class="close-dialog" type="button" aria-label="Close field note">×</button>
+    </div>
+    <div class="dialog-body">
+      <h2 id="dialog-title"></h2>
+      <p class="dialog-company" id="dialog-company"></p>
+      <dl class="meta"><div><dt>Habitat</dt><dd id="dialog-location"></dd></div><div><dt>Season</dt><dd id="dialog-season"></dd></div></dl>
+      <div class="observation"><b>Observer's note</b><span id="dialog-note"></span></div>
+      <p class="field-label">Useful field signals</p>
+      <ul class="dialog-facts" id="dialog-signals"></ul>
+      <p class="dialog-disclaimer">Sample listing data for design exploration. Confirm the current posting before applying.</p>
+    </div>
+  </dialog>
+
+  <dialog id="subscribe-dialog" aria-labelledby="subscribe-title">
+    <div class="dialog-head">
+      <p>Field Notes enrollment</p>
+      <button class="close-dialog" type="button" aria-label="Close enrollment note">×</button>
+    </div>
+    <div class="dialog-body">
+      <h2 id="subscribe-title">Your Monday route, without the bushwhacking.</h2>
+      <p>Field Notes sends 10 hand-picked matches with named contacts each Monday for $15 CAD per month.</p>
+      <div class="observation"><b>Secure trail marker</b><span>Payment is handled by Stripe. This offline design mockup does not start a real checkout.</span></div>
+      <button class="button" type="button" id="demo-checkout">Continue to Stripe</button>
+    </div>
+  </dialog>
+
+  <script>
+    (function () {
+      const search = document.getElementById('search-filter');
+      const locationFilter = document.getElementById('location-filter');
+      const disciplineFilter = document.getElementById('discipline-filter');
+      const form = document.getElementById('filters');
+      const cards = Array.from(document.querySelectorAll('.listing'));
+      const count = document.getElementById('result-count');
+      const empty = document.getElementById('empty-state');
+      const detailDialog = document.getElementById('detail-dialog');
+      const subscribeDialog = document.getElementById('subscribe-dialog');
+
+      function filterCards() {
+        const query = search.value.trim().toLowerCase();
+        const location = locationFilter.value;
+        const discipline = disciplineFilter.value;
+        let visible = 0;
+
+        cards.forEach(function (card) {
+          const matchesQuery = !query || card.dataset.search.includes(query);
+          const matchesLocation = location === 'all' || card.dataset.location === location;
+          const matchesDiscipline = discipline === 'all' || card.dataset.discipline === discipline;
+          const isVisible = matchesQuery && matchesLocation && matchesDiscipline;
+          card.hidden = !isVisible;
+          if (isVisible) visible += 1;
+        });
+
+        count.textContent = visible + (visible === 1 ? ' specimen' : ' specimens');
+        empty.classList.toggle('is-visible', visible === 0);
+      }
+
+      search.addEventListener('input', filterCards);
+      locationFilter.addEventListener('change', filterCards);
+      disciplineFilter.addEventListener('change', filterCards);
+      form.addEventListener('reset', function () {
+        window.setTimeout(filterCards, 0);
+      });
+
+      document.querySelectorAll('.detail-button').forEach(function (button) {
+        button.addEventListener('click', function () {
+          document.getElementById('dialog-title').textContent = button.dataset.title;
+          document.getElementById('dialog-company').textContent = button.dataset.company;
+          document.getElementById('dialog-location').textContent = button.dataset.location;
+          document.getElementById('dialog-season').textContent = button.dataset.season;
+          document.getElementById('dialog-note').textContent = button.dataset.note;
+          const signalList = document.getElementById('dialog-signals');
+          signalList.replaceChildren();
+          button.dataset.signals.split('|').forEach(function (signal) {
+            const item = document.createElement('li');
+            item.textContent = signal;
+            signalList.appendChild(item);
+          });
+          detailDialog.showModal();
+        });
+      });
+
+      document.querySelectorAll('.close-dialog').forEach(function (button) {
+        button.addEventListener('click', function () {
+          button.closest('dialog').close();
+        });
+      });
+
+      [detailDialog, subscribeDialog].forEach(function (dialog) {
+        dialog.addEventListener('click', function (event) {
+          if (event.target === dialog) dialog.close();
+        });
+      });
+
+      document.getElementById('subscribe-button').addEventListener('click', function () {
+        subscribeDialog.showModal();
+      });
+
+      document.getElementById('demo-checkout').addEventListener('click', function () {
+        const note = subscribeDialog.querySelector('.observation span');
+        note.textContent = 'Checkout is intentionally disabled in this offline mockup. In the live product, Stripe opens here.';
+      });
+    }());
+  </script>
+</body>
+</html>

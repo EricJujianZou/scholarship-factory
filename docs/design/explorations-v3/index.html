@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UGMI explorations v3: before/after gallery</title>
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { font: 14px/1.5 system-ui, sans-serif; background: #1a1a1a; color: #eee;
+         display: flex; flex-direction: column; height: 100dvh; }
+  header { padding: 10px 14px; display: flex; gap: 6px; align-items: center;
+           flex-wrap: wrap; border-bottom: 1px solid #333; }
+  header strong { margin-right: 8px; }
+  button { font: inherit; padding: 7px 12px; background: #2a2a2a; color: #ddd;
+           border: 1px solid #444; cursor: pointer; border-radius: 6px; }
+  button.active { background: #eee; color: #111; border-color: #eee; }
+  button:disabled { opacity: .35; cursor: default; }
+  .right { margin-left: auto; display: flex; gap: 6px; }
+  #note { padding: 6px 14px; color: #aaa; font-size: 13px; border-bottom: 1px solid #333;
+          display: flex; gap: 12px; flex-wrap: wrap; }
+  #stage { color: #7fd17f; font-weight: 700; }
+  main { flex: 1; display: flex; justify-content: center; align-items: stretch;
+         background: #111; overflow: hidden; }
+  iframe { border: 0; width: 100%; height: 100%; background: #fff; }
+  main.phone iframe { width: 390px; margin: 12px auto; border: 1px solid #444;
+                      border-radius: 12px; }
+</style>
+</head>
+<body>
+<header>
+  <strong>v3</strong>
+  <span id="tabs"></span>
+  <div class="right">
+    <button id="beforeBtn" class="active">before</button>
+    <button id="afterBtn" disabled>after</button>
+    <button id="mode">phone view</button>
+  </div>
+</header>
+<div id="note"><span id="stage"></span><span id="desc"></span></div>
+<main id="main"><iframe id="frame" src=""></iframe></main>
+<script>
+  // hasAfter flips to true per theme when its redesign lands in redesigns/.
+  // 01-10: Claude orchestrator. 11-20: external orchestrator (do not edit
+  // this file; the gallery is maintained by the Claude orchestrator).
+  const THEMES = [
+    { f: "01-soft-premium.html",         n: "Soft premium: Airbnb/Linear consumer polish.",            hasAfter: true },
+    { f: "02-bank-calm.html",            n: "Bank calm: cream/navy institutional trust.",              hasAfter: true },
+    { f: "03-playful-arcade.html",       n: "Playful arcade: loud gamified collectible cards.",        hasAfter: true },
+    { f: "04-notion-doc.html",           n: "Notion doc: the site as a workspace document.",           hasAfter: true },
+    { f: "05-vaporwave-night.html",      n: "Vaporwave night: neon grids, vibe over legibility.",      hasAfter: true },
+    { f: "06-campus-poster.html",        n: "Campus poster: corkboard flyer with pull-tabs.",          hasAfter: true },
+    { f: "07-ios-native.html",           n: "iOS native: grouped lists, segmented controls.",          hasAfter: true },
+    { f: "08-newspaper-classified.html", n: "Newspaper classifieds: broadsheet job-ads page.",         hasAfter: true },
+    { f: "09-map-dashboard.html",        n: "Map dashboard: SVG Canada map + KPI tiles.",              hasAfter: true },
+    { f: "10-luxury-fashion.html",       n: "Luxury fashion: deliberately wrong-for-audience.",        hasAfter: true },
+    { f: "11-terminal-recruiter.html",   n: "Terminal recruiter: keyboard-first query console.",       hasAfter: false },
+    { f: "12-departure-board.html",      n: "Departure board: listings as transit departures.",        hasAfter: false },
+    { f: "13-comic-panels.html",         n: "Comic panels: the hunt told as an inked issue.",          hasAfter: false },
+    { f: "14-swiss-index.html",          n: "Swiss index: red/black/cream editorial catalog.",         hasAfter: false },
+    { f: "15-field-guide.html",          n: "Field guide: internships classified by habitat.",         hasAfter: false },
+    { f: "16-game-show.html",            n: "Game show: 1970s studio category reveal.",                hasAfter: false },
+    { f: "17-grocery-flyer.html",        n: "Grocery flyer: roles by aisle, freshness-dated.",         hasAfter: false },
+    { f: "18-orbital-mission.html",      n: "Orbital mission: deadlines as launch windows.",           hasAfter: false },
+    { f: "19-corkboard-collage.html",    n: "Corkboard collage: pinnable dorm-room notes.",            hasAfter: false },
+    { f: "20-blueprint-spec.html",       n: "Blueprint spec: the service as an engineering drawing.",  hasAfter: false }
+  ];
+
+  const tabs = document.getElementById("tabs");
+  const frame = document.getElementById("frame");
+  const desc = document.getElementById("desc");
+  const stage = document.getElementById("stage");
+  const beforeBtn = document.getElementById("beforeBtn");
+  const afterBtn = document.getElementById("afterBtn");
+  const main = document.getElementById("main");
+  const mode = document.getElementById("mode");
+  let cur = 0, showAfter = false;
+
+  THEMES.forEach((t, i) => {
+    const b = document.createElement("button");
+    b.textContent = t.f.slice(0, 2);
+    b.title = t.n;
+    b.addEventListener("click", () => { cur = i; showAfter = false; render(); });
+    tabs.appendChild(b);
+  });
+
+  function render() {
+    const t = THEMES[cur];
+    tabs.querySelectorAll("button").forEach((b, i) => b.classList.toggle("active", i === cur));
+    if (showAfter && !t.hasAfter) showAfter = false;
+    frame.src = (showAfter ? "redesigns/" : "originals/") + t.f;
+    desc.textContent = t.n;
+    stage.textContent = showAfter ? "AFTER (post-audit redesign)" : "BEFORE (naive original)";
+    beforeBtn.classList.toggle("active", !showAfter);
+    afterBtn.classList.toggle("active", showAfter);
+    afterBtn.disabled = !t.hasAfter;
+  }
+  beforeBtn.addEventListener("click", () => { showAfter = false; render(); });
+  afterBtn.addEventListener("click", () => { showAfter = true; render(); });
+  mode.addEventListener("click", () => {
+    main.classList.toggle("phone");
+    mode.textContent = main.classList.contains("phone") ? "desktop view" : "phone view";
+  });
+  render();
+</script>
+</body>
+</html>

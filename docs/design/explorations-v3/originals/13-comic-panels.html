@@ -1,0 +1,646 @@
+<!-- INTERNAL DESIGN MOCKUP - sample listing data -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="UGMI helps students find Canadian internships with 1,427 free searchable listings and an optional hand-picked Monday shortlist.">
+  <title>UGMI: The Internship Hunt Strikes Back</title>
+  <style>
+    :root {
+      --ink: #14120f;
+      --paper: #fff7dc;
+      --yellow: #ffd91a;
+      --red: #f13b2d;
+      --blue: #20a7e0;
+      --mint: #6bd9a8;
+      --white: #fffdf5;
+      --shadow: 7px 8px 0 var(--ink);
+      --line: 4px solid var(--ink);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-width: 0;
+      overflow-x: hidden;
+      color: var(--ink);
+      background-color: var(--paper);
+      background-image: radial-gradient(circle, rgba(20,18,15,.15) 1px, transparent 1.5px);
+      background-size: 9px 9px;
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.45;
+    }
+    button, input, select, a { font: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    :focus-visible { outline: 4px solid var(--blue); outline-offset: 4px; }
+    .skip-link {
+      position: fixed;
+      z-index: 100;
+      left: 1rem;
+      top: .5rem;
+      transform: translateY(-180%);
+      padding: .7rem 1rem;
+      border: 3px solid var(--ink);
+      background: var(--white);
+      color: var(--ink);
+      font-weight: 900;
+    }
+    .skip-link:focus { transform: none; }
+
+    .issue-bar {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .75rem;
+      padding: .7rem max(1rem, calc((100vw - 1180px) / 2));
+      border-bottom: var(--line);
+      background: var(--ink);
+      color: var(--white);
+    }
+    .issue-mark { font-weight: 1000; letter-spacing: .08em; }
+    .issue-mark span { color: var(--yellow); }
+    .issue-nav { display: flex; gap: .4rem; }
+    .issue-nav a {
+      min-width: 2.7rem;
+      padding: .45rem .55rem;
+      border: 2px solid var(--white);
+      color: var(--white);
+      text-align: center;
+      text-decoration: none;
+      font-size: .75rem;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+    .issue-nav a:hover, .issue-nav a[aria-current="true"] { background: var(--yellow); color: var(--ink); }
+
+    main { width: min(100% - 1.5rem, 1180px); margin: 1rem auto 4rem; }
+    .panel {
+      position: relative;
+      min-width: 0;
+      overflow: hidden;
+      border: var(--line);
+      background: var(--white);
+      box-shadow: var(--shadow);
+      isolation: isolate;
+    }
+    .panel::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background-image: radial-gradient(circle, rgba(20,18,15,.16) 1px, transparent 1.6px);
+      background-size: 7px 7px;
+      opacity: .45;
+    }
+    .caption {
+      display: inline-block;
+      padding: .45rem .65rem;
+      border: 3px solid var(--ink);
+      background: var(--yellow);
+      font-size: .73rem;
+      font-weight: 1000;
+      letter-spacing: .08em;
+      line-height: 1.1;
+      text-transform: uppercase;
+      transform: rotate(-1deg);
+    }
+    .kicker {
+      margin: 0 0 .75rem;
+      font-size: .78rem;
+      font-weight: 1000;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    h1, h2, h3, p { overflow-wrap: anywhere; }
+    h1, h2, h3 {
+      margin-top: 0;
+      font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+      line-height: .93;
+      letter-spacing: .02em;
+      text-transform: uppercase;
+    }
+
+    .opening { display: grid; gap: 1rem; }
+    .cover {
+      min-height: 31rem;
+      padding: 1rem;
+      background: var(--red);
+    }
+    .cover::after { opacity: .28; }
+    .cover-top { display: flex; align-items: flex-start; justify-content: space-between; gap: .5rem; }
+    .price-burst {
+      display: grid;
+      place-items: center;
+      width: 5.2rem;
+      height: 5.2rem;
+      padding: .4rem;
+      flex: 0 0 auto;
+      background: var(--yellow);
+      border: 3px solid var(--ink);
+      clip-path: polygon(50% 0,61% 14%,78% 7%,82% 25%,100% 29%,89% 45%,100% 59%,82% 66%,84% 85%,65% 82%,52% 100%,41% 83%,22% 94%,19% 74%,0 69%,13% 52%,1% 39%,20% 31%,17% 12%,38% 17%);
+      text-align: center;
+      font-size: .65rem;
+      font-weight: 1000;
+      line-height: 1.05;
+      transform: rotate(8deg);
+    }
+    .logo {
+      margin: 1.8rem 0 .4rem;
+      color: var(--yellow);
+      font-size: clamp(5rem, 24vw, 9.5rem);
+      text-shadow: -4px -4px 0 var(--ink), 4px -4px 0 var(--ink), -4px 4px 0 var(--ink), 6px 7px 0 var(--ink);
+      transform: skew(-5deg) rotate(-2deg);
+    }
+    .cover h1 { max-width: 18ch; margin: 0; color: var(--white); font-size: clamp(2rem, 10vw, 4.7rem); text-shadow: 3px 3px 0 var(--ink); }
+    .speech {
+      position: relative;
+      width: min(90%, 29rem);
+      margin: 1.6rem 0 2.6rem auto;
+      padding: 1rem;
+      border: var(--line);
+      border-radius: 50%;
+      background: var(--white);
+      font-weight: 900;
+      text-align: center;
+      transform: rotate(2deg);
+    }
+    .speech::after {
+      content: "";
+      position: absolute;
+      right: 16%;
+      bottom: -1.25rem;
+      width: 2rem;
+      height: 2rem;
+      border-right: var(--line);
+      border-bottom: var(--line);
+      background: var(--white);
+      transform: skew(24deg) rotate(28deg);
+    }
+    .cover-actions { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; }
+    .comic-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 3.25rem;
+      padding: .7rem 1rem;
+      border: var(--line);
+      box-shadow: 4px 5px 0 var(--ink);
+      background: var(--yellow);
+      color: var(--ink);
+      font-weight: 1000;
+      text-decoration: none;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s;
+    }
+    .comic-button:hover { transform: translate(2px, 2px); box-shadow: 2px 3px 0 var(--ink); }
+    .comic-button.secondary { background: var(--white); }
+    .cover-note { color: var(--white); font-size: .8rem; font-weight: 900; text-shadow: 2px 2px 0 var(--ink); }
+
+    .problem-strip { display: grid; gap: 1rem; }
+    .problem { min-height: 12rem; padding: 1rem; }
+    .problem:nth-child(1) { background: var(--blue); transform: rotate(.4deg); }
+    .problem:nth-child(2) { background: var(--yellow); transform: rotate(-.5deg); }
+    .problem:nth-child(3) { background: var(--mint); transform: rotate(.3deg); }
+    .problem h2 { margin: .9rem 0 .5rem; font-size: 2.1rem; }
+    .problem p { margin: 0; max-width: 37ch; font-weight: 800; }
+    .sound {
+      display: block;
+      color: var(--red);
+      font-family: Impact, Haettenschweiler, sans-serif;
+      font-size: 3.2rem;
+      line-height: .9;
+      text-shadow: 2px 2px 0 var(--ink);
+      transform: rotate(-5deg);
+    }
+
+    .hero-stat { margin-top: 1rem; padding: 1.25rem; background: var(--yellow); text-align: center; }
+    .hero-stat .number { display: block; font-family: Impact, sans-serif; font-size: clamp(5rem, 25vw, 10rem); line-height: .8; }
+    .hero-stat h2 { margin: 1rem auto .5rem; font-size: clamp(1.6rem, 7vw, 3rem); }
+    .hero-stat p { max-width: 47rem; margin: .3rem auto; font-weight: 900; }
+    .trust-row { display: flex; flex-wrap: wrap; justify-content: center; gap: .55rem; margin-top: 1rem; }
+    .trust-row span { padding: .5rem .65rem; border: 3px solid var(--ink); background: var(--white); font-size: .75rem; font-weight: 1000; text-transform: uppercase; transform: rotate(-1deg); }
+    .trust-row span:nth-child(even) { transform: rotate(1deg); }
+
+    .listings { margin-top: 1.4rem; padding: 1rem; background: var(--blue); }
+    .section-head { display: flex; flex-direction: column; gap: .75rem; margin-bottom: 1rem; }
+    .section-head h2 { margin: 0; font-size: clamp(2.5rem, 12vw, 5.2rem); }
+    .section-head p { margin: 0; max-width: 48ch; font-weight: 900; }
+    .search-box {
+      display: grid;
+      gap: .65rem;
+      padding: .8rem;
+      border: 3px solid var(--ink);
+      background: var(--white);
+    }
+    .search-box label { font-size: .75rem; font-weight: 1000; letter-spacing: .08em; text-transform: uppercase; }
+    .search-box input, .search-box select {
+      width: 100%;
+      min-height: 3rem;
+      padding: .65rem .75rem;
+      border: 3px solid var(--ink);
+      border-radius: 0;
+      background: var(--white);
+      color: var(--ink);
+      font-weight: 800;
+    }
+    .filter-buttons { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .filter-chip {
+      padding: .5rem .7rem;
+      border: 3px solid var(--ink);
+      background: var(--white);
+      color: var(--ink);
+      font-weight: 1000;
+      cursor: pointer;
+    }
+    .filter-chip[aria-pressed="true"] { background: var(--yellow); box-shadow: 3px 3px 0 var(--ink); }
+    .result-line { margin: .8rem 0; font-weight: 1000; }
+    .listing-grid { display: grid; gap: .85rem; }
+    .listing-card {
+      position: relative;
+      padding: 1rem;
+      border: var(--line);
+      background: var(--white);
+      box-shadow: 4px 5px 0 var(--ink);
+    }
+    .listing-card[hidden] { display: none; }
+    .listing-card h3 { margin: .65rem 0 .3rem; font-size: 1.6rem; }
+    .company { margin: 0; font-size: 1.05rem; font-weight: 1000; }
+    .listing-meta { display: flex; flex-wrap: wrap; gap: .35rem; margin: .7rem 0; }
+    .listing-meta span { padding: .25rem .4rem; border: 2px solid var(--ink); background: var(--paper); font-size: .7rem; font-weight: 900; text-transform: uppercase; }
+    .details { margin-top: .75rem; padding-top: .75rem; border-top: 3px dashed var(--ink); }
+    .details p { margin: .3rem 0; }
+    .reveal {
+      padding: .55rem .7rem;
+      border: 3px solid var(--ink);
+      background: var(--yellow);
+      color: var(--ink);
+      font-weight: 1000;
+      cursor: pointer;
+    }
+    .empty-state { padding: 1.2rem; border: 3px solid var(--ink); background: var(--yellow); font-weight: 1000; text-align: center; }
+
+    .monday { display: grid; gap: 1rem; margin-top: 1.4rem; }
+    .monday-main { padding: 1.2rem; background: var(--red); color: var(--white); }
+    .monday-main h2 { margin: 1rem 0; color: var(--yellow); font-size: clamp(3rem, 15vw, 7rem); text-shadow: 4px 4px 0 var(--ink); }
+    .monday-main p { font-size: 1.05rem; font-weight: 900; }
+    .offer-list { display: grid; gap: .6rem; margin: 1.2rem 0; padding: 0; list-style: none; }
+    .offer-list li { padding: .65rem; border: 3px solid var(--ink); background: var(--white); color: var(--ink); font-weight: 1000; transform: rotate(-.5deg); }
+    .offer-list li:nth-child(even) { transform: rotate(.5deg); }
+    .price-panel { padding: 1.2rem; background: var(--yellow); text-align: center; }
+    .price-panel .big-price { display: block; font-family: Impact, sans-serif; font-size: clamp(4.5rem, 22vw, 8rem); line-height: .9; }
+    .price-panel .cad { display: block; margin-bottom: 1rem; font-weight: 1000; text-transform: uppercase; }
+    .price-panel p { font-weight: 900; }
+    .secure-note { font-size: .75rem; }
+
+    .maker { display: grid; gap: 1rem; margin-top: 1.4rem; }
+    .maker-panel { padding: 1.2rem; background: var(--mint); }
+    .maker-panel h2 { margin: 1rem 0 .7rem; font-size: clamp(2.6rem, 12vw, 5.5rem); }
+    .maker-panel p { max-width: 48ch; font-weight: 800; }
+    .avatar {
+      display: grid;
+      place-items: center;
+      width: 8rem;
+      height: 8rem;
+      margin: 1rem auto;
+      border: var(--line);
+      border-radius: 50%;
+      background: var(--yellow);
+    }
+    .avatar svg { width: 6rem; height: 6rem; }
+    .maker-link { color: var(--ink); font-weight: 1000; text-decoration-thickness: 3px; }
+    .final-panel { padding: 1.2rem; background: var(--ink); color: var(--white); text-align: center; }
+    .final-panel h2 { color: var(--yellow); font-size: clamp(2.8rem, 13vw, 6rem); }
+    .final-panel p { margin-inline: auto; max-width: 38rem; font-weight: 800; }
+    footer { padding: 1.5rem 1rem; border-top: var(--line); background: var(--yellow); text-align: center; font-size: .8rem; font-weight: 900; }
+    footer a { color: var(--ink); }
+
+    .pow {
+      position: absolute;
+      z-index: -1;
+      right: -1.5rem;
+      top: 5.5rem;
+      width: 11rem;
+      height: 11rem;
+      background: var(--yellow);
+      clip-path: polygon(50% 0,60% 29%,79% 8%,77% 35%,100% 30%,81% 52%,100% 65%,71% 67%,77% 97%,55% 75%,44% 100%,37% 73%,11% 90%,27% 61%,0 53%,30% 43%,7% 21%,39% 32%);
+      opacity: .75;
+    }
+
+    @media (min-width: 700px) {
+      main { width: min(100% - 2.5rem, 1180px); margin-top: 1.5rem; }
+      .opening { grid-template-columns: 1.5fr 1fr; align-items: stretch; }
+      .problem-strip { grid-template-rows: repeat(3, 1fr); }
+      .cover { min-height: 45rem; padding: 1.5rem; }
+      .problem { min-height: 0; }
+      .search-box { grid-template-columns: minmax(12rem, 1fr) auto; align-items: end; }
+      .search-field { display: grid; gap: .3rem; }
+      .listing-grid { grid-template-columns: repeat(2, 1fr); }
+      .monday { grid-template-columns: 1.45fr .8fr; }
+      .maker { grid-template-columns: 1.2fr .8fr; }
+    }
+    @media (min-width: 1000px) {
+      .opening { grid-template-columns: 1.7fr 1fr; }
+      .listing-grid { grid-template-columns: repeat(3, 1fr); }
+      .listing-card:nth-child(2), .listing-card:nth-child(5) { transform: translateY(1rem) rotate(.35deg); }
+      .listing-card:nth-child(3) { transform: rotate(-.35deg); }
+      .monday-main { padding: 2rem; }
+      .price-panel { display: flex; flex-direction: column; justify-content: center; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#free-listings">Skip to free listings</a>
+
+  <header class="issue-bar">
+    <div class="issue-mark"><span>UGMI</span> ISSUE 01</div>
+    <nav class="issue-nav" aria-label="Issue navigation">
+      <a href="#origin" data-chapter="origin">01<span class="sr-only"> Problem</span></a>
+      <a href="#free-listings" data-chapter="free-listings">02<span class="sr-only"> Listings</span></a>
+      <a href="#monday-drop" data-chapter="monday-drop">03<span class="sr-only"> Monday shortlist</span></a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="opening" id="origin" aria-labelledby="main-title">
+      <article class="panel cover">
+        <div class="cover-top">
+          <span class="caption">A true job hunt story</span>
+          <span class="price-burst">FREE TO SEARCH!</span>
+        </div>
+        <div class="pow" aria-hidden="true"></div>
+        <div class="logo" aria-label="UGMI">UGMI</div>
+        <h1 id="main-title">The internship hunt strikes back</h1>
+        <div class="speech">Wait. The good internships are all in one searchable place?</div>
+        <div class="cover-actions">
+          <a class="comic-button" href="#free-listings">Open the listings</a>
+          <a class="comic-button secondary" href="#monday-drop">Meet the Monday drop</a>
+        </div>
+        <p class="cover-note">No account. No email. No paywall.</p>
+      </article>
+
+      <div class="problem-strip" aria-label="The internship hunt problem">
+        <article class="panel problem">
+          <span class="sound" aria-hidden="true">CLICK!</span>
+          <h2>Thirty tabs later...</h2>
+          <p>Company boards, stale links, vague titles, and the same role reposted six ways.</p>
+        </article>
+        <article class="panel problem">
+          <span class="sound" aria-hidden="true">THUD!</span>
+          <h2>The deadline moved.</h2>
+          <p>You find a great role three days after it closes. The villain was timing all along.</p>
+        </article>
+        <article class="panel problem">
+          <span class="caption">Then, a signal</span>
+          <h2>One student builds a better list.</h2>
+          <p>UGMI gathers open internships so students can search the field without surrendering their inbox.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel hero-stat" aria-labelledby="stat-title">
+      <span class="caption">The free superpower</span>
+      <strong class="number">1,427</strong>
+      <h2 id="stat-title">Searchable open internships</h2>
+      <p>Mostly Canadian opportunities, collected in one clear place and free to explore.</p>
+      <div class="trust-row" aria-label="Free search promises">
+        <span>No account</span>
+        <span>No email</span>
+        <span>No paywall</span>
+        <span>Search right now</span>
+      </div>
+    </section>
+
+    <section class="panel listings" id="free-listings" aria-labelledby="listing-title">
+      <div class="section-head">
+        <div>
+          <span class="caption">Chapter two</span>
+          <h2 id="listing-title">The open files</h2>
+        </div>
+        <p>Try the sample issue below. Search by company, role, or city, then crack each case open for details.</p>
+      </div>
+
+      <div class="search-box" role="search">
+        <div class="search-field">
+          <label for="listing-search">Search the sample listings</label>
+          <input id="listing-search" type="search" placeholder="Try Toronto, design, or Shopify" autocomplete="off">
+        </div>
+        <div class="filter-buttons" aria-label="Filter by work style">
+          <button class="filter-chip" type="button" data-filter="all" aria-pressed="true">All</button>
+          <button class="filter-chip" type="button" data-filter="remote" aria-pressed="false">Remote</button>
+          <button class="filter-chip" type="button" data-filter="hybrid" aria-pressed="false">Hybrid</button>
+          <button class="filter-chip" type="button" data-filter="onsite" aria-pressed="false">On-site</button>
+        </div>
+      </div>
+      <p class="result-line" aria-live="polite"><span id="result-count">5</span> sample cases on the board</p>
+
+      <div class="listing-grid" id="listing-grid">
+        <article class="listing-card" data-search="shopify software developer intern remote canada engineering" data-style="remote">
+          <span class="caption">Case 001</span>
+          <h3>Software Developer Intern</h3>
+          <p class="company">Shopify</p>
+          <div class="listing-meta"><span>Remote</span><span>Canada</span><span>Engineering</span></div>
+          <button class="reveal" type="button" aria-expanded="false" aria-controls="details-shopify">Reveal details</button>
+          <div class="details" id="details-shopify" hidden>
+            <p><strong>Plot:</strong> Build product systems with a distributed team.</p>
+            <p><strong>Status:</strong> Sample open listing</p>
+          </div>
+        </article>
+
+        <article class="listing-card" data-search="rbc data analyst co-op toronto hybrid banking analytics" data-style="hybrid">
+          <span class="caption">Case 002</span>
+          <h3>Data Analyst Co-op</h3>
+          <p class="company">RBC</p>
+          <div class="listing-meta"><span>Hybrid</span><span>Toronto</span><span>Analytics</span></div>
+          <button class="reveal" type="button" aria-expanded="false" aria-controls="details-rbc">Reveal details</button>
+          <div class="details" id="details-rbc" hidden>
+            <p><strong>Plot:</strong> Turn operational data into decisions for a Canadian team.</p>
+            <p><strong>Status:</strong> Sample open listing</p>
+          </div>
+        </article>
+
+        <article class="listing-card" data-search="amazon software development engineer intern vancouver onsite engineering" data-style="onsite">
+          <span class="caption">Case 003</span>
+          <h3>Software Development Engineer Intern</h3>
+          <p class="company">Amazon</p>
+          <div class="listing-meta"><span>On-site</span><span>Vancouver</span><span>Engineering</span></div>
+          <button class="reveal" type="button" aria-expanded="false" aria-controls="details-amazon">Reveal details</button>
+          <div class="details" id="details-amazon" hidden>
+            <p><strong>Plot:</strong> Ship code with an engineering group in Vancouver.</p>
+            <p><strong>Status:</strong> Sample open listing</p>
+          </div>
+        </article>
+
+        <article class="listing-card" data-search="google ux design intern waterloo hybrid design research" data-style="hybrid">
+          <span class="caption">Case 004</span>
+          <h3>UX Design Intern</h3>
+          <p class="company">Google</p>
+          <div class="listing-meta"><span>Hybrid</span><span>Waterloo</span><span>Design</span></div>
+          <button class="reveal" type="button" aria-expanded="false" aria-controls="details-google">Reveal details</button>
+          <div class="details" id="details-google" hidden>
+            <p><strong>Plot:</strong> Explore product problems through research and interface design.</p>
+            <p><strong>Status:</strong> Sample open listing</p>
+          </div>
+        </article>
+
+        <article class="listing-card" data-search="ubisoft gameplay programmer intern montreal onsite games engineering" data-style="onsite">
+          <span class="caption">Case 005</span>
+          <h3>Gameplay Programmer Intern</h3>
+          <p class="company">Ubisoft</p>
+          <div class="listing-meta"><span>On-site</span><span>Montreal</span><span>Games</span></div>
+          <button class="reveal" type="button" aria-expanded="false" aria-controls="details-ubisoft">Reveal details</button>
+          <div class="details" id="details-ubisoft" hidden>
+            <p><strong>Plot:</strong> Prototype player systems alongside a game development team.</p>
+            <p><strong>Status:</strong> Sample open listing</p>
+          </div>
+        </article>
+      </div>
+      <div class="empty-state" id="empty-state" hidden>No cases match that clue. Try another company, role, city, or work style.</div>
+    </section>
+
+    <section class="monday" id="monday-drop" aria-labelledby="monday-title">
+      <article class="panel monday-main">
+        <span class="caption">Optional power-up</span>
+        <h2 id="monday-title">Ten picks. Every Monday.</h2>
+        <p>When searching becomes its own full-time job, the paid UGMI shortlist narrows the field for you.</p>
+        <ul class="offer-list">
+          <li>10 matched internships each Monday</li>
+          <li>Hand-picked for your goals</li>
+          <li>Named contacts to help you reach a real person</li>
+          <li>Cancel when you no longer need the signal</li>
+        </ul>
+        <div class="speech">Monday morning. Fresh leads. Actual names. Let's move.</div>
+      </article>
+
+      <aside class="panel price-panel" aria-label="Paid shortlist price">
+        <span class="caption">The shortlist</span>
+        <strong class="big-price">$15</strong>
+        <span class="cad">CAD per month</span>
+        <p>The free listings stay free. This is for students who want a matched, hand-picked route through them.</p>
+        <button class="comic-button" type="button" id="checkout-button">Choose the Monday shortlist</button>
+        <p class="secure-note" id="checkout-note" aria-live="polite">Payment is handled securely by Stripe.</p>
+      </aside>
+    </section>
+
+    <section class="maker" aria-labelledby="maker-title">
+      <article class="panel maker-panel">
+        <span class="caption">Behind the panels</span>
+        <div class="avatar" aria-hidden="true">
+          <svg viewBox="0 0 120 120" role="img">
+            <path d="M25 55C26 28 43 16 61 16c23 0 39 16 38 42l-8 1c-1 28-13 43-31 43S31 88 30 61z" fill="#fffdf5" stroke="#14120f" stroke-width="6"/>
+            <path d="M25 54c1-26 17-40 37-40 18 0 31 10 36 27-13-1-23-6-31-15-7 15-20 24-42 28z" fill="#14120f"/>
+            <circle cx="47" cy="61" r="4" fill="#14120f"/>
+            <circle cx="76" cy="61" r="4" fill="#14120f"/>
+            <path d="M49 78c8 7 17 7 25 0" fill="none" stroke="#14120f" stroke-width="5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h2 id="maker-title">Built by one Waterloo university student.</h2>
+        <p>UGMI is run by one student who knows the search from the inside. The goal is simple: make open internships easier to find, then offer a sharper Monday shortlist for anyone who wants the extra help.</p>
+        <span class="maker-link">Follow @sleppyeric <span aria-hidden="true">→</span></span>
+      </article>
+
+      <article class="panel final-panel">
+        <span class="caption">Next issue</span>
+        <h2>Your application arc starts here.</h2>
+        <p>Search 1,427 open internships for free, or let ten matched picks land in your hands every Monday.</p>
+        <a class="comic-button" href="#free-listings">Search free listings</a>
+      </article>
+    </section>
+  </main>
+
+  <footer>
+    <p>UGMI. Mostly Canadian internships. Free search with no account, email, or paywall. Optional $15 CAD monthly shortlist, processed by Stripe.</p>
+    <p>Sample listing data is shown for design demonstration.</p>
+  </footer>
+
+  <script>
+    (function () {
+      var search = document.getElementById('listing-search');
+      var cards = Array.prototype.slice.call(document.querySelectorAll('.listing-card'));
+      var chips = Array.prototype.slice.call(document.querySelectorAll('.filter-chip'));
+      var count = document.getElementById('result-count');
+      var empty = document.getElementById('empty-state');
+      var activeFilter = 'all';
+
+      function updateListings() {
+        var query = search.value.trim().toLowerCase();
+        var visible = 0;
+        cards.forEach(function (card) {
+          var matchesText = card.getAttribute('data-search').indexOf(query) !== -1;
+          var matchesStyle = activeFilter === 'all' || card.getAttribute('data-style') === activeFilter;
+          var show = matchesText && matchesStyle;
+          card.hidden = !show;
+          if (show) visible += 1;
+        });
+        count.textContent = visible;
+        empty.hidden = visible !== 0;
+      }
+
+      search.addEventListener('input', updateListings);
+      chips.forEach(function (chip, index) {
+        chip.addEventListener('click', function () {
+          activeFilter = chip.getAttribute('data-filter');
+          chips.forEach(function (item) {
+            item.setAttribute('aria-pressed', String(item === chip));
+          });
+          updateListings();
+        });
+        chip.addEventListener('keydown', function (event) {
+          if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+          event.preventDefault();
+          var direction = event.key === 'ArrowRight' ? 1 : -1;
+          var next = (index + direction + chips.length) % chips.length;
+          chips[next].focus();
+          chips[next].click();
+        });
+      });
+
+      document.querySelectorAll('.reveal').forEach(function (button) {
+        button.addEventListener('click', function () {
+          var details = document.getElementById(button.getAttribute('aria-controls'));
+          var isOpen = button.getAttribute('aria-expanded') === 'true';
+          button.setAttribute('aria-expanded', String(!isOpen));
+          details.hidden = isOpen;
+          button.textContent = isOpen ? 'Reveal details' : 'Hide details';
+        });
+      });
+
+      var checkoutButton = document.getElementById('checkout-button');
+      var checkoutNote = document.getElementById('checkout-note');
+      checkoutButton.addEventListener('click', function () {
+        checkoutNote.textContent = 'Stripe checkout would open here. This offline design mockup makes no network requests.';
+        checkoutButton.textContent = 'Shortlist selected';
+      });
+
+      var navLinks = Array.prototype.slice.call(document.querySelectorAll('[data-chapter]'));
+      var sections = navLinks.map(function (link) {
+        return document.getElementById(link.getAttribute('data-chapter'));
+      });
+      if ('IntersectionObserver' in window) {
+        var observer = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            navLinks.forEach(function (link) {
+              if (link.getAttribute('data-chapter') === entry.target.id) {
+                link.setAttribute('aria-current', 'true');
+              } else {
+                link.removeAttribute('aria-current');
+              }
+            });
+          });
+        }, { rootMargin: '-20% 0px -65% 0px' });
+        sections.forEach(function (section) { observer.observe(section); });
+      }
+    }());
+  </script>
+</body>
+</html>

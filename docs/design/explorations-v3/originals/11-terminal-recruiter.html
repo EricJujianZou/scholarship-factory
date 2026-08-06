@@ -1,0 +1,1037 @@
+<!-- INTERNAL DESIGN MOCKUP - sample listing data -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="UGMI is a free searchable list of 1,427 open internships, mostly Canadian.">
+  <title>UGMI / Internship Recruiter Console</title>
+  <style>
+    :root {
+      --ink: #11110f;
+      --paper: #f2f0e8;
+      --panel: #fffef8;
+      --dim: #68675f;
+      --line: #161614;
+      --acid: #d7ff36;
+      --orange: #ff5b24;
+      --blue: #1555ff;
+      --shadow: 5px 5px 0 var(--ink);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-width: 0;
+      color: var(--ink);
+      background-color: var(--paper);
+      background-image:
+        linear-gradient(rgba(17,17,15,.055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(17,17,15,.055) 1px, transparent 1px);
+      background-size: 24px 24px;
+      font-family: var(--mono);
+      font-size: 14px;
+      line-height: 1.45;
+      overflow-x: hidden;
+    }
+
+    button, input, select, a { font: inherit; }
+    button, input, select { color: inherit; }
+    button, a, select { -webkit-tap-highlight-color: transparent; }
+
+    a { color: inherit; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    a:focus-visible {
+      outline: 4px solid var(--blue);
+      outline-offset: 3px;
+    }
+
+    .skip {
+      position: fixed;
+      left: 12px;
+      top: 10px;
+      z-index: 99;
+      padding: 9px 12px;
+      background: var(--acid);
+      border: 2px solid var(--ink);
+      transform: translateY(-160%);
+    }
+    .skip:focus { transform: translateY(0); }
+
+    .shell {
+      width: min(1440px, 100%);
+      margin: 0 auto;
+      min-height: 100vh;
+      border-left: 2px solid var(--line);
+      border-right: 2px solid var(--line);
+      background: rgba(242,240,232,.92);
+    }
+
+    .utility {
+      min-height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 6px 10px;
+      border-bottom: 2px solid var(--line);
+      background: var(--ink);
+      color: var(--paper);
+      font-size: 11px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .live-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      margin-right: 7px;
+      border-radius: 50%;
+      background: var(--acid);
+      box-shadow: 0 0 0 2px rgba(215,255,54,.25);
+    }
+
+    .utility .session { color: #bbb9ad; }
+
+    header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: stretch;
+      border-bottom: 3px solid var(--line);
+      background: var(--panel);
+    }
+
+    .brand {
+      display: flex;
+      min-width: 0;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 12px;
+    }
+
+    .logo {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      flex: 0 0 auto;
+      border: 3px solid var(--ink);
+      background: var(--acid);
+      box-shadow: 3px 3px 0 var(--ink);
+      font-weight: 900;
+      font-size: 22px;
+      letter-spacing: -.1em;
+      text-indent: -.1em;
+    }
+
+    .brand-text { min-width: 0; }
+    .brand-name {
+      margin: 0;
+      font-family: var(--sans);
+      font-size: clamp(24px, 7vw, 42px);
+      font-weight: 950;
+      line-height: .9;
+      letter-spacing: -.07em;
+    }
+    .brand-sub {
+      margin-top: 5px;
+      color: var(--dim);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .header-action {
+      display: none;
+      align-items: center;
+      padding: 12px 18px;
+      border-left: 2px solid var(--line);
+      background: var(--orange);
+      color: var(--ink);
+      font-weight: 900;
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+
+    .console-tabs {
+      display: flex;
+      overflow-x: auto;
+      border-bottom: 2px solid var(--line);
+      background: #d8d6cd;
+      scrollbar-width: thin;
+    }
+
+    .tab {
+      flex: 0 0 auto;
+      padding: 10px 13px;
+      border: 0;
+      border-right: 2px solid var(--line);
+      background: transparent;
+      color: #4e4d47;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+    .tab[aria-selected="true"] { background: var(--panel); color: var(--ink); }
+    .tab .close { margin-left: 8px; color: #77756c; }
+
+    main { min-width: 0; }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 1fr;
+      min-width: 0;
+    }
+
+    .intro {
+      position: relative;
+      padding: 24px 14px 20px;
+      border-bottom: 2px solid var(--line);
+      background: var(--panel);
+      overflow: hidden;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      margin-bottom: 12px;
+      padding: 4px 7px;
+      border: 2px solid var(--line);
+      background: var(--acid);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      transform: rotate(-1deg);
+    }
+
+    h1 {
+      max-width: 890px;
+      margin: 0;
+      font-family: var(--sans);
+      font-size: clamp(40px, 12.5vw, 92px);
+      font-weight: 950;
+      line-height: .87;
+      letter-spacing: -.075em;
+      text-transform: uppercase;
+    }
+
+    h1 .invert {
+      display: inline-block;
+      margin-top: 5px;
+      padding: 2px 8px 7px 5px;
+      background: var(--ink);
+      color: var(--panel);
+      letter-spacing: -.06em;
+    }
+
+    .lead {
+      max-width: 660px;
+      margin: 20px 0 0;
+      font-family: var(--sans);
+      font-size: clamp(17px, 4.8vw, 24px);
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .lead strong {
+      padding: 0 3px;
+      background: var(--acid);
+      box-decoration-break: clone;
+      -webkit-box-decoration-break: clone;
+    }
+
+    .facts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      margin: 22px 0 0;
+      border: 2px solid var(--line);
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+
+    .fact {
+      min-width: 0;
+      padding: 11px 10px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    .fact:nth-child(2n) { border-right: 0; }
+    .fact:nth-last-child(-n+2) { border-bottom: 0; }
+    .fact b {
+      display: block;
+      font-family: var(--sans);
+      font-size: 21px;
+      font-weight: 950;
+      line-height: 1;
+    }
+    .fact span {
+      display: block;
+      margin-top: 3px;
+      color: var(--dim);
+      font-size: 9px;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .search-pane {
+      min-width: 0;
+      background: var(--paper);
+    }
+
+    .pane-bar {
+      display: flex;
+      min-height: 38px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 7px 10px;
+      border-bottom: 2px solid var(--line);
+      background: var(--ink);
+      color: var(--panel);
+      font-size: 10px;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+    }
+
+    .pane-bar .pane-status { color: var(--acid); }
+
+    .query-wrap { padding: 12px; border-bottom: 2px solid var(--line); }
+
+    .query-line {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      padding: 10px;
+      border: 3px solid var(--line);
+      background: var(--panel);
+      box-shadow: 4px 4px 0 var(--ink);
+    }
+
+    .prompt { color: var(--blue); font-weight: 900; font-size: 17px; }
+
+    .query-line input {
+      width: 100%;
+      min-width: 0;
+      padding: 3px 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .query-line input:focus-visible { outline: 0; }
+
+    .keycap {
+      display: none;
+      padding: 2px 5px;
+      border: 1px solid #9d9b92;
+      border-bottom-width: 2px;
+      background: #e8e6de;
+      color: #55544e;
+      font-size: 9px;
+      white-space: nowrap;
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 12px;
+      border-bottom: 2px solid var(--line);
+      background: #dddacf;
+    }
+
+    .filter-label {
+      display: block;
+      min-width: 0;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .filter-label span { display: block; margin-bottom: 4px; }
+
+    select {
+      width: 100%;
+      min-width: 0;
+      min-height: 40px;
+      padding: 7px 26px 7px 8px;
+      border: 2px solid var(--line);
+      border-radius: 0;
+      background: var(--panel);
+      font-weight: 800;
+    }
+
+    .view-switch {
+      display: flex;
+      grid-column: 1 / -1;
+      border: 2px solid var(--line);
+      background: var(--panel);
+    }
+
+    .view-btn {
+      flex: 1;
+      min-height: 38px;
+      padding: 7px;
+      border: 0;
+      border-right: 2px solid var(--line);
+      background: transparent;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+    .view-btn:last-child { border-right: 0; }
+    .view-btn[aria-pressed="true"] { background: var(--acid); }
+
+    .results-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 11px;
+      border-bottom: 2px solid var(--line);
+      background: var(--panel);
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .results-head strong { color: var(--blue); }
+
+    .listings { background: var(--panel); }
+
+    .listing {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr);
+      border-bottom: 2px solid var(--line);
+      background: var(--panel);
+    }
+
+    .listing.hidden { display: none; }
+
+    .listing-index {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 16px;
+      border-right: 2px solid var(--line);
+      background: #dddacf;
+      color: var(--dim);
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .listing-main {
+      display: grid;
+      grid-template-columns: minmax(0,1fr) auto;
+      gap: 10px;
+      min-width: 0;
+      padding: 13px 10px;
+    }
+
+    .listing-copy { min-width: 0; }
+    .listing-title {
+      margin: 0 0 4px;
+      font-family: var(--sans);
+      font-size: 18px;
+      font-weight: 950;
+      line-height: 1.05;
+      letter-spacing: -.03em;
+    }
+    .listing-role {
+      overflow: hidden;
+      color: var(--blue);
+      font-weight: 900;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .listing-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px 9px;
+      margin-top: 8px;
+      color: var(--dim);
+      font-size: 10px;
+      text-transform: uppercase;
+    }
+    .listing-meta span::before { content: "> "; color: var(--ink); }
+
+    .close-cell {
+      align-self: start;
+      min-width: 57px;
+      padding: 6px 5px;
+      border: 2px solid var(--line);
+      background: var(--acid);
+      text-align: center;
+      font-size: 9px;
+      font-weight: 900;
+      line-height: 1.15;
+      text-transform: uppercase;
+    }
+    .close-cell.hot { background: var(--orange); }
+    .close-cell b { display: block; font-size: 15px; }
+
+    .listing.compact .listing-main { padding-top: 8px; padding-bottom: 8px; }
+    .listing.compact .listing-title { display: inline; font-family: var(--mono); font-size: 13px; }
+    .listing.compact .listing-role { display: inline; margin-left: 5px; font-size: 12px; }
+    .listing.compact .listing-meta { margin-top: 4px; }
+
+    .empty {
+      display: none;
+      padding: 40px 20px;
+      border-bottom: 2px solid var(--line);
+      background: var(--panel);
+      text-align: center;
+    }
+    .empty.show { display: block; }
+    .empty b { display: block; margin-bottom: 5px; font-size: 18px; }
+
+    .command-help {
+      display: grid;
+      gap: 7px;
+      padding: 12px;
+      border-bottom: 2px solid var(--line);
+      background: var(--ink);
+      color: #d8d6cd;
+      font-size: 10px;
+    }
+    .command-help div { display: flex; justify-content: space-between; gap: 10px; }
+    .command-help code { color: var(--acid); font: inherit; font-weight: 900; }
+
+    .scout {
+      padding: 22px 14px;
+      border-bottom: 3px solid var(--line);
+      background: var(--acid);
+    }
+
+    .scout-grid { display: grid; gap: 18px; }
+
+    .scout h2,
+    .about h2 {
+      margin: 0;
+      font-family: var(--sans);
+      font-size: clamp(35px, 10vw, 66px);
+      font-weight: 950;
+      line-height: .9;
+      letter-spacing: -.065em;
+      text-transform: uppercase;
+    }
+
+    .scout p {
+      max-width: 640px;
+      margin: 13px 0 0;
+      font-family: var(--sans);
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.25;
+    }
+
+    .scout-output {
+      padding: 13px;
+      border: 3px solid var(--line);
+      background: var(--ink);
+      color: var(--panel);
+      box-shadow: 6px 6px 0 rgba(17,17,15,.35);
+    }
+
+    .scout-output .line { margin: 3px 0; }
+    .scout-output .ok { color: var(--acid); }
+    .scout-output .variable { color: #73a0ff; }
+
+    .price-row {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 16px 0 10px;
+      padding-top: 13px;
+      border-top: 1px dashed #77756c;
+    }
+    .price {
+      font-family: var(--sans);
+      font-size: 42px;
+      font-weight: 950;
+      line-height: .85;
+      letter-spacing: -.06em;
+    }
+    .price small { font-family: var(--mono); font-size: 10px; letter-spacing: 0; }
+
+    .stripe {
+      color: #aaa79b;
+      font-size: 9px;
+      text-align: right;
+      text-transform: uppercase;
+    }
+
+    .cta {
+      width: 100%;
+      min-height: 50px;
+      margin-top: 10px;
+      padding: 12px 14px;
+      border: 3px solid var(--panel);
+      background: var(--orange);
+      color: var(--ink);
+      cursor: pointer;
+      font-weight: 950;
+      text-transform: uppercase;
+      box-shadow: 4px 4px 0 var(--panel);
+    }
+    .cta:active { transform: translate(3px,3px); box-shadow: 1px 1px 0 var(--panel); }
+
+    .about {
+      display: grid;
+      gap: 19px;
+      padding: 25px 14px;
+      border-bottom: 3px solid var(--line);
+      background: var(--panel);
+    }
+
+    .about-copy p {
+      max-width: 670px;
+      margin: 14px 0 0;
+      font-family: var(--sans);
+      font-size: 17px;
+      font-weight: 650;
+      line-height: 1.35;
+    }
+
+    .operator-card {
+      border: 3px solid var(--line);
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+    .operator-top {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 10px;
+      border-bottom: 2px solid var(--line);
+      background: var(--blue);
+      color: white;
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+    .operator-body { padding: 13px; }
+    .ascii {
+      margin: 0 0 13px;
+      font-size: 9px;
+      line-height: 1.05;
+      white-space: pre;
+    }
+    .operator-body dl {
+      display: grid;
+      grid-template-columns: 75px 1fr;
+      gap: 7px 8px;
+      margin: 0;
+      font-size: 11px;
+    }
+    .operator-body dt { color: var(--dim); text-transform: uppercase; }
+    .operator-body dd { margin: 0; font-weight: 900; }
+
+    footer {
+      padding: 16px 12px 20px;
+      background: var(--ink);
+      color: var(--paper);
+    }
+    .footer-line {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 10px 18px;
+    }
+    footer strong { color: var(--acid); }
+    footer nav { display: flex; flex-wrap: wrap; gap: 13px; }
+    .fineprint { margin-top: 17px; color: #8e8c82; font-size: 9px; text-transform: uppercase; }
+
+    .toast {
+      position: fixed;
+      right: 12px;
+      bottom: 12px;
+      z-index: 50;
+      max-width: calc(100vw - 24px);
+      padding: 11px 13px;
+      border: 3px solid var(--line);
+      background: var(--acid);
+      box-shadow: 4px 4px 0 var(--ink);
+      font-weight: 900;
+      transform: translateY(160%);
+      transition: transform .18s steps(2, end);
+    }
+    .toast.show { transform: translateY(0); }
+
+    @media (min-width: 700px) {
+      .utility { padding-inline: 18px; }
+      .brand { padding: 15px 18px; }
+      .header-action { display: flex; }
+      .intro { padding: 42px 30px 34px; }
+      .facts { grid-template-columns: repeat(4, 1fr); max-width: 720px; }
+      .fact, .fact:nth-child(2n) { border-right: 1px solid var(--line); border-bottom: 0; }
+      .fact:last-child { border-right: 0; }
+      .keycap { display: inline-block; }
+      .filters { grid-template-columns: 1fr 1fr 1.2fr; }
+      .view-switch { grid-column: auto; align-self: end; }
+      .listing { grid-template-columns: 42px minmax(0, 1fr); }
+      .listing-main { padding: 15px 16px; }
+      .listing-title { font-size: 21px; }
+      .command-help { grid-template-columns: repeat(3,1fr); }
+      .command-help div { justify-content: flex-start; }
+      .scout { padding: 40px 30px; }
+      .scout-grid { grid-template-columns: minmax(0, 1.25fr) minmax(320px,.75fr); align-items: center; }
+      .about { grid-template-columns: minmax(0, 1.2fr) minmax(310px,.8fr); padding: 42px 30px; align-items: center; }
+      footer { padding: 20px 30px 26px; }
+    }
+
+    @media (min-width: 1050px) {
+      .workspace { grid-template-columns: minmax(0, .88fr) minmax(500px, 1.12fr); }
+      .intro { border-right: 3px solid var(--line); border-bottom: 0; }
+      .search-pane { border-bottom: 0; }
+      .facts { position: absolute; right: 30px; bottom: 34px; left: 30px; margin: 0; }
+      .intro { min-height: 700px; padding-top: 58px; }
+      h1 { font-size: clamp(72px, 7vw, 104px); }
+      .lead { max-width: 520px; }
+      .listing-main { padding-top: 13px; padding-bottom: 13px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#results">Skip to internship results</a>
+  <div class="shell">
+    <div class="utility">
+      <span><span class="live-dot" aria-hidden="true"></span>database online / 1,427 open</span>
+      <span class="session">guest session / no login</span>
+    </div>
+
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true">U_</div>
+        <div class="brand-text">
+          <div class="brand-name">UGMI</div>
+          <div class="brand-sub">Undergrad opportunity matching interface</div>
+        </div>
+      </div>
+      <a class="header-action" href="#scout">run scout.exe <span aria-hidden="true">&nbsp;↵</span></a>
+    </header>
+
+    <nav class="console-tabs" aria-label="Console sections">
+      <button class="tab" type="button" aria-selected="true" data-scroll="results">01_SEARCH.sql <span class="close">×</span></button>
+      <button class="tab" type="button" aria-selected="false" data-scroll="scout">02_SCOUT.sh <span class="close">×</span></button>
+      <button class="tab" type="button" aria-selected="false" data-scroll="operator">03_OPERATOR.txt <span class="close">×</span></button>
+    </nav>
+
+    <main>
+      <section class="workspace" aria-label="Internship search console">
+        <div class="intro">
+          <span class="eyebrow">Free access granted</span>
+          <h1>Find the internship. <span class="invert">Skip the sludge.</span></h1>
+          <p class="lead">Query <strong>1,427 open internships</strong>, mostly Canadian. No account. No email. No paywall.</p>
+
+          <div class="facts" aria-label="UGMI facts">
+            <div class="fact"><b>1,427</b><span>open roles</span></div>
+            <div class="fact"><b>$0</b><span>search fee</span></div>
+            <div class="fact"><b>0</b><span>forms before access</span></div>
+            <div class="fact"><b>CA+</b><span>mostly Canada</span></div>
+          </div>
+        </div>
+
+        <section class="search-pane" id="results" aria-labelledby="results-title">
+          <div class="pane-bar">
+            <span id="results-title">live_query / internships</span>
+            <span class="pane-status">● sync complete</span>
+          </div>
+
+          <div class="query-wrap">
+            <label class="query-line" for="searchInput">
+              <span class="prompt" aria-hidden="true">$</span>
+              <input id="searchInput" type="search" autocomplete="off" placeholder="search role, company, city..." aria-describedby="shortcutHelp">
+              <span class="keycap" aria-hidden="true">/ focus</span>
+            </label>
+          </div>
+
+          <div class="filters">
+            <label class="filter-label">
+              <span>location</span>
+              <select id="locationFilter">
+                <option value="all">All locations</option>
+                <option value="remote">Remote</option>
+                <option value="toronto">Toronto</option>
+                <option value="vancouver">Vancouver</option>
+                <option value="waterloo">Waterloo</option>
+              </select>
+            </label>
+            <label class="filter-label">
+              <span>discipline</span>
+              <select id="roleFilter">
+                <option value="all">All disciplines</option>
+                <option value="software">Software</option>
+                <option value="data">Data</option>
+                <option value="product">Product</option>
+              </select>
+            </label>
+            <div class="view-switch" aria-label="Result density">
+              <button class="view-btn" id="fullView" type="button" aria-pressed="true">[1] full</button>
+              <button class="view-btn" id="compactView" type="button" aria-pressed="false">[2] compact</button>
+            </div>
+          </div>
+
+          <div class="results-head">
+            <span><strong id="resultCount">6</strong> records returned</span>
+            <span>sort: closing ↑</span>
+          </div>
+
+          <div class="listings" id="listingContainer" aria-live="polite">
+            <article class="listing" data-search="shopify swe software engineer intern remote canada" data-location="remote" data-role="software">
+              <div class="listing-index">001</div>
+              <div class="listing-main">
+                <div class="listing-copy">
+                  <h3 class="listing-title">Shopify</h3>
+                  <div class="listing-role">SWE Intern</div>
+                  <div class="listing-meta"><span>Remote, Canada</span><span>$34/hr</span><span>added 2d</span></div>
+                </div>
+                <div class="close-cell hot">closes<b>3d</b></div>
+              </div>
+            </article>
+
+            <article class="listing" data-search="amazon sde software development engineer vancouver" data-location="vancouver" data-role="software">
+              <div class="listing-index">002</div>
+              <div class="listing-main">
+                <div class="listing-copy">
+                  <h3 class="listing-title">Amazon</h3>
+                  <div class="listing-role">SDE Intern</div>
+                  <div class="listing-meta"><span>Vancouver, BC</span><span>$41/hr</span><span>added 1d</span></div>
+                </div>
+                <div class="close-cell hot">closes<b>5d</b></div>
+              </div>
+            </article>
+
+            <article class="listing" data-search="rbc amplify software developer product toronto" data-location="toronto" data-role="product software">
+              <div class="listing-index">003</div>
+              <div class="listing-main">
+                <div class="listing-copy">
+                  <h3 class="listing-title">RBC Amplify</h3>
+                  <div class="listing-role">Developer Intern</div>
+                  <div class="listing-meta"><span>Toronto, ON</span><span>$31/hr</span><span>added today</span></div>
+                </div>
+                <div class="close-cell">closes<b>6d</b></div>
+              </div>
+            </article>
+
+            <article class="listing" data-search="stripe swe software engineer remote us united states" data-location="remote" data-role="software">
+              <div class="listing-index">004</div>
+              <div class="listing-main">
+                <div class="listing-copy">
+                  <h3 class="listing-title">Stripe</h3>
+                  <div class="listing-role">Software Engineer Intern</div>
+                  <div class="listing-meta"><span>Remote, US</span><span>paid</span><span>added today</span></div>
+                </div>
+                <div class="close-cell">closes<b>9d</b></div>
+              </div>
+            </article>
+
+            <article class="listing" data-search="wealthsimple data science scientist intern toronto" data-location="toronto" data-role="data">
+              <div class="listing-index">005</div>
+              <div class="listing-main">
+                <div class="listing-copy">
+                  <h3 class="listing-title">Wealthsimple</h3>
+                  <div class="listing-role">Data Science Intern</div>
+                  <div class="listing-meta"><span>Toronto, ON</span><span>paid</span><span>added 3d</span></div>
+                </div>
+                <div class="close-cell">closes<b>12d</b></div>
+              </div>
+            </article>
+
+            <article class="listing" data-search="opentext software co-op coop waterloo" data-location="waterloo" data-role="software">
+              <div class="listing-index">006</div>
+              <div class="listing-main">
+                <div class="listing-copy">
+                  <h3 class="listing-title">OpenText</h3>
+                  <div class="listing-role">Software Co-op</div>
+                  <div class="listing-meta"><span>Waterloo, ON</span><span>$30/hr</span><span>added 4d</span></div>
+                </div>
+                <div class="close-cell">closes<b>14d</b></div>
+              </div>
+            </article>
+
+            <div class="empty" id="emptyState">
+              <b>QUERY RETURNED 0 ROWS</b>
+              <span>Try fewer terms or reset a filter.</span>
+            </div>
+          </div>
+
+          <div class="command-help" id="shortcutHelp">
+            <div><code>/</code><span>focus query</span></div>
+            <div><code>1 / 2</code><span>change density</span></div>
+            <div><code>ESC</code><span>clear query</span></div>
+          </div>
+        </section>
+      </section>
+
+      <section class="scout" id="scout" aria-labelledby="scout-title">
+        <div class="scout-grid">
+          <div>
+            <span class="eyebrow">Optional paid process</span>
+            <h2 id="scout-title">Tell Scout what you want.</h2>
+            <p>Get 10 hand-picked internships every Monday, matched to you. Every role includes a named contact so you know who to reach.</p>
+          </div>
+          <div class="scout-output" aria-label="Scout plan details">
+            <div class="line"><span class="ok">OK</span> profile.match = <span class="variable">personal</span></div>
+            <div class="line"><span class="ok">OK</span> delivery.day = <span class="variable">monday</span></div>
+            <div class="line"><span class="ok">OK</span> results.count = <span class="variable">10</span></div>
+            <div class="line"><span class="ok">OK</span> contact.named = <span class="variable">true</span></div>
+            <div class="price-row">
+              <div class="price">$15 <small>CAD / month</small></div>
+              <div class="stripe">secure checkout<br>via Stripe</div>
+            </div>
+            <button class="cta" id="scoutButton" type="button">Initialize Scout subscription ↵</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="about" id="operator" aria-labelledby="operator-title">
+        <div class="about-copy">
+          <span class="eyebrow">Human process found</span>
+          <h2 id="operator-title">One student. One useful list.</h2>
+          <p>UGMI is built and run by one University of Waterloo student who got tired of finding expired roles, buried links, and forms that ask for an email before showing anything useful.</p>
+        </div>
+        <aside class="operator-card" aria-label="Operator profile">
+          <div class="operator-top"><span>operator.profile</span><span>read only</span></div>
+          <div class="operator-body">
+<pre class="ascii" aria-hidden="true">   ┌──────────────┐
+   │  [o]    [o]  │
+   │      __      │
+   │   \______/   │
+   └──────┬───────┘
+       ┌──┴──┐
+       │ UGMI│
+       └─────┘</pre>
+            <dl>
+              <dt>school</dt><dd>University of Waterloo</dd>
+              <dt>crew</dt><dd>1 student</dd>
+              <dt>status</dt><dd>still shipping</dd>
+              <dt>contact</dt><dd>@sleppyeric</dd>
+            </dl>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer-line">
+        <div><strong>ugmi.ca</strong> / internship search that gets to the point</div>
+        <nav aria-label="Footer navigation">
+          <a href="#results">search</a>
+          <a href="#scout">scout</a>
+          <span>instagram @sleppyeric</span>
+        </nav>
+      </div>
+      <div class="fineprint">No account required for search. Scout is optional. Sample listing data shown in this design mockup.</div>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">SCOUT HANDOFF READY / STRIPE CHECKOUT</div>
+
+  <script>
+    (function () {
+      var input = document.getElementById('searchInput');
+      var locationFilter = document.getElementById('locationFilter');
+      var roleFilter = document.getElementById('roleFilter');
+      var listings = Array.prototype.slice.call(document.querySelectorAll('.listing'));
+      var count = document.getElementById('resultCount');
+      var empty = document.getElementById('emptyState');
+      var fullView = document.getElementById('fullView');
+      var compactView = document.getElementById('compactView');
+      var toast = document.getElementById('toast');
+      var toastTimer;
+
+      function filterResults() {
+        var query = input.value.trim().toLowerCase();
+        var location = locationFilter.value;
+        var role = roleFilter.value;
+        var visible = 0;
+
+        listings.forEach(function (listing) {
+          var textMatch = !query || listing.dataset.search.indexOf(query) !== -1;
+          var locationMatch = location === 'all' || listing.dataset.location === location;
+          var roleMatch = role === 'all' || listing.dataset.role.indexOf(role) !== -1;
+          var show = textMatch && locationMatch && roleMatch;
+          listing.classList.toggle('hidden', !show);
+          if (show) visible += 1;
+        });
+
+        count.textContent = String(visible);
+        empty.classList.toggle('show', visible === 0);
+      }
+
+      function setView(compact) {
+        listings.forEach(function (listing) {
+          listing.classList.toggle('compact', compact);
+        });
+        compactView.setAttribute('aria-pressed', String(compact));
+        fullView.setAttribute('aria-pressed', String(!compact));
+      }
+
+      input.addEventListener('input', filterResults);
+      locationFilter.addEventListener('change', filterResults);
+      roleFilter.addEventListener('change', filterResults);
+      fullView.addEventListener('click', function () { setView(false); });
+      compactView.addEventListener('click', function () { setView(true); });
+
+      document.addEventListener('keydown', function (event) {
+        var tag = document.activeElement && document.activeElement.tagName;
+        var typing = tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA';
+
+        if (event.key === '/' && !typing) {
+          event.preventDefault();
+          input.focus();
+        }
+        if (event.key === 'Escape') {
+          input.value = '';
+          locationFilter.value = 'all';
+          roleFilter.value = 'all';
+          filterResults();
+          input.focus();
+        }
+        if (!typing && event.key === '1') setView(false);
+        if (!typing && event.key === '2') setView(true);
+      });
+
+      document.querySelectorAll('.tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          document.querySelectorAll('.tab').forEach(function (item) {
+            item.setAttribute('aria-selected', String(item === tab));
+          });
+          document.getElementById(tab.dataset.scroll).scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      });
+
+      document.getElementById('scoutButton').addEventListener('click', function () {
+        window.clearTimeout(toastTimer);
+        toast.classList.add('show');
+        toastTimer = window.setTimeout(function () { toast.classList.remove('show'); }, 3200);
+      });
+    }());
+  </script>
+</body>
+</html>

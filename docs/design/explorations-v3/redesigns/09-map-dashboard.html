@@ -1,0 +1,858 @@
+<!-- INTERNAL DESIGN MOCKUP - sample listing data -->
+<!--
+  REDESIGN: 09-map-dashboard (per REDESIGN-SPEC.md + audit)
+
+  Kept: dot-matrix SVG Canada map with clickable city markers, dark
+  data-panel aesthetic, monospace accents, KPI-tile grammar.
+
+  Fixed: pulsing LIVE badge, sparkline and fabricated deltas deleted;
+  KPI tiles now carry only the four pulse-strip facts. Veiled preview
+  deleted; one fully visible example pick (the only named contact).
+  "Upgrade via Stripe" / "ugmi pro" replaced by The UGMI 10 pitch and
+  the single "Get my first list" CTA. 3-tap eligibility pills added;
+  map markers act as the Location tap. Trust bullets deleted, prose to
+  budget, red urgency replaced with warm amber, 44px targets, calm
+  checkout is the quietest block on the page.
+
+  Mockup notes: counts are notionally build-time; the eligible count
+  scales the sample-row proportion to 1,427 (production computes the
+  real count). Stripe link is stubbed. Zero external requests.
+-->
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UGMI · Canadian internship radar</title>
+<style>
+  :root{
+    --bg:#070c16;
+    --panel:#0d1526;
+    --panel2:#111c31;
+    --line:#1d2a45;
+    --line2:#27375c;
+    --text:#e6edf7;
+    --mut:#8fa3c4;
+    --dim:#7d90b6;
+    --acc:#3ee6a8;
+    --acc-dim:rgba(62,230,168,.14);
+    --acc2:#57a8ff;
+    --warn:#ffb457;
+    --mono:ui-monospace,"Cascadia Mono",Consolas,"SF Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{overflow-x:hidden}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:15px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1120px;margin:0 auto;padding:0 14px}
+  a{color:var(--acc2)}
+  :focus-visible{outline:2px solid var(--acc);outline-offset:2px;border-radius:4px}
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{transition:none !important;animation:none !important}
+  }
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    position:sticky;top:0;z-index:20;
+    background:rgba(7,12,22,.92);
+    border-bottom:1px solid var(--line);
+    backdrop-filter:blur(6px);
+  }
+  .topbar .wrap{display:flex;align-items:center;gap:10px;min-height:56px}
+  .logo{display:flex;align-items:center;gap:9px;font-weight:800;letter-spacing:.04em;font-size:16px}
+  .logomark{
+    width:26px;height:26px;border-radius:7px;flex:none;
+    background:linear-gradient(135deg,#123c31,#0d2a3f);
+    border:1px solid var(--line2);
+    display:grid;place-items:center;
+  }
+  .logomark svg{display:block}
+  .logo small{font-weight:500;color:var(--dim);letter-spacing:0;font-size:11px;display:none}
+  .topbar .spacer{flex:1}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    border:0;cursor:pointer;text-decoration:none;text-align:center;
+    font:inherit;font-weight:700;font-size:13px;
+    min-height:44px;padding:10px 16px;border-radius:8px;
+    background:var(--acc);color:#04170f;
+    white-space:nowrap;
+  }
+  .btn.ghost{background:transparent;color:var(--mut);border:1px solid var(--line2)}
+  .btn.ghost:hover{color:var(--text);border-color:var(--acc)}
+
+  /* ---------- intro ---------- */
+  .intro{padding:22px 0 4px}
+  .intro .crumb{font-family:var(--mono);font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.14em;margin-bottom:8px}
+  h1{font-size:25px;line-height:1.2;letter-spacing:-.01em;font-weight:800;max-width:640px}
+  h1 em{font-style:normal;color:var(--acc)}
+  .intro .sub{color:var(--mut);max-width:600px;margin-top:6px;font-size:14.5px;font-weight:600}
+
+  /* ---------- pulse strip: KPI tiles, four build-time facts only ---------- */
+  .kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:14px 0 0}
+  .kpi{
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:11px 13px;
+  }
+  .kpi .k-label{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--dim)}
+  .kpi .k-val{font-family:var(--mono);font-size:22px;font-weight:700;margin-top:3px;letter-spacing:-.02em}
+  .kpi .k-sub{font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:1px}
+  .pulse-note{font-family:var(--mono);font-size:11px;color:var(--dim);padding:7px 2px 0}
+  .pulse-note::before{content:"✓ ";color:var(--acc)}
+
+  /* ---------- 3-tap eligibility ---------- */
+  .elig{padding:16px 0 4px}
+  .elig-title{font-size:13.5px;color:var(--mut);margin-bottom:8px}
+  .q-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+  .q-label{flex:0 0 66px;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim)}
+  .pills{display:flex;flex-wrap:wrap;gap:6px}
+  .pill{
+    font:inherit;font-size:13px;font-weight:600;cursor:pointer;
+    min-height:44px;padding:9px 14px;
+    border:1px solid var(--line2);border-radius:999px;
+    background:var(--panel2);color:var(--mut);
+  }
+  .pill:hover{border-color:var(--acc);color:var(--text)}
+  .pill[aria-pressed="true"]{background:var(--acc-dim);border-color:var(--acc);color:var(--acc)}
+  .elig-status{margin-top:8px;min-height:24px}
+  .result-line{font-size:16px;font-weight:800}
+  .result-line b{color:var(--acc);font-family:var(--mono);font-weight:700}
+  .zero-line{font-size:14.5px;font-weight:700;color:var(--warn)}
+  .text-btn{
+    background:none;border:0;font:inherit;font-size:13px;font-weight:700;
+    color:var(--acc2);text-decoration:underline;text-underline-offset:3px;
+    cursor:pointer;min-height:44px;padding:0 6px;
+  }
+  .saved-note{font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:2px}
+
+  /* ---------- panels ---------- */
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .panel-head{
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+    padding:12px 14px;border-bottom:1px solid var(--line);
+  }
+  .panel-head h2{font-size:13px;font-weight:700;letter-spacing:.02em}
+  .panel-head .tag{font-family:var(--mono);font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.12em}
+  .panel-head .spacer{flex:1}
+
+  .board{display:grid;grid-template-columns:1fr;gap:12px;padding:14px 0}
+
+  /* ---------- map panel (location tap) ---------- */
+  .map-box svg{display:block;width:100%;height:auto}
+  .map-note{font-family:var(--mono);font-size:10px;color:var(--dim);padding:0 14px 10px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px 14px}
+  .chip{
+    font:inherit;font-size:12.5px;cursor:pointer;
+    min-height:44px;padding:9px 13px;
+    border:1px solid var(--line2);border-radius:999px;
+    background:var(--panel2);color:var(--mut);
+    display:inline-flex;align-items:center;gap:6px;
+  }
+  .chip b{font-family:var(--mono);font-weight:600;color:var(--dim);font-size:11px}
+  .chip:hover{border-color:var(--acc);color:var(--text)}
+  .chip[aria-pressed="true"]{background:var(--acc-dim);border-color:var(--acc);color:var(--acc)}
+  .chip[aria-pressed="true"] b{color:var(--acc)}
+
+  /* svg marker styling */
+  .land{fill:#22345a}
+  .mk .bubble{fill:rgba(62,230,168,.13);stroke:#2fbb8b;stroke-width:.32}
+  .mk .core{fill:var(--acc)}
+  .mk text{
+    font-family:var(--mono);font-size:2.2px;fill:#b9c9e6;
+    paint-order:stroke;stroke:#0d1526;stroke-width:.85px;stroke-linejoin:round;
+  }
+  .mk text .n{fill:var(--acc);font-weight:700}
+  .mk .hit{fill:transparent;cursor:pointer}
+  .mk:hover .bubble{fill:rgba(62,230,168,.28)}
+  .mk:focus{outline:none}
+  .mk:focus .bubble{stroke:var(--acc2);stroke-width:.6}
+  .mk.on .bubble{fill:rgba(62,230,168,.34);stroke:var(--acc);stroke-width:.5}
+  .mk.on text{fill:#fff}
+  .remote-chip rect{fill:#101b31;stroke:#2fbb8b;stroke-width:.28;stroke-dasharray:.9 .7}
+  .remote-chip text{font-family:var(--mono);font-size:2px;fill:#b9c9e6}
+  .remote-chip .n{fill:var(--acc);font-weight:700}
+  .remote-chip .hit{fill:transparent;cursor:pointer}
+  .remote-chip:hover rect{stroke:var(--acc)}
+  .remote-chip:focus{outline:none}
+  .remote-chip:focus rect{stroke:var(--acc2);stroke-width:.5}
+  .remote-chip.on rect{fill:rgba(62,230,168,.16);stroke:var(--acc);stroke-dasharray:none}
+
+  /* ---------- data panel ---------- */
+  .toolbar{display:flex;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .toolbar input[type="search"]{
+    flex:1;min-width:150px;min-height:44px;
+    background:var(--panel2);border:1px solid var(--line2);border-radius:8px;
+    color:var(--text);font:inherit;font-size:13px;padding:7px 11px;outline:none;
+  }
+  .toolbar input[type="search"]::placeholder{color:var(--dim)}
+  .toolbar input[type="search"]:focus{border-color:var(--acc)}
+  .toolbar select{
+    min-height:44px;
+    background:var(--panel2);border:1px solid var(--line2);border-radius:8px;
+    color:var(--mut);font:inherit;font-size:12.5px;padding:7px 8px;outline:none;cursor:pointer;
+  }
+  .toolbar select:focus{border-color:var(--acc)}
+
+  .thead{
+    display:none;
+    padding:8px 14px;border-bottom:1px solid var(--line);
+    font-family:var(--mono);font-size:10px;color:var(--dim);
+    text-transform:uppercase;letter-spacing:.1em;
+  }
+  .rows{list-style:none}
+  .row{
+    display:grid;
+    grid-template-areas:"main pay" "main close";
+    grid-template-columns:1fr auto;
+    gap:2px 12px;align-items:center;
+    padding:11px 14px;border-bottom:1px solid var(--line);
+  }
+  .row:last-child{border-bottom:0}
+  .row:hover{background:var(--panel2)}
+  .c-main{grid-area:main;min-width:0}
+  .c-main .co{font-weight:700;font-size:14px}
+  .c-main .role{display:block;color:var(--mut);font-size:12.5px;overflow-wrap:anywhere}
+  .c-main .loc-m{display:inline-block;font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-top:3px;border:1px solid var(--line);border-radius:5px;padding:1px 6px}
+  .c-loc,.c-added{display:none;font-size:12.5px;color:var(--mut)}
+  .c-pay{grid-area:pay;justify-self:end;font-family:var(--mono);font-size:13px;font-weight:600}
+  .c-pay.na{color:var(--dim);font-weight:400}
+  .c-close{grid-area:close;justify-self:end}
+  .badge{
+    display:inline-block;font-family:var(--mono);font-size:11px;font-weight:600;
+    border-radius:6px;padding:2px 7px;white-space:nowrap;
+    background:var(--panel2);border:1px solid var(--line2);color:var(--mut);
+  }
+  .badge.warn{background:rgba(255,180,87,.1);border-color:rgba(255,180,87,.4);color:var(--warn)}
+  .badge.none{color:var(--dim);border-style:dashed}
+  .badge.off{color:var(--dim);background:transparent}
+  .row.closed{background:transparent}
+  .row.closed:hover{background:transparent}
+  .row.closed .co,.row.closed .role,.row.closed .loc-m,.row.closed .c-loc,
+  .row.closed .c-added,.row.closed .c-pay{color:var(--dim)}
+  .empty{padding:28px 14px;text-align:center;color:var(--dim);font-size:13px}
+  .empty button{background:none;border:0;color:var(--acc2);font:inherit;cursor:pointer;text-decoration:underline;min-height:44px}
+  .tfoot{
+    padding:10px 14px;border-top:1px solid var(--line);
+    font-family:var(--mono);font-size:10.5px;color:var(--dim);
+  }
+
+  /* ---------- closings bridge + the UGMI 10 ---------- */
+  .closings{padding:22px 0 0}
+  .closings-line{font-size:19px;font-weight:800}
+  .closings-line b{font-family:var(--mono);color:var(--warn);font-weight:700}
+  .closings-bridge{color:var(--mut);font-size:14.5px;margin-top:2px}
+
+  .pro{
+    margin:14px 0;
+    border:1px solid rgba(62,230,168,.4);
+    background:
+      radial-gradient(600px 260px at 85% -10%,rgba(62,230,168,.09),transparent 60%),
+      var(--panel);
+  }
+  .pro-inner{padding:20px 16px}
+  .pro .plan-tag{
+    display:inline-block;
+    font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--acc);border:1px solid rgba(62,230,168,.4);border-radius:999px;
+    padding:3px 10px;background:var(--acc-dim);
+  }
+  .pro h2{font-size:22px;line-height:1.25;margin-top:10px;letter-spacing:-.01em}
+  .pro .lede{color:var(--mut);font-size:14.5px;font-weight:600;margin-top:6px;max-width:520px}
+  .example-label{
+    font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--dim);margin:18px 0 6px;
+  }
+  .example-pick{
+    background:var(--panel2);border:1px solid var(--line2);border-radius:12px;
+    padding:14px;max-width:560px;
+  }
+  .pick-head{font-weight:700;font-size:14.5px}
+  .pick-meta{font-family:var(--mono);font-size:12px;color:var(--mut);margin-top:3px}
+  .pick-meta b{color:var(--acc);font-weight:600}
+  .pick-why{font-size:13.5px;color:var(--mut);margin-top:8px}
+  .pick-why strong{color:var(--text)}
+  .pro .how{color:var(--mut);font-size:13.5px;margin-top:16px}
+  .pro .price-line{font-family:var(--mono);font-size:14px;margin-top:6px}
+  .pro .price-line b{font-size:22px;font-weight:700}
+  .pro .cta-row{margin-top:14px}
+
+  /* ---------- calm checkout: quietest block on the page ---------- */
+  .checkout{padding:36px 0 8px}
+  .checkout-card{
+    background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:22px 18px;max-width:520px;
+  }
+  .checkout h2{font-size:18px;margin-bottom:12px}
+  .fee-grid{list-style:none}
+  .fee-grid li{
+    display:flex;justify-content:space-between;gap:16px;
+    padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px;
+  }
+  .fee-grid li:last-child{border-bottom:0}
+  .fee-k{color:var(--dim);font-family:var(--mono);font-size:12px;padding-top:1px}
+  .fee-v{font-weight:600;text-align:right;max-width:62%;color:var(--text)}
+  .firewall{font-size:13.5px;color:var(--mut);margin-top:14px}
+  .handoff{font-family:var(--mono);font-size:11.5px;color:var(--dim);margin-top:10px}
+  .checkout .btn{display:flex;width:100%;margin-top:12px}
+  .checkout .btn:hover{filter:none}
+  .blemish{font-size:13px;color:var(--dim);font-style:italic;margin-top:12px}
+
+  /* ---------- footer ---------- */
+  footer{border-top:1px solid var(--line);margin-top:28px;padding:22px 0 34px}
+  footer .wrap{display:grid;gap:8px}
+  footer p{font-size:13px;color:var(--mut)}
+  footer .checked{font-family:var(--mono);font-size:11px;color:var(--dim)}
+  footer .mock{font-family:var(--mono);font-size:10px;color:var(--dim)}
+
+  /* ---------- desktop ---------- */
+  @media (min-width:720px){
+    body{font-size:16px}
+    .logo small{display:inline}
+    h1{font-size:34px}
+    .kpis{grid-template-columns:repeat(4,1fr)}
+    .thead{display:grid;grid-template-columns:minmax(0,1fr) 130px 86px 104px 74px;gap:12px}
+    .row{
+      grid-template-areas:none;
+      grid-template-columns:minmax(0,1fr) 130px 86px 104px 74px;
+      gap:12px;
+    }
+    .c-main,.c-pay,.c-close{grid-area:auto}
+    .c-main .loc-m{display:none}
+    .c-loc,.c-added{display:block}
+    .c-pay{justify-self:start}
+    .c-close{justify-self:start}
+    .pro-inner{padding:28px 26px}
+  }
+  @media (min-width:980px){
+    .board{grid-template-columns:5fr 7fr;align-items:start}
+    .map-box{order:-1}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <div class="logo">
+      <span class="logomark" aria-hidden="true">
+        <svg width="14" height="14" viewBox="0 0 14 14">
+          <circle cx="7" cy="7" r="5.6" fill="none" stroke="#3ee6a8" stroke-width="1" opacity=".45"/>
+          <circle cx="7" cy="7" r="2.6" fill="none" stroke="#3ee6a8" stroke-width="1" opacity=".7"/>
+          <circle cx="9.4" cy="4.8" r="1.5" fill="#3ee6a8"/>
+        </svg>
+      </span>
+      UGMI <small>· internship radar · ugmi.ca</small>
+    </div>
+    <span class="spacer"></span>
+    <a class="btn ghost" href="#ugmi10">The UGMI 10</a>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="intro">
+    <div class="crumb">canada / internships / all</div>
+    <h1>Every open internship in Canada, on <em>one free board</em>.</h1>
+    <p class="sub">Free, no account, no email.</p>
+  </section>
+
+  <!-- pulse strip: the four build-time facts, nothing invented -->
+  <section class="kpis" aria-label="Board status, computed at build time">
+    <div class="kpi">
+      <div class="k-label">last checked</div>
+      <div class="k-val">7:04am</div>
+      <div class="k-sub">Wed Aug 6 · ET</div>
+    </div>
+    <div class="kpi">
+      <div class="k-label">open now</div>
+      <div class="k-val">1,427</div>
+      <div class="k-sub">listings</div>
+    </div>
+    <div class="kpi">
+      <div class="k-label">added this week</div>
+      <div class="k-val">31</div>
+      <div class="k-sub">new listings</div>
+    </div>
+    <div class="kpi">
+      <div class="k-label">closed this week</div>
+      <div class="k-val">23</div>
+      <div class="k-sub">gone for good</div>
+    </div>
+  </section>
+  <p class="pulse-note">hand-checked, never invented</p>
+
+  <!-- 3-tap eligibility -->
+  <section class="elig">
+    <p class="elig-title">Three taps show what you're eligible for.</p>
+
+    <div class="q-row">
+      <span class="q-label" id="q-auth">Work in</span>
+      <div class="pills" role="group" aria-labelledby="q-auth" data-q="auth">
+        <button type="button" class="pill" data-v="ca" aria-pressed="false">Canada</button>
+        <button type="button" class="pill" data-v="us" aria-pressed="false">US</button>
+        <button type="button" class="pill" data-v="both" aria-pressed="false">both</button>
+      </div>
+    </div>
+    <div class="q-row">
+      <span class="q-label" id="q-term">Term</span>
+      <div class="pills" role="group" aria-labelledby="q-term" data-q="term">
+        <button type="button" class="pill" data-v="s27" aria-pressed="false">Summer 2027</button>
+        <button type="button" class="pill" data-v="f26" aria-pressed="false">Fall 2026</button>
+        <button type="button" class="pill" data-v="w27" aria-pressed="false">Winter 2027</button>
+        <button type="button" class="pill" data-v="any" aria-pressed="false">any</button>
+      </div>
+    </div>
+    <div class="q-row">
+      <span class="q-label" id="q-loc">Location</span>
+      <div class="pills" role="group" aria-labelledby="q-loc" data-q="loc">
+        <button type="button" class="pill" data-v="Remote" aria-pressed="false">remote ok</button>
+        <button type="button" class="pill" data-v="Toronto" aria-pressed="false">Toronto</button>
+        <button type="button" class="pill" data-v="Vancouver" aria-pressed="false">Vancouver</button>
+        <button type="button" class="pill" data-v="anywhere" aria-pressed="false">anywhere</button>
+      </div>
+    </div>
+
+    <div class="elig-status" aria-live="polite">
+      <p class="result-line" id="resultLine" hidden></p>
+      <div id="zeroRow" hidden>
+        <p class="zero-line">0 of 1,427 match all your filters. Loosen one?</p>
+        <button type="button" class="text-btn" id="undoBtn">undo last answer</button>
+      </div>
+      <p class="saved-note" id="savedNote" hidden>showing your filters · saved in this browser only</p>
+    </div>
+  </section>
+
+  <section class="board">
+
+    <!-- ===== DATA PANEL ===== -->
+    <div class="panel">
+      <div class="panel-head">
+        <h2 id="tableTitle">Open listings · All Canada</h2>
+        <span class="spacer"></span>
+        <span class="tag" id="tableCount"></span>
+      </div>
+      <div class="toolbar">
+        <input id="q" type="search" placeholder="Search company or role…" aria-label="Search listings">
+        <select id="sort" aria-label="Sort listings">
+          <option value="close">Closing soonest</option>
+          <option value="newest">Newest first</option>
+          <option value="pay">Pay: high to low</option>
+        </select>
+      </div>
+      <div class="thead" aria-hidden="true">
+        <span>Company / Role</span><span>Location</span><span>Pay</span><span>Closes</span><span>Added</span>
+      </div>
+      <ul class="rows" id="rows"></ul>
+      <div class="tfoot">sample slice · <span id="sliceCount"></span> of 1,427 rows shown in this mockup · full board on ugmi.ca</div>
+    </div>
+
+    <!-- ===== MAP PANEL: map = the Location tap ===== -->
+    <div class="panel map-box">
+      <div class="panel-head">
+        <h2>Listings by region</h2>
+        <span class="spacer"></span>
+        <span class="tag">tap a marker = location filter</span>
+      </div>
+      <svg id="map" viewBox="-2 -1 70 46.6" role="img"
+           aria-label="Stylized dot map of Canada with internship counts per city"></svg>
+      <div class="map-note">counts = open listings tagged to each metro, as of last check</div>
+      <div class="chips" id="chips" role="group" aria-label="City filters"></div>
+    </div>
+
+  </section>
+
+  <!-- closings bridge -->
+  <section class="closings">
+    <p class="closings-line"><b>23</b> internships closed in the last 7 days.</p>
+    <p class="closings-bridge">The weekly list exists so you hear about things before they join that number.</p>
+  </section>
+
+  <!-- ===== THE UGMI 10 ===== -->
+  <section class="panel pro" id="ugmi10">
+    <div class="pro-inner">
+      <span class="plan-tag">the ugmi 10</span>
+      <h2>The UGMI 10</h2>
+      <p class="lede">10 per week, each with a named contact. I read the 1,427 so you read 10.</p>
+
+      <p class="example-label">example pick, from a real week</p>
+      <div class="example-pick">
+        <p class="pick-head">3. PitchBook, Software Engineering Intern</p>
+        <p class="pick-meta">Toronto · $38/hr CAD · closes Fri · contact: <b>Sarah Chen, campus recruiting</b></p>
+        <p class="pick-why"><strong>Why this one:</strong> they take first-years, posted 2 days ago, and the recruiter replied to a student DM last month.</p>
+      </div>
+
+      <p class="how">Resume plus three lines to start. First list within 48 hours, then every Monday.</p>
+      <p class="price-line"><b>$15</b>/mo CAD · cancel anytime</p>
+      <div class="cta-row">
+        <a class="btn" href="#checkout">Get my first list</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CALM CHECKOUT: quietest block on the page ===== -->
+  <section class="checkout" id="checkout">
+    <div class="checkout-card">
+      <h2>What $15 buys</h2>
+      <ul class="fee-grid">
+        <li><span class="fee-k">you get</span><span class="fee-v">4 Monday lists, 10 picks each, a named contact per pick</span></li>
+        <li><span class="fee-k">monthly</span><span class="fee-v">$15 CAD, that's everything</span></li>
+        <li><span class="fee-k">sign-up fee</span><span class="fee-v">$0</span></li>
+        <li><span class="fee-k">cancellation</span><span class="fee-v">anytime, from your Stripe receipt email. No DM needed.</span></li>
+        <li><span class="fee-k">your card</span><span class="fee-v">handled by Stripe. I never see it.</span></li>
+      </ul>
+      <p class="firewall">The full board stays free either way. $15 is for me doing your reading.</p>
+      <p class="handoff">You'll be taken to Stripe to pay.</p>
+      <!-- production: Stripe payment link goes here -->
+      <a class="btn" href="#">Get my first list</a>
+      <p class="blemish">I'm one Waterloo student, not a company.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Dead link? Wrong deadline? DM <a href="#">@sleppyeric</a>, fixed within a day.</p>
+    <p class="checked">last checked Wed Aug 6, 7:04am ET</p>
+    <p class="mock">internal design mockup · sample listing data · renders offline, zero external requests</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============ data ============ */
+  /* country: work authorization bucket · term: s27/f26/w27 · closed rows stay greyed */
+  var LISTINGS=[
+    {co:"Shopify",     role:"Software Engineering Intern",  loc:"Remote, Canada", city:"Remote",    country:"ca", term:"s27", pay:"$34/hr", payN:34,  closes:"in 3 days",   closeShort:"3d",     closesD:3,   added:"2d ago", addedD:2},
+    {co:"Amazon",      role:"SDE Intern",                   loc:"Vancouver",      city:"Vancouver", country:"ca", term:"s27", pay:"$41/hr", payN:41,  closes:"in 5 days",   closeShort:"5d",     closesD:5,   added:"2w ago", addedD:14},
+    {co:"RBC",         role:"Amplify Developer Intern",     loc:"Toronto",        city:"Toronto",   country:"ca", term:"f26", pay:"$31/hr", payN:31,  closes:"in 6 days",   closeShort:"6d",     closesD:6,   added:"today",  addedD:0},
+    {co:"Pinterest",   role:"Software Engineer Intern",     loc:"Toronto",        city:"Toronto",   country:"ca", term:"s27", pay:null,     payN:null,closes:"closed",      closeShort:"closed", closesD:998, added:"3w ago", addedD:21, closed:true},
+    {co:"Stripe",      role:"Software Engineer Intern",     loc:"Remote, US",     city:"Remote",    country:"us", term:"s27", pay:null,     payN:null,closes:"in 9 days",   closeShort:"9d",     closesD:9,   added:"5d ago", addedD:5},
+    {co:"Wealthsimple",role:"Data Science Intern",          loc:"Toronto",        city:"Toronto",   country:"ca", term:"s27", pay:null,     payN:null,closes:"in 11 days",  closeShort:"11d",    closesD:11,  added:"4d ago", addedD:4},
+    {co:"OpenText",    role:"Software Developer Co-op",     loc:"Waterloo",       city:"Waterloo",  country:"ca", term:"f26", pay:"$30/hr", payN:30,  closes:"in 13 days",  closeShort:"13d",    closesD:13,  added:"1w ago", addedD:7},
+    {co:"ecobee",      role:"Embedded Systems Intern",      loc:"Toronto",        city:"Toronto",   country:"ca", term:"s27", pay:"$29/hr", payN:29,  closes:"Aug 31",      closeShort:"Aug 31", closesD:17,  added:"1d ago", addedD:1},
+    {co:"Sun Life",    role:"Data Analyst Intern",          loc:"Toronto",        city:"Toronto",   country:"ca", term:"f26", pay:"$27/hr", payN:27,  closes:"closed",      closeShort:"closed", closesD:998, added:"2w ago", addedD:15, closed:true},
+    {co:"TELUS",       role:"Network Engineering Co-op",    loc:"Vancouver",      city:"Vancouver", country:"ca", term:"w27", pay:"$28/hr", payN:28,  closes:"Sep 2",       closeShort:"Sep 2",  closesD:19,  added:"6d ago", addedD:6},
+    {co:"Benevity",    role:"Full-Stack Developer Intern",  loc:"Calgary",        city:"Calgary",   country:"ca", term:"w27", pay:"$30/hr", payN:30,  closes:"Sep 5",       closeShort:"Sep 5",  closesD:22,  added:"1w ago", addedD:7},
+    {co:"Sanctuary AI",role:"Robotics Software Intern",     loc:"Vancouver",      city:"Vancouver", country:"ca", term:"w27", pay:null,     payN:null,closes:"Sep 8",       closeShort:"Sep 8",  closesD:25,  added:"6d ago", addedD:6},
+    {co:"Ericsson",    role:"Cloud Developer Co-op",        loc:"Montreal",       city:"Montreal",  country:"ca", term:"f26", pay:"$28/hr", payN:28,  closes:"Sep 10",      closeShort:"Sep 10", closesD:27,  added:"3d ago", addedD:3},
+    {co:"BC Hydro",    role:"Engineering Co-op",            loc:"Vancouver",      city:"Vancouver", country:"ca", term:"w27", pay:"$27/hr", payN:27,  closes:"Sep 12",      closeShort:"Sep 12", closesD:29,  added:"3d ago", addedD:3},
+    {co:"Nokia",       role:"5G Software Intern",           loc:"Ottawa",         city:"Ottawa",    country:"ca", term:"s27", pay:"$29/hr", payN:29,  closes:"Sep 15",      closeShort:"Sep 15", closesD:32,  added:"4d ago", addedD:4},
+    {co:"Google",      role:"STEP Intern",                  loc:"Waterloo",       city:"Waterloo",  country:"ca", term:"s27", pay:null,     payN:null,closes:"Sep 19",      closeShort:"Sep 19", closesD:36,  added:"2d ago", addedD:2},
+    {co:"Ubisoft",     role:"Gameplay Programmer Intern",   loc:"Montreal",       city:"Montreal",  country:"ca", term:"s27", pay:"$30/hr", payN:30,  closes:"none listed", closeShort:"none",   closesD:999, added:"1w ago", addedD:7}
+  ];
+
+  /* city buckets: build-time counts across the full dataset */
+  var CITIES=[
+    {name:"Toronto",  count:412, lat:43.65, lon:79.38,  nx: 0.8, ny: 0.6, lx: 2.6, ly: 1.2, anchor:"start"},
+    {name:"Vancouver",count:298, lat:49.28, lon:123.12, nx: 0.0, ny: 0.0, lx: 1.6, ly: 3.0, anchor:"start"},
+    {name:"Waterloo", count:176, lat:43.47, lon:80.52,  nx:-2.2, ny: 1.3, lx:-1.8, ly: 1.6, anchor:"end"},
+    {name:"Montreal", count:154, lat:45.50, lon:73.57,  nx: 1.6, ny:-0.6, lx: 1.4, ly:-1.3, anchor:"start"},
+    {name:"Ottawa",   count:118, lat:45.42, lon:75.70,  nx:-0.8, ny:-1.4, lx:-1.7, ly:-1.2, anchor:"end"},
+    {name:"Calgary",  count: 96, lat:51.05, lon:114.07, nx: 0.0, ny: 0.0, lx: 2.2, ly: 0.5, anchor:"start"}
+  ];
+  var REMOTE_COUNT=173, TOTAL=1427;
+
+  /* ============ projection ============ */
+  var K=0.72, LONW=141, LATN=83.6;
+  function px(lonW){return (LONW-lonW)*K;}
+  function py(lat){return LATN-lat;}
+
+  /* simplified coastline polygons: [lat, lonWest] */
+  var MAINLAND=[
+    [69.6,141],[69.4,133],[68.2,120],[67.7,115],[68.3,108],[68.0,101],[67.8,96],[66.5,95.5],
+    [64.2,93.5],[62.8,92.2],[60.8,94.4],[58.8,94.2],[57.2,92.4],[55.9,87.7],[52.9,82.3],
+    [51.2,79.9],[52.6,78.7],[54.6,79.2],[56.6,76.6],[58.8,77.6],[61.0,77.6],[62.4,77.9],
+    [62.3,74.5],[61.5,71.8],[60.0,69.7],[58.2,68.3],[59.9,65.7],[60.4,64.7],[58.4,62.5],
+    [56.4,61.2],[54.6,58.2],[53.3,55.9],[52.2,55.7],[50.2,60.0],[48.9,64.2],[48.0,66.2],
+    [47.1,64.9],[46.2,63.6],[46.6,60.9],[45.9,59.8],[44.6,63.4],[43.5,65.5],[45.2,66.3],
+    [45.1,67.3],[47.2,67.9],[46.5,70.9],[45.4,73.7],[44.2,76.5],[43.3,79.1],[42.6,80.6],
+    [42.1,82.8],[43.0,82.4],[44.6,81.4],[46.3,84.4],[47.9,86.5],[48.4,89.3],[49.0,95.2],
+    [49.0,123.1],[49.4,123.9],[50.8,127.4],[52.8,129.2],[54.3,130.4],[55.9,130.1],
+    [58.0,133.2],[59.4,137.5],[60.0,139.1],[60.0,141]
+  ];
+  var ISLANDS=[
+    /* Baffin */    [[73.8,86.5],[72.5,75],[70,68],[66.5,61.8],[63.8,64.5],[61.9,66],[64,72],[66.5,74],[68.8,77],[71,80],[72.5,85]],
+    /* Victoria */  [[73.2,114],[71.8,105],[70,101.5],[68.8,104],[68.8,110],[70,113.5],[71.4,118.5],[72.5,118]],
+    /* Banks */     [[74.3,124.5],[73.5,119.5],[71.4,119.8],[71.9,123.5],[73,125.5]],
+    /* Ellesmere */ [[82.9,68],[81.5,63],[79.5,71],[76.8,79.5],[77.5,86],[79.5,85],[81.5,80]],
+    /* Nfld */      [[51.6,55.6],[49.6,53.8],[48.6,53],[46.8,53.2],[47.5,55.5],[47.6,59.2],[49.5,58],[50.5,56.1]],
+    /* Van. Isl. */ [[50.8,128.4],[49.9,127.2],[48.4,124.4],[48.3,123.4],[49.4,124.6],[50.4,127.1]],
+    /* Southampton*/[[65.9,86.5],[64.4,83.2],[63.6,85.6],[64.6,88]]
+  ];
+  var POLYS=[MAINLAND].concat(ISLANDS).map(function(poly){
+    return poly.map(function(p){return [px(p[1]),py(p[0])];});
+  });
+
+  function inPoly(x,y,poly){
+    var inside=false;
+    for(var i=0,j=poly.length-1;i<poly.length;j=i++){
+      var xi=poly[i][0],yi=poly[i][1],xj=poly[j][0],yj=poly[j][1];
+      if(((yi>y)!==(yj>y)) && (x < (xj-xi)*(y-yi)/(yj-yi)+xi)) inside=!inside;
+    }
+    return inside;
+  }
+  function onLand(x,y){
+    for(var i=0;i<POLYS.length;i++){ if(inPoly(x,y,POLYS[i])) return true; }
+    return false;
+  }
+
+  /* ============ map render ============ */
+  var SVG_NS="http://www.w3.org/2000/svg";
+  var map=document.getElementById("map");
+  function el(name,attrs,parent){
+    var n=document.createElementNS(SVG_NS,name);
+    for(var k in attrs) n.setAttribute(k,attrs[k]);
+    if(parent) parent.appendChild(n);
+    return n;
+  }
+
+  /* dot-matrix landmass */
+  var dots=el("g",{"class":"land"},map);
+  var STEP=1.5;
+  for(var gy=0.4; gy<45; gy+=STEP){
+    for(var gx=0.4; gx<64.5; gx+=STEP){
+      if(onLand(gx,gy)) el("circle",{cx:gx.toFixed(1),cy:gy.toFixed(1),r:0.52},dots);
+    }
+  }
+
+  /* city markers: tapping one is the Location answer */
+  var markerEls={};
+  CITIES.forEach(function(c){
+    var x=px(c.lon)+c.nx, y=py(c.lat)+c.ny;
+    var r=1.1 + (c.count/412)*1.3;
+    var g=el("g",{"class":"mk",role:"button",tabindex:"0",
+                  "aria-label":"Filter by "+c.name+" · "+c.count+" listings"},map);
+    el("circle",{"class":"bubble",cx:x,cy:y,r:r.toFixed(2)},g);
+    el("circle",{"class":"core",cx:x,cy:y,r:0.55},g);
+    var t=el("text",{x:(x+c.lx).toFixed(1),y:(y+c.ly).toFixed(1),"text-anchor":c.anchor},g);
+    t.appendChild(document.createTextNode(c.name+" "));
+    var n=el("tspan",{"class":"n"},t);
+    n.textContent=String(c.count);
+    /* hit target sized to ~44px minimum at 390px viewport */
+    el("circle",{"class":"hit",cx:x,cy:y,r:Math.max(4.2,r+1.6).toFixed(2)},g);
+    g.addEventListener("click",function(){tapLoc(c.name);});
+    g.addEventListener("keydown",function(e){
+      if(e.key==="Enter"||e.key===" "){e.preventDefault();tapLoc(c.name);}
+    });
+    markerEls[c.name]=g;
+  });
+
+  /* remote chip floating in the Pacific */
+  (function(){
+    var g=el("g",{"class":"remote-chip",role:"button",tabindex:"0",
+                  "aria-label":"Filter by Remote · "+REMOTE_COUNT+" listings"},map);
+    el("rect",{x:1.5,y:41.2,width:15.6,height:3.4,rx:1.7},g);
+    var t=el("text",{x:9.3,y:43.55,"text-anchor":"middle"},g);
+    t.appendChild(document.createTextNode("⌂ remote "));
+    var n=el("tspan",{"class":"n"},t);
+    n.textContent=String(REMOTE_COUNT);
+    el("rect",{"class":"hit",x:0.5,y:39.7,width:17.6,height:6.4},g);
+    g.addEventListener("click",function(){tapLoc("Remote");});
+    g.addEventListener("keydown",function(e){
+      if(e.key==="Enter"||e.key===" "){e.preventDefault();tapLoc("Remote");}
+    });
+    markerEls["Remote"]=g;
+  })();
+
+  /* ============ city chips (44px, mirror the markers) ============ */
+  var chipsBox=document.getElementById("chips");
+  var chipDefs=[{name:"All",count:TOTAL}]
+    .concat(CITIES.map(function(c){return {name:c.name,count:c.count};}))
+    .concat([{name:"Remote",count:REMOTE_COUNT}]);
+  var chipEls={};
+  chipDefs.forEach(function(d){
+    var b=document.createElement("button");
+    b.className="chip";
+    b.type="button";
+    b.setAttribute("aria-pressed", d.name==="All" ? "true":"false");
+    b.innerHTML=d.name+" <b>"+d.count.toLocaleString("en-CA")+"</b>";
+    b.addEventListener("click",function(){
+      if(d.name==="All"){ if(state.loc){ state.loc=null; dropFromHistory("loc"); persist(); render(); } }
+      else tapLoc(d.name);
+    });
+    chipsBox.appendChild(b);
+    chipEls[d.name]=b;
+  });
+
+  /* ============ state: 3-tap eligibility + search + sort ============ */
+  var KEY="ugmi-elig-map";
+  var state={auth:null,term:null,loc:null,q:"",sort:"close"};
+  var history=[];
+  var restored=false;
+
+  function load(){
+    try{
+      var raw=localStorage.getItem(KEY);
+      if(!raw) return;
+      var saved=JSON.parse(raw);
+      ["auth","term","loc"].forEach(function(q){
+        if(saved && saved[q]){ state[q]=saved[q]; history.push(q); }
+      });
+      restored=history.length>0;
+    }catch(e){ /* file:// or private mode: filters just don't persist */ }
+  }
+  function persist(){
+    try{ localStorage.setItem(KEY,JSON.stringify({auth:state.auth,term:state.term,loc:state.loc})); }catch(e){}
+  }
+  function anyAnswered(){ return !!(state.auth||state.term||state.loc); }
+  function dropFromHistory(q){
+    var i=history.indexOf(q);
+    if(i!==-1) history.splice(i,1);
+  }
+
+  function tapLoc(city){
+    restored=false;
+    if(state.loc===city){ state.loc=null; dropFromHistory("loc"); }
+    else{ state.loc=city; dropFromHistory("loc"); history.push("loc"); }
+    persist(); render();
+  }
+
+  /* pills */
+  document.querySelectorAll(".pills").forEach(function(group){
+    var q=group.getAttribute("data-q");
+    group.addEventListener("click",function(e){
+      var pill=e.target.closest(".pill");
+      if(!pill) return;
+      restored=false;
+      var v=pill.getAttribute("data-v");
+      dropFromHistory(q);
+      if(state[q]===v){ state[q]=null; }
+      else{ state[q]=v; history.push(q); }
+      persist(); render();
+    });
+  });
+
+  document.getElementById("undoBtn").addEventListener("click",function(){
+    var q=history.pop();
+    if(q) state[q]=null;
+    restored=false;
+    persist(); render();
+  });
+
+  /* ============ table ============ */
+  var rowsEl=document.getElementById("rows");
+  var titleEl=document.getElementById("tableTitle");
+  var countEl=document.getElementById("tableCount");
+  var sliceEl=document.getElementById("sliceCount");
+  var resultLine=document.getElementById("resultLine");
+  var zeroRow=document.getElementById("zeroRow");
+  var savedNote=document.getElementById("savedNote");
+
+  var OPEN_TOTAL=LISTINGS.filter(function(r){return !r.closed;}).length;
+
+  var SORTS={
+    close:function(a,b){return a.closesD-b.closesD;},
+    newest:function(a,b){return a.addedD-b.addedD;},
+    pay:function(a,b){return (b.payN||0)-(a.payN||0);}
+  };
+  function fmt(n){ return n.toLocaleString("en-CA"); }
+  function badgeClass(r){
+    if(r.closed)        return "off";
+    if(r.closesD===999) return "none";
+    if(r.closesD<=7)    return "warn";
+    return "";
+  }
+  function eligMatch(r){
+    if(state.auth && state.auth!=="both" && r.country!==state.auth) return false;
+    if(state.term && state.term!=="any" && r.term!==state.term) return false;
+    if(state.loc && state.loc!=="anywhere" && r.city!==state.loc) return false;
+    return true;
+  }
+
+  function render(){
+    /* sync pills */
+    document.querySelectorAll(".pills").forEach(function(group){
+      var q=group.getAttribute("data-q");
+      group.querySelectorAll(".pill").forEach(function(pill){
+        pill.setAttribute("aria-pressed", state[q]===pill.getAttribute("data-v")?"true":"false");
+      });
+    });
+    /* sync map markers + chips (loc only) */
+    for(var name in markerEls){
+      markerEls[name].classList.toggle("on", name===state.loc);
+    }
+    for(var cn in chipEls){
+      var active = (!state.loc||state.loc==="anywhere") ? cn==="All" : cn===state.loc;
+      chipEls[cn].setAttribute("aria-pressed", active?"true":"false");
+    }
+
+    /* eligibility count: pills+map only, open rows only.
+       Mockup only: scales the sample-row proportion to the full 1,427.
+       Production computes the real count from the dataset. */
+    var active=anyAnswered();
+    var eligOpen=LISTINGS.filter(function(r){return !r.closed && eligMatch(r);}).length;
+    var est=active ? Math.max(1,Math.round(TOTAL*eligOpen/OPEN_TOTAL)) : TOTAL;
+
+    resultLine.hidden=!(active && eligOpen>0);
+    zeroRow.hidden=!(active && eligOpen===0);
+    if(active && eligOpen>0){
+      resultLine.innerHTML="Showing <b>"+fmt(est)+"</b> of "+fmt(TOTAL)+" you're actually eligible for.";
+    }
+    savedNote.hidden=!(restored && active);
+
+    /* table: eligibility + search, then sort; closed rows sink to the bottom */
+    var q=state.q.trim().toLowerCase();
+    var list=LISTINGS.filter(function(r){
+      if(!eligMatch(r)) return false;
+      if(q && (r.co+" "+r.role+" "+r.loc).toLowerCase().indexOf(q)===-1) return false;
+      return true;
+    }).slice().sort(function(a,b){
+      if(!!a.closed!==!!b.closed) return a.closed?1:-1;
+      return SORTS[state.sort](a,b);
+    });
+
+    rowsEl.innerHTML="";
+    if(!list.length){
+      var li=document.createElement("li");
+      li.className="empty";
+      li.innerHTML="No sample rows match. <button type=\"button\" id=\"clearBtn\">Clear filters</button>";
+      rowsEl.appendChild(li);
+      li.querySelector("#clearBtn").addEventListener("click",function(){
+        state.q=""; document.getElementById("q").value="";
+        state.auth=null; state.term=null; state.loc=null;
+        history=[]; restored=false;
+        try{ localStorage.removeItem(KEY); }catch(e){}
+        render();
+      });
+    }else{
+      list.forEach(function(r){
+        var li=document.createElement("li");
+        li.className="row"+(r.closed?" closed":"");
+        li.innerHTML=
+          "<div class=\"c-main\"><span class=\"co\">"+r.co+"</span>"+
+          "<span class=\"role\">"+r.role+"</span>"+
+          "<span class=\"loc-m\">"+r.loc+"</span></div>"+
+          "<div class=\"c-loc\">"+r.loc+"</div>"+
+          "<div class=\"c-pay"+(r.pay?"":" na")+"\">"+(r.pay?r.pay:"n/a")+"</div>"+
+          "<div class=\"c-close\"><span class=\"badge "+badgeClass(r)+"\" title=\"closes "+r.closes+"\">"+r.closeShort+"</span></div>"+
+          "<div class=\"c-added\">"+r.added+"</div>";
+        rowsEl.appendChild(li);
+      });
+    }
+
+    var openShown=list.filter(function(r){return !r.closed;}).length;
+    titleEl.textContent="Open listings · "+((state.loc&&state.loc!=="anywhere")?state.loc:"All Canada");
+    countEl.textContent=openShown+" open in sample";
+    sliceEl.textContent=String(list.length);
+  }
+
+  document.getElementById("q").addEventListener("input",function(e){
+    state.q=e.target.value; render();
+  });
+  document.getElementById("sort").addEventListener("change",function(e){
+    state.sort=e.target.value; render();
+  });
+
+  load(); render();
+})();
+</script>
+</body>
+</html>

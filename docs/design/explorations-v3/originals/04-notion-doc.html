@@ -1,0 +1,597 @@
+<!-- INTERNAL DESIGN MOCKUP - sample listing data -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UGMI — All open internships</title>
+<style>
+  /* ============ base ============ */
+  :root{
+    --text:#37352f;
+    --text-2:#787774;
+    --text-3:#9b9a97;
+    --line:#e9e9e7;
+    --line-2:#dfdfdd;
+    --bg:#ffffff;
+    --bg-2:#f7f7f5;
+    --bg-3:#f1f1ef;
+    --accent:#2383e2;
+    --accent-bg:#e7f0fb;
+    --accent-dark:#1b6ec2;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    color:var(--text);
+    background:var(--bg);
+    font-size:16px;
+    line-height:1.55;
+    overflow-x:clip;
+  }
+  ::selection{background:var(--accent-bg)}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(35,131,226,.35)}
+  a:hover{border-bottom-color:var(--accent)}
+
+  /* ============ breadcrumb top bar ============ */
+  .topbar{
+    position:sticky;top:0;z-index:10;
+    display:flex;align-items:center;gap:8px;
+    padding:10px 16px;
+    background:rgba(255,255,255,.92);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line);
+    font-size:13.5px;color:var(--text-2);
+    white-space:nowrap;overflow:hidden;
+  }
+  .crumb{display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden}
+  .crumb .sep{color:var(--text-3);flex:none}
+  .crumb .seg{flex:none;color:var(--text-2)}
+  .crumb .seg.here{color:var(--text);overflow:hidden;text-overflow:ellipsis;min-width:0;flex:0 1 auto}
+  .crumb .ws{display:none}
+  .logo{
+    flex:none;width:18px;height:18px;border-radius:4px;
+    background:var(--text);color:#fff;
+    font-size:11px;font-weight:700;line-height:18px;text-align:center;
+    letter-spacing:.02em;
+  }
+  .topbar-right{margin-left:auto;display:flex;align-items:center;gap:12px;flex:none}
+  .edited{color:var(--text-3);font-size:12.5px}
+  .share{
+    font-size:13px;color:var(--text-2);
+    border:1px solid var(--line-2);border-radius:5px;
+    padding:2px 9px;background:var(--bg);
+  }
+  @media(min-width:480px){ .crumb .ws{display:inline} }
+
+  /* ============ page ============ */
+  .page{max-width:708px;margin:0 auto;padding:40px 16px 80px}
+  @media(min-width:720px){ .page{padding:56px 24px 100px} }
+
+  .page-icon{
+    width:56px;height:56px;border-radius:8px;
+    background:var(--text);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-size:26px;font-weight:700;letter-spacing:.01em;
+    margin-bottom:14px;
+  }
+  h1{
+    font-size:30px;line-height:1.2;font-weight:700;
+    letter-spacing:-.01em;margin-bottom:6px;
+  }
+  @media(min-width:720px){ h1{font-size:38px} }
+  .subtitle{color:var(--text-2);font-size:16px;margin-bottom:22px}
+
+  /* page properties (Notion-style property rows) */
+  .props{margin-bottom:26px;font-size:14px}
+  .prop{display:flex;align-items:baseline;padding:3.5px 0}
+  .prop .k{
+    flex:none;width:118px;color:var(--text-3);
+    display:inline-flex;align-items:center;gap:6px;
+  }
+  .prop .k svg{flex:none;position:relative;top:1.5px}
+  .prop .v{color:var(--text)}
+  .prop .v .tag{
+    display:inline-block;background:var(--bg-3);border-radius:3px;
+    padding:0 6px;font-size:13px;line-height:20px;color:var(--text);
+  }
+  .prop .v .tag.blue{background:var(--accent-bg);color:var(--accent-dark)}
+
+  /* callout */
+  .callout{
+    display:flex;gap:12px;align-items:flex-start;
+    background:var(--bg-2);border:1px solid var(--line);border-radius:6px;
+    padding:14px 16px;font-size:15px;margin:8px 0 26px;
+  }
+  .callout .ic{flex:none;margin-top:3px}
+  .callout.blue{background:var(--accent-bg);border-color:#cfe2f7}
+
+  hr{border:none;border-top:1px solid var(--line);margin:34px 0}
+
+  h2{
+    font-size:21px;font-weight:700;letter-spacing:-.005em;
+    margin:0 0 4px;
+  }
+  .h2-sub{color:var(--text-2);font-size:14px;margin-bottom:14px}
+  h3{font-size:16.5px;font-weight:600;margin:22px 0 8px}
+  p{margin:0 0 14px}
+  .muted{color:var(--text-2)}
+  .small{font-size:13.5px}
+
+  /* ============ to-do / checkbox list ============ */
+  .todo{list-style:none;margin:0 0 16px}
+  .todo li{
+    display:flex;align-items:flex-start;gap:10px;
+    padding:3.5px 0;font-size:15.5px;
+  }
+  .box{
+    flex:none;width:16px;height:16px;margin-top:4px;
+    border:1.5px solid var(--text-3);border-radius:3px;position:relative;
+    background:var(--bg);
+  }
+  .todo li.done .box{background:var(--accent);border-color:var(--accent)}
+  .todo li.done .box::after{
+    content:"";position:absolute;left:4.5px;top:1px;
+    width:4px;height:8px;
+    border:solid #fff;border-width:0 2px 2px 0;
+    transform:rotate(45deg);
+  }
+  .todo li.done .t{}
+  .todo li .t{min-width:0}
+
+  /* ============ database toolbar ============ */
+  .db-head{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    border-bottom:1px solid var(--line);
+    padding-bottom:8px;margin-bottom:2px;
+  }
+  .view-tab{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:14px;font-weight:600;color:var(--text);
+    padding:2px 2px 6px;border-bottom:2px solid var(--text);
+    margin-bottom:-9px;
+  }
+  .view-tab.ghost{color:var(--text-3);font-weight:400;border-bottom-color:transparent}
+  .db-count{color:var(--text-3);font-size:13px;margin-left:auto}
+
+  .db-tools{
+    display:flex;flex-direction:column;gap:10px;
+    padding:12px 0 14px;
+  }
+  @media(min-width:720px){
+    .db-tools{flex-direction:row;align-items:center;justify-content:space-between}
+  }
+  .search-wrap{position:relative;flex:1;max-width:420px}
+  .search-wrap svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);pointer-events:none}
+  #search{
+    width:100%;
+    font:inherit;font-size:14.5px;color:var(--text);
+    background:var(--bg-2);
+    border:1px solid var(--line);border-radius:6px;
+    padding:7px 12px 7px 32px;
+    outline:none;
+  }
+  #search:focus{border-color:var(--accent);background:var(--bg);box-shadow:0 0 0 2px var(--accent-bg)}
+  #search::placeholder{color:var(--text-3)}
+  .chips{display:flex;gap:6px;flex-wrap:wrap}
+  .chip{
+    font:inherit;font-size:13px;color:var(--text-2);
+    background:var(--bg);border:1px solid var(--line-2);border-radius:99px;
+    padding:2.5px 11px;cursor:pointer;
+  }
+  .chip:hover{background:var(--bg-2)}
+  .chip[aria-pressed="true"]{
+    background:var(--accent-bg);border-color:var(--accent);
+    color:var(--accent-dark);font-weight:600;
+  }
+
+  /* ============ database table ============ */
+  .db{font-size:14px}
+  .db-cols{display:none}
+  .row{
+    display:block;
+    padding:11px 2px 12px;
+    border-bottom:1px solid var(--line);
+  }
+  .row:hover{background:var(--bg-2)}
+  .c{display:inline}
+  .c.company{font-weight:600}
+  .c.company::after{content:" — ";color:var(--text-3);font-weight:400}
+  .c.role{font-weight:400}
+  .meta-break{display:block;height:3px}
+  .c.loc,.c.pay,.c.added,.c.closes{color:var(--text-2);font-size:13px}
+  .c.pay::before,.c.closes::before,.c.added::before{content:"· ";color:var(--text-3)}
+  .c.closes .lbl,.c.added .lbl{display:inline}
+  .c .none{color:var(--text-3)}
+  .pill{
+    display:inline-block;border-radius:3px;padding:0 6px;
+    font-size:12.5px;line-height:19px;
+  }
+  .pill.soon{background:var(--accent-bg);color:var(--accent-dark);font-weight:600}
+  .row-more{
+    padding:12px 2px;color:var(--text-3);font-size:13.5px;
+    border-bottom:1px solid var(--line);
+  }
+  .row-more a{font-size:13.5px}
+  #empty{
+    padding:28px 2px;color:var(--text-2);font-size:14.5px;
+    border-bottom:1px solid var(--line);
+  }
+  #empty button{
+    font:inherit;font-size:13.5px;color:var(--accent-dark);
+    background:var(--accent-bg);border:none;border-radius:5px;
+    padding:3px 10px;cursor:pointer;margin-left:6px;
+  }
+
+  @media(min-width:720px){
+    .db-cols{
+      display:grid;
+      grid-template-columns:1.05fr 1.55fr 1fr .78fr .82fr .6fr;
+      gap:0 12px;
+      padding:7px 2px;
+      border-bottom:1px solid var(--line);
+      color:var(--text-3);font-size:12.5px;font-weight:500;
+    }
+    .db-cols span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden}
+    .row{
+      display:grid;
+      grid-template-columns:1.05fr 1.55fr 1fr .78fr .82fr .6fr;
+      gap:0 12px;
+      align-items:baseline;
+      padding:9px 2px;
+    }
+    .c{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .c.company::after{content:none}
+    .meta-break{display:none}
+    .c.loc,.c.pay,.c.added,.c.closes{font-size:13.5px}
+    .c.pay::before,.c.closes::before,.c.added::before{content:none}
+    .c.closes .lbl,.c.added .lbl{display:none}
+  }
+
+  /* ============ pricing block ============ */
+  .price-block{
+    border:1px solid var(--line-2);border-radius:8px;
+    padding:22px 18px;margin:18px 0 10px;
+  }
+  @media(min-width:720px){ .price-block{padding:28px 28px} }
+  .price-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+  .price-head .name{font-size:18px;font-weight:700}
+  .price-head .amt{font-size:15px;color:var(--text-2)}
+  .btn{
+    display:inline-block;
+    font:inherit;font-size:15px;font-weight:600;color:#fff;
+    background:var(--accent);border:none;border-radius:6px;
+    padding:9px 18px;cursor:pointer;
+    border-bottom:none;
+  }
+  .btn:hover{background:var(--accent-dark);border-bottom:none}
+  .btn-note{color:var(--text-3);font-size:13px;margin-top:9px}
+
+  /* ============ toggles ============ */
+  details{border-bottom:1px solid var(--line)}
+  details:first-of-type{border-top:1px solid var(--line)}
+  summary{
+    list-style:none;cursor:pointer;
+    display:flex;align-items:center;gap:9px;
+    padding:12px 2px;font-size:15.5px;font-weight:500;
+  }
+  summary::-webkit-details-marker{display:none}
+  summary:hover{background:var(--bg-2)}
+  .tri{
+    flex:none;width:0;height:0;
+    border-left:6px solid var(--text-3);
+    border-top:4.5px solid transparent;
+    border-bottom:4.5px solid transparent;
+    transition:transform .12s ease;
+    margin-left:3px;
+  }
+  details[open] .tri{transform:rotate(90deg)}
+  .toggle-body{padding:2px 2px 16px 27px;color:var(--text-2);font-size:14.5px}
+  .toggle-body p{margin-bottom:10px}
+  .toggle-body p:last-child{margin-bottom:0}
+
+  /* ============ footer ============ */
+  footer{color:var(--text-3);font-size:13px;line-height:1.7}
+  footer .dot{margin:0 5px}
+</style>
+</head>
+<body>
+
+<!-- ======= breadcrumb header ======= -->
+<header class="topbar">
+  <div class="crumb">
+    <span class="logo" aria-hidden="true">u</span>
+    <span class="seg ws">eric's workspace</span>
+    <span class="sep ws">/</span>
+    <span class="seg">ugmi.ca</span>
+    <span class="sep">/</span>
+    <span class="seg here">All open internships</span>
+  </div>
+  <div class="topbar-right">
+    <span class="edited">Edited today</span>
+    <span class="share">Share</span>
+  </div>
+</header>
+
+<main class="page">
+
+  <!-- ======= page title ======= -->
+  <div class="page-icon" aria-hidden="true">u</div>
+  <h1>All open internships</h1>
+  <p class="subtitle">One searchable list. No account, no email, no paywall.</p>
+
+  <!-- ======= page properties ======= -->
+  <div class="props" aria-label="Page properties">
+    <div class="prop">
+      <span class="k">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#9b9a97" stroke-width="1.4"><rect x="1.5" y="2.5" width="11" height="9" rx="1.5"/><path d="M1.5 5.5h11"/></svg>
+        Listings
+      </span>
+      <span class="v">1,427 open right now</span>
+    </div>
+    <div class="prop">
+      <span class="k">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#9b9a97" stroke-width="1.4"><circle cx="7" cy="7" r="5.5"/><path d="M7 4v3l2 1.5"/></svg>
+        Updated
+      </span>
+      <span class="v">Daily — closed roles removed</span>
+    </div>
+    <div class="prop">
+      <span class="k">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#9b9a97" stroke-width="1.4"><path d="M7 12s-4.5-3.2-4.5-6.3A4.5 4.5 0 0 1 7 1.5a4.5 4.5 0 0 1 4.5 4.2C11.5 8.8 7 12 7 12Z"/><circle cx="7" cy="5.8" r="1.4"/></svg>
+        Region
+      </span>
+      <span class="v"><span class="tag">Mostly Canada</span></span>
+    </div>
+    <div class="prop">
+      <span class="k">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#9b9a97" stroke-width="1.4"><circle cx="7" cy="4.5" r="2.5"/><path d="M2.5 12c.6-2.5 2.4-3.8 4.5-3.8S10.9 9.5 11.5 12"/></svg>
+        Price
+      </span>
+      <span class="v"><span class="tag blue">Free</span></span>
+    </div>
+    <div class="prop">
+      <span class="k">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#9b9a97" stroke-width="1.4"><path d="M2 11.5 7 2l5 9.5H2Z"/></svg>
+        Built by
+      </span>
+      <span class="v">One student at Waterloo</span>
+    </div>
+  </div>
+
+  <!-- ======= callout ======= -->
+  <div class="callout">
+    <span class="ic" aria-hidden="true">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#787774" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 7.2v4"/><circle cx="8" cy="4.8" r=".2" fill="#787774" stroke-width="1.6"/></svg>
+    </span>
+    <div>The whole list below is free to search and always will be. You never make an account. The only paid thing on this site is the <a href="#monday">Monday&nbsp;10</a> — and you don't need it to use the list.</div>
+  </div>
+
+  <!-- ======= start here checklist ======= -->
+  <h3>Start here</h3>
+  <ul class="todo">
+    <li class="done"><span class="box" aria-hidden="true"></span><span class="t">Open this page (done — you're here)</span></li>
+    <li class="done"><span class="box" aria-hidden="true"></span><span class="t">Search the table or tap a city filter</span></li>
+    <li><span class="box" aria-hidden="true"></span><span class="t">Apply before the close date — the good ones go fast</span></li>
+    <li><span class="box" aria-hidden="true"></span><span class="t">Optional: let the <a href="#monday">Monday 10</a> do the searching for you</span></li>
+  </ul>
+
+  <hr>
+
+  <!-- ======= database ======= -->
+  <h2 id="listings">Open listings</h2>
+  <p class="h2-sub">A live database. This mockup shows a 16-row sample of the 1,427 currently open.</p>
+
+  <div class="db-head">
+    <span class="view-tab">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1" y="1.5" width="11" height="10" rx="1.5"/><path d="M1 5h11M5.2 5v6.5"/></svg>
+      Table
+    </span>
+    <span class="view-tab ghost">Board</span>
+    <span class="view-tab ghost">Calendar</span>
+    <span class="db-count" id="count">16 of 1,427 shown</span>
+  </div>
+
+  <div class="db-tools">
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#9b9a97" stroke-width="1.5"><circle cx="6" cy="6" r="4.5"/><path d="m9.5 9.5 3 3"/></svg>
+      <input id="search" type="search" placeholder="Search company, role, city…" aria-label="Search listings">
+    </div>
+    <div class="chips" role="group" aria-label="Filter listings">
+      <button class="chip" data-filter="all" aria-pressed="true">All</button>
+      <button class="chip" data-filter="remote" aria-pressed="false">Remote</button>
+      <button class="chip" data-filter="toronto" aria-pressed="false">Toronto</button>
+      <button class="chip" data-filter="vancouver" aria-pressed="false">Vancouver</button>
+      <button class="chip" data-filter="waterloo" aria-pressed="false">Waterloo</button>
+      <button class="chip" data-filter="montreal" aria-pressed="false">Montreal</button>
+      <button class="chip" data-filter="soon" aria-pressed="false">Closing soon</button>
+    </div>
+  </div>
+
+  <div class="db" id="db">
+    <div class="db-cols" aria-hidden="true">
+      <span><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="1.5" y="2" width="9" height="8" rx="1"/><path d="M4 5h4M4 7h2.5"/></svg>Company</span>
+      <span><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M2 3.5h8M2 6h8M2 8.5h5"/></svg>Role</span>
+      <span><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M6 10.5S2.5 8 2.5 5.4A3.5 3.5 0 0 1 6 2a3.5 3.5 0 0 1 3.5 3.4C9.5 8 6 10.5 6 10.5Z"/></svg>Location</span>
+      <span><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="6" cy="6" r="4.5"/><path d="M6 3.8v4.4M4.6 7.2c.3.6 2.5.7 2.6-.4.1-1-2.3-.7-2.3-1.8 0-.9 1.8-1 2.3-.3"/></svg>Pay</span>
+      <span><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="6" cy="6" r="4.5"/><path d="M6 3.5V6l1.8 1.3"/></svg>Closes</span>
+      <span><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M6 1.5v9M1.5 6h9"/></svg>Added</span>
+    </div>
+
+    <div class="row" data-loc="remote" data-soon="1" data-search="shopify software engineering intern remote canada">
+      <span class="c company">Shopify</span><span class="c role">Software Engineering Intern</span><span class="meta-break"></span><span class="c loc">Remote, Canada</span><span class="c pay">$34/hr CAD</span><span class="c closes"><span class="pill soon"><span class="lbl">closes </span>in 3 days</span></span><span class="c added"><span class="lbl">added </span>2d ago</span>
+    </div>
+    <div class="row" data-loc="vancouver" data-soon="1" data-search="amazon sde intern vancouver software">
+      <span class="c company">Amazon</span><span class="c role">SDE Intern</span><span class="meta-break"></span><span class="c loc">Vancouver</span><span class="c pay">$41/hr CAD</span><span class="c closes"><span class="pill soon"><span class="lbl">closes </span>in 5 days</span></span><span class="c added"><span class="lbl">added </span>2w ago</span>
+    </div>
+    <div class="row" data-loc="toronto" data-soon="1" data-search="rbc amplify developer intern toronto">
+      <span class="c company">RBC</span><span class="c role">Amplify Developer Intern</span><span class="meta-break"></span><span class="c loc">Toronto</span><span class="c pay">$31/hr CAD</span><span class="c closes"><span class="pill soon"><span class="lbl">closes </span>in 6 days</span></span><span class="c added"><span class="lbl">added </span>today</span>
+    </div>
+    <div class="row" data-loc="remote" data-soon="0" data-search="stripe software engineer intern remote us">
+      <span class="c company">Stripe</span><span class="c role">Software Engineer Intern</span><span class="meta-break"></span><span class="c loc">Remote, US</span><span class="c pay"><span class="none">not listed</span></span><span class="c closes"><span class="lbl">closes </span>in 9 days</span><span class="c added"><span class="lbl">added </span>5d ago</span>
+    </div>
+    <div class="row" data-loc="toronto" data-soon="0" data-search="wealthsimple data science intern toronto">
+      <span class="c company">Wealthsimple</span><span class="c role">Data Science Intern</span><span class="meta-break"></span><span class="c loc">Toronto</span><span class="c pay"><span class="none">not listed</span></span><span class="c closes"><span class="lbl">closes </span>in 11 days</span><span class="c added"><span class="lbl">added </span>4d ago</span>
+    </div>
+    <div class="row" data-loc="waterloo" data-soon="0" data-search="opentext software developer co-op coop waterloo">
+      <span class="c company">OpenText</span><span class="c role">Software Developer Co-op</span><span class="meta-break"></span><span class="c loc">Waterloo</span><span class="c pay">$30/hr CAD</span><span class="c closes"><span class="lbl">closes </span>in 13 days</span><span class="c added"><span class="lbl">added </span>1w ago</span>
+    </div>
+    <div class="row" data-loc="toronto" data-soon="0" data-search="ecobee embedded systems intern toronto">
+      <span class="c company">ecobee</span><span class="c role">Embedded Systems Intern</span><span class="meta-break"></span><span class="c loc">Toronto</span><span class="c pay">$29/hr CAD</span><span class="c closes"><span class="lbl">closes </span>Aug 31</span><span class="c added"><span class="lbl">added </span>1d ago</span>
+    </div>
+    <div class="row" data-loc="vancouver" data-soon="0" data-search="telus network engineering co-op coop vancouver">
+      <span class="c company">TELUS</span><span class="c role">Network Engineering Co-op</span><span class="meta-break"></span><span class="c loc">Vancouver</span><span class="c pay">$28/hr CAD</span><span class="c closes"><span class="lbl">closes </span>Sep 2</span><span class="c added"><span class="lbl">added </span>6d ago</span>
+    </div>
+    <div class="row" data-loc="vancouver" data-soon="0" data-search="sanctuary ai robotics software intern vancouver">
+      <span class="c company">Sanctuary AI</span><span class="c role">Robotics Software Intern</span><span class="meta-break"></span><span class="c loc">Vancouver</span><span class="c pay"><span class="none">not listed</span></span><span class="c closes"><span class="lbl">closes </span>Sep 8</span><span class="c added"><span class="lbl">added </span>6d ago</span>
+    </div>
+    <div class="row" data-loc="vancouver" data-soon="0" data-search="bc hydro engineering co-op coop vancouver">
+      <span class="c company">BC Hydro</span><span class="c role">Engineering Co-op</span><span class="meta-break"></span><span class="c loc">Vancouver</span><span class="c pay">$27/hr CAD</span><span class="c closes"><span class="lbl">closes </span>Sep 12</span><span class="c added"><span class="lbl">added </span>3d ago</span>
+    </div>
+    <div class="row" data-loc="waterloo" data-soon="0" data-search="google step intern waterloo">
+      <span class="c company">Google</span><span class="c role">STEP Intern</span><span class="meta-break"></span><span class="c loc">Waterloo</span><span class="c pay"><span class="none">not listed</span></span><span class="c closes"><span class="lbl">closes </span>Sep 19</span><span class="c added"><span class="lbl">added </span>2d ago</span>
+    </div>
+    <div class="row" data-loc="toronto" data-soon="0" data-search="cohere machine learning intern toronto ml ai">
+      <span class="c company">Cohere</span><span class="c role">Machine Learning Intern</span><span class="meta-break"></span><span class="c loc">Toronto</span><span class="c pay"><span class="none">not listed</span></span><span class="c closes"><span class="lbl">closes </span>Sep 22</span><span class="c added"><span class="lbl">added </span>3d ago</span>
+    </div>
+    <div class="row" data-loc="montreal" data-soon="0" data-search="ubisoft gameplay programmer intern montreal games">
+      <span class="c company">Ubisoft</span><span class="c role">Gameplay Programmer Intern</span><span class="meta-break"></span><span class="c loc">Montreal</span><span class="c pay">$30/hr CAD</span><span class="c closes"><span class="none">none listed</span></span><span class="c added"><span class="lbl">added </span>1w ago</span>
+    </div>
+    <div class="row" data-loc="montreal" data-soon="0" data-search="intact full stack developer intern montreal">
+      <span class="c company">Intact</span><span class="c role">Full Stack Developer Intern</span><span class="meta-break"></span><span class="c loc">Montreal</span><span class="c pay">$28/hr CAD</span><span class="c closes"><span class="lbl">closes </span>Sep 26</span><span class="c added"><span class="lbl">added </span>1w ago</span>
+    </div>
+    <div class="row" data-loc="waterloo" data-soon="0" data-search="blackberry qnx software development student waterloo embedded">
+      <span class="c company">BlackBerry QNX</span><span class="c role">Software Development Student</span><span class="meta-break"></span><span class="c loc">Waterloo</span><span class="c pay">$26/hr CAD</span><span class="c closes"><span class="lbl">closes </span>Sep 30</span><span class="c added"><span class="lbl">added </span>2w ago</span>
+    </div>
+    <div class="row" data-loc="remote" data-soon="0" data-search="1password developer intern remote canada security">
+      <span class="c company">1Password</span><span class="c role">Developer Intern</span><span class="meta-break"></span><span class="c loc">Remote, Canada</span><span class="c pay">$32/hr CAD</span><span class="c closes"><span class="lbl">closes </span>Oct 3</span><span class="c added"><span class="lbl">added </span>today</span>
+    </div>
+
+    <div id="empty" hidden>No listings match. <button id="clear" type="button">Clear filters</button></div>
+    <div class="row-more">+ 1,411 more rows in the live database at <a href="#listings">ugmi.ca</a></div>
+  </div>
+
+  <hr>
+
+  <!-- ======= the paid thing ======= -->
+  <h2 id="monday">The Monday 10</h2>
+  <p class="h2-sub">The one paid thing on this site. Everything above stays free.</p>
+
+  <p>Searching 1,427 listings every week is a part-time job. If you'd rather not, I'll do it for you. Every Monday morning you get a short doc — like this one — with ten internships picked for <em>you</em>, not for everyone.</p>
+
+  <div class="price-block">
+    <div class="price-head">
+      <span class="name">Monday 10</span>
+      <span class="amt">$15/month CAD</span>
+    </div>
+    <ul class="todo">
+      <li class="done"><span class="box" aria-hidden="true"></span><span class="t">10 hand-picked internships in your inbox every Monday</span></li>
+      <li class="done"><span class="box" aria-hidden="true"></span><span class="t">Matched to your program, year, and location — picked by a person, not a keyword filter</span></li>
+      <li class="done"><span class="box" aria-hidden="true"></span><span class="t">A named contact person at each company, so you're not applying into a void</span></li>
+      <li class="done"><span class="box" aria-hidden="true"></span><span class="t">Cancel anytime, one click, no guilt trip</span></li>
+    </ul>
+    <button class="btn" type="button">Get the Monday 10 — $15/month</button>
+    <p class="btn-note">Checkout via Stripe. The free list stays free whether you subscribe or not.</p>
+  </div>
+
+  <hr>
+
+  <!-- ======= toggles / FAQ ======= -->
+  <h2>Questions people actually ask</h2>
+  <p class="h2-sub">Tap to expand.</p>
+
+  <details>
+    <summary><span class="tri" aria-hidden="true"></span>Why is the list free? What's the catch?</summary>
+    <div class="toggle-body">
+      <p>There isn't one. These listings are public information — charging you to see them would be a scummy move. The Monday 10 subscription covers hosting and my time, and the list stays free either way.</p>
+    </div>
+  </details>
+  <details>
+    <summary><span class="tri" aria-hidden="true"></span>What exactly do I get for $15/month?</summary>
+    <div class="toggle-body">
+      <p>Every Monday: ten internships chosen for your specific situation — program, year, city, work-permit status if it matters. Each one comes with a named contact person (a recruiter or engineer at the company), so you can reach a human instead of a portal.</p>
+      <p>It's the difference between a job board and a friend who reads job boards for you.</p>
+    </div>
+  </details>
+  <details>
+    <summary><span class="tri" aria-hidden="true"></span>Who runs this?</summary>
+    <div class="toggle-body">
+      <p>One university student at Waterloo. No company, no team, no VC. I built it because I was tired of internship lists that wanted my email before showing me anything. I'm <a href="#footer">@sleppyeric</a> on Instagram if you want to say hi or yell at me about a broken link.</p>
+    </div>
+  </details>
+  <details>
+    <summary><span class="tri" aria-hidden="true"></span>How fresh is the data?</summary>
+    <div class="toggle-body">
+      <p>The database updates daily. Closed listings get removed, new ones get added, and the "closes" column is checked against the actual posting — not scraped once and left to rot.</p>
+    </div>
+  </details>
+  <details>
+    <summary><span class="tri" aria-hidden="true"></span>Is payment safe? Can I cancel?</summary>
+    <div class="toggle-body">
+      <p>Payment goes through Stripe — I never see your card number. Cancel anytime from the Stripe receipt email; it takes one click and works immediately.</p>
+    </div>
+  </details>
+
+  <hr>
+
+  <!-- ======= footer ======= -->
+  <footer id="footer">
+    <p>UGMI · ugmi.ca<span class="dot">·</span>Built and run by one student at Waterloo<span class="dot">·</span>Instagram <a href="#footer">@sleppyeric</a></p>
+    <p>Payments handled by Stripe. This page is an internal design mockup — listing data shown is sample data.</p>
+  </footer>
+
+</main>
+
+<script>
+(function(){
+  var rows = Array.prototype.slice.call(document.querySelectorAll('.row'));
+  var search = document.getElementById('search');
+  var chips = Array.prototype.slice.call(document.querySelectorAll('.chip'));
+  var count = document.getElementById('count');
+  var empty = document.getElementById('empty');
+  var clearBtn = document.getElementById('clear');
+  var activeFilter = 'all';
+
+  function apply(){
+    var q = search.value.trim().toLowerCase();
+    var shown = 0;
+    rows.forEach(function(r){
+      var okQ = !q || r.getAttribute('data-search').indexOf(q) !== -1;
+      var okF;
+      if (activeFilter === 'all') okF = true;
+      else if (activeFilter === 'soon') okF = r.getAttribute('data-soon') === '1';
+      else okF = r.getAttribute('data-loc') === activeFilter;
+      var show = okQ && okF;
+      r.style.display = show ? '' : 'none';
+      if (show) shown++;
+    });
+    count.textContent = shown + ' of 1,427 shown';
+    empty.hidden = shown > 0;
+  }
+
+  search.addEventListener('input', apply);
+
+  chips.forEach(function(chip){
+    chip.addEventListener('click', function(){
+      activeFilter = chip.getAttribute('data-filter');
+      chips.forEach(function(c){
+        c.setAttribute('aria-pressed', c === chip ? 'true' : 'false');
+      });
+      apply();
+    });
+  });
+
+  clearBtn.addEventListener('click', function(){
+    search.value = '';
+    activeFilter = 'all';
+    chips.forEach(function(c){
+      c.setAttribute('aria-pressed', c.getAttribute('data-filter') === 'all' ? 'true' : 'false');
+    });
+    apply();
+  });
+})();
+</script>
+
+</body>
+</html>

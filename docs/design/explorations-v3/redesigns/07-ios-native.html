@@ -1,0 +1,837 @@
+<!-- INTERNAL DESIGN MOCKUP - sample listing data -->
+<!--
+  REDESIGN of originals/07-ios-native.html per REDESIGN-SPEC.md.
+  Identity kept: first-party-Apple feel, condensing large title, grouped
+  inset lists, segmented controls, bottom sheet, auto dark mode.
+  Changes: red urgency is now warm amber; pulse strip installed; the
+  location tablist became the spec's 3-tap eligibility filter as three
+  segmented controls (live filter, scaled count, zero-state with undo,
+  localStorage); 2 greyed Closed rows + closings bridge line; the sheet
+  is the paid pitch + calm checkout (example pick, fee grid, Stripe
+  handoff, blemish, single "Get my first list" CTA); no forms anywhere;
+  group-footer prose cut; footer carries the fix-it line.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>UGMI · 1,427 open internships. Free.</title>
+<style>
+  :root{
+    color-scheme: light dark;
+    --blue:#007AFF;
+    --amber:#8A5A00;
+    --bg:#F2F2F7;
+    --cell:#FFFFFF;
+    --label:#000000;
+    --secondary:rgba(60,60,67,.75);
+    --tertiary:rgba(60,60,67,.3);
+    --sep:rgba(60,60,67,.29);
+    --seg-track:rgba(118,118,128,.12);
+    --seg-sel:#FFFFFF;
+    --search-bg:rgba(118,118,128,.12);
+    --nav-bg:rgba(249,249,249,.82);
+    --sheet-bg:#F2F2F7;
+    --sheet-cell:#FFFFFF;
+    --grabber:rgba(60,60,67,.3);
+    --btn-quiet:rgba(118,118,128,.12);
+    --shadow:0 3px 8px rgba(0,0,0,.12), 0 3px 1px rgba(0,0,0,.04);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --blue:#0A84FF;
+      --amber:#FFB340;
+      --bg:#000000;
+      --cell:#1C1C1E;
+      --label:#FFFFFF;
+      --secondary:rgba(235,235,245,.6);
+      --tertiary:rgba(235,235,245,.3);
+      --sep:rgba(84,84,88,.6);
+      --seg-track:rgba(118,118,128,.24);
+      --seg-sel:#636366;
+      --search-bg:rgba(118,118,128,.24);
+      --nav-bg:rgba(22,22,24,.82);
+      --sheet-bg:#1C1C1E;
+      --sheet-cell:#2C2C2E;
+      --grabber:rgba(235,235,245,.3);
+      --btn-quiet:rgba(118,118,128,.24);
+      --shadow:none;
+    }
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{overflow-x:hidden}
+  body{
+    font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background:var(--bg);
+    color:var(--label);
+    font-size:17px;
+    line-height:1.35;
+    -webkit-font-smoothing:antialiased;
+  }
+  body.modal-open{overflow:hidden}
+  button{font-family:inherit;cursor:pointer}
+  a{color:var(--blue);text-decoration:none}
+  [hidden]{display:none !important}
+  :focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:8px}
+  .num{font-variant-numeric:tabular-nums}
+
+  /* ---------- Nav bar (condenses on scroll) ---------- */
+  .navbar{
+    position:fixed;top:0;left:0;right:0;z-index:40;
+    height:52px;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 16px;
+    background:transparent;
+    transition:background .25s ease;
+  }
+  .navbar::after{
+    content:"";position:absolute;left:0;right:0;bottom:0;height:.5px;
+    background:var(--sep);opacity:0;transition:opacity .25s ease;
+  }
+  .navbar.condensed{
+    background:var(--nav-bg);
+    -webkit-backdrop-filter:saturate(180%) blur(20px);
+    backdrop-filter:saturate(180%) blur(20px);
+  }
+  .navbar.condensed::after{opacity:1}
+  .nav-title{
+    position:absolute;left:50%;transform:translate(-50%,6px);
+    font-size:17px;font-weight:600;
+    opacity:0;transition:opacity .2s ease, transform .2s ease;
+    pointer-events:none;
+  }
+  .navbar.condensed .nav-title{opacity:1;transform:translate(-50%,0)}
+  .nav-lead{font-size:15px;color:var(--secondary);font-weight:400}
+  .nav-btn{
+    border:0;background:none;color:var(--blue);
+    font-size:17px;font-weight:400;padding:10px 0;min-height:44px;
+  }
+  .nav-btn:active{opacity:.4}
+
+  /* ---------- Page shell ---------- */
+  .page{max-width:640px;margin:0 auto;padding:52px 0 40px}
+
+  /* ---------- Large title ---------- */
+  .large-header{padding:10px 16px 4px}
+  .large-title{font-size:34px;font-weight:700;letter-spacing:.01em}
+  .large-sub{font-size:15px;color:var(--secondary);margin-top:2px}
+  .large-sub strong{color:var(--label);font-weight:600}
+
+  /* ---------- Pulse strip ---------- */
+  .pulse{
+    margin:8px 16px 0;padding:8px 12px;
+    background:var(--cell);border-radius:10px;
+    font-size:12px;color:var(--secondary);line-height:1.55;
+  }
+
+  /* ---------- Search ---------- */
+  .searchwrap{padding:10px 16px 6px}
+  .search{
+    display:flex;align-items:center;gap:6px;min-height:44px;
+    background:var(--search-bg);border-radius:10px;padding:7px 8px;
+  }
+  .search svg{flex:none;width:16px;height:16px;stroke:var(--secondary)}
+  .search input{
+    flex:1;border:0;background:none;outline:none;
+    font-size:17px;font-family:inherit;color:var(--label);min-width:0;
+  }
+  .search input::placeholder{color:var(--secondary)}
+  .search input::-webkit-search-cancel-button,
+  .search input::-webkit-search-decoration{-webkit-appearance:none;appearance:none}
+  .search-clear{
+    border:0;background:none;padding:0;display:none;line-height:0;
+  }
+  .search-clear svg{width:17px;height:17px;stroke:none;fill:var(--tertiary)}
+  .search.has-text .search-clear{display:block}
+
+  /* ---------- 3-tap eligibility, three segmented controls ---------- */
+  .elig{padding:4px 16px 0}
+  .elig-title{font-size:13px;color:var(--secondary);padding:2px 0 6px}
+  .seg-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .seg-label{
+    flex:0 0 60px;font-size:11px;font-weight:600;color:var(--secondary);
+    text-transform:uppercase;letter-spacing:.04em;
+  }
+  .segmented{
+    flex:1;display:flex;background:var(--seg-track);border-radius:9px;padding:2px;
+    min-width:0;
+  }
+  .segmented button{
+    flex:1;border:0;background:transparent;border-radius:7px;min-height:40px;
+    padding:5px 2px;font-size:12px;font-weight:500;color:var(--label);
+    transition:background .15s ease;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .segmented button[aria-pressed="true"]{
+    background:var(--seg-sel);font-weight:600;box-shadow:var(--shadow);
+  }
+  .elig-status{min-height:22px;padding:2px 0 0}
+  .result-line{font-size:15px;font-weight:600}
+  .zero-row{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+  .zero-line{font-size:14px;font-weight:600}
+  .undo-btn{
+    border:0;background:none;color:var(--blue);
+    font-size:14px;font-weight:400;min-height:44px;padding:0 8px;
+  }
+  .undo-btn:active{opacity:.4}
+  .saved-note{font-size:12px;color:var(--secondary);margin-top:1px}
+
+  /* ---------- Grouped inset lists ---------- */
+  .group{margin-top:22px}
+  .group-hd{
+    font-size:13px;font-weight:400;color:var(--secondary);
+    text-transform:uppercase;letter-spacing:.03em;
+    padding:0 32px 7px;
+  }
+  .group-ft{
+    font-size:13px;color:var(--secondary);
+    padding:7px 32px 0;
+  }
+  .bridge{
+    font-size:15px;font-weight:600;padding:0 32px 8px;
+  }
+  .inset{
+    background:var(--cell);border-radius:10px;margin:0 16px;
+    list-style:none;overflow:hidden;
+  }
+
+  /* ---------- Listing cells ---------- */
+  .cell{
+    display:flex;gap:12px;padding:11px 16px;position:relative;
+    align-items:flex-start;
+  }
+  .cell:active{background:var(--seg-track)}
+  .cell + .cell::before{
+    content:"";position:absolute;top:0;left:64px;right:0;height:.5px;
+    background:var(--sep);
+  }
+  .avatar{
+    flex:none;width:36px;height:36px;border-radius:8px;margin-top:2px;
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-size:17px;font-weight:600;
+  }
+  .cell-body{flex:1;min-width:0}
+  .row1{display:flex;align-items:baseline;gap:8px}
+  .company{
+    font-size:16px;font-weight:600;flex:1;min-width:0;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    display:flex;align-items:center;gap:6px;
+  }
+  .newdot{
+    flex:none;width:8px;height:8px;border-radius:50%;background:var(--blue);
+  }
+  .closes{flex:none;font-size:13px;color:var(--secondary)}
+  .closes.warm{color:var(--amber);font-weight:600}
+  .role{
+    font-size:15px;margin-top:1px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .meta{
+    font-size:13px;color:var(--secondary);margin-top:1px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .cell.closed .avatar{background:var(--tertiary) !important}
+  .cell.closed .company,.cell.closed .role,.cell.closed .meta{color:var(--tertiary)}
+  .closed-chip{
+    flex:none;font-size:12px;font-weight:600;color:var(--secondary);
+    background:var(--seg-track);border-radius:6px;padding:2px 8px;
+  }
+  .empty{
+    padding:36px 16px;text-align:center;
+  }
+  .empty-title{font-size:17px;font-weight:600}
+  .empty-sub{font-size:14px;color:var(--secondary);margin-top:3px}
+
+  /* ---------- Weekly upsell cell ---------- */
+  .upsell{
+    display:flex;gap:12px;align-items:center;width:100%;
+    border:0;background:var(--cell);text-align:left;
+    padding:13px 16px;font-size:inherit;color:inherit;
+  }
+  .upsell:active{background:var(--seg-track)}
+  .upsell-icon{
+    flex:none;width:42px;height:42px;border-radius:9px;
+    background:linear-gradient(180deg,#3395FF,#007AFF);
+    display:flex;align-items:center;justify-content:center;
+  }
+  @media (prefers-color-scheme: dark){
+    .upsell-icon{background:linear-gradient(180deg,#3BA0FF,#0A84FF)}
+  }
+  .upsell-icon svg{width:24px;height:24px;stroke:#fff}
+  .upsell-body{flex:1;min-width:0}
+  .upsell-title{font-size:16px;font-weight:600}
+  .upsell-sub{font-size:13px;color:var(--secondary);margin-top:1px}
+  .chevron{flex:none;width:8px;height:14px;stroke:var(--tertiary)}
+
+  /* ---------- About cells ---------- */
+  .about-cell{
+    display:flex;align-items:center;gap:12px;padding:11px 16px;position:relative;
+    color:inherit;
+  }
+  .about-cell + .about-cell::before{
+    content:"";position:absolute;top:0;left:58px;right:0;height:.5px;
+    background:var(--sep);
+  }
+  .about-icon{
+    flex:none;width:30px;height:30px;border-radius:7px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .about-icon svg{width:18px;height:18px;stroke:#fff}
+  .about-label{flex:1;font-size:16px}
+  .about-value{font-size:16px;color:var(--secondary)}
+
+  footer{
+    text-align:center;padding:28px 16px 0;
+    font-size:12px;color:var(--secondary);line-height:1.7;
+  }
+
+  /* ---------- Sheet modal: pitch + calm checkout ---------- */
+  .backdrop{
+    position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.4);
+    opacity:0;pointer-events:none;transition:opacity .3s ease;
+  }
+  body.modal-open .backdrop{opacity:1;pointer-events:auto}
+  .sheet{
+    position:fixed;left:0;right:0;bottom:0;z-index:60;
+    max-width:480px;margin:0 auto;
+    max-height:92vh;max-height:92dvh;overflow-y:auto;
+    background:var(--sheet-bg);
+    border-radius:12px 12px 0 0;
+    transform:translateY(105%);
+    transition:transform .38s cubic-bezier(.32,.72,0,1);
+    padding:6px 16px calc(24px + env(safe-area-inset-bottom,0px));
+  }
+  body.modal-open .sheet{transform:translateY(0)}
+  .grabber{
+    width:36px;height:5px;border-radius:3px;background:var(--grabber);
+    margin:4px auto 6px;
+  }
+  .sheet-close{
+    position:absolute;top:10px;right:12px;
+    width:44px;height:44px;border-radius:50%;border:0;
+    background:var(--btn-quiet);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .sheet-close svg{width:12px;height:12px;stroke:var(--secondary)}
+  .sheet-close:active{opacity:.5}
+  .sheet-hero{text-align:center;padding:14px 8px 4px}
+  .sheet-appicon{
+    width:64px;height:64px;border-radius:14px;margin:0 auto 12px;
+    background:linear-gradient(180deg,#3395FF,#007AFF);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 8px 24px rgba(0,122,255,.35);
+  }
+  @media (prefers-color-scheme: dark){
+    .sheet-appicon{background:linear-gradient(180deg,#3BA0FF,#0A84FF)}
+  }
+  .sheet-appicon svg{width:34px;height:34px;stroke:#fff}
+  .sheet-title{font-size:24px;font-weight:700}
+  .sheet-sub{font-size:15px;color:var(--secondary);margin-top:4px}
+  .sample{
+    background:var(--sheet-cell);border-radius:10px;margin-top:16px;
+    padding:12px 14px;
+  }
+  .sample-tag{
+    display:inline-block;font-size:10px;font-weight:700;letter-spacing:.08em;
+    color:var(--blue);background:rgba(0,122,255,.12);
+    border-radius:5px;padding:2px 7px;margin-bottom:7px;
+  }
+  @media (prefers-color-scheme: dark){
+    .sample-tag{background:rgba(10,132,255,.2)}
+  }
+  .sample-role{font-size:15px;font-weight:600}
+  .sample-meta{font-size:13px;color:var(--secondary);margin-top:1px}
+  .sample-why{
+    font-size:13px;margin-top:9px;padding-top:9px;
+    border-top:.5px solid var(--sep);line-height:1.5;
+  }
+  .fee-grid{
+    background:var(--sheet-cell);border-radius:10px;margin-top:12px;overflow:hidden;
+  }
+  .fee{
+    display:flex;justify-content:space-between;gap:16px;align-items:baseline;
+    padding:11px 14px;position:relative;
+  }
+  .fee + .fee::before{
+    content:"";position:absolute;top:0;left:14px;right:0;height:.5px;
+    background:var(--sep);
+  }
+  .fee-k{font-size:14px;color:var(--secondary);flex:none}
+  .fee-v{font-size:14px;font-weight:600;text-align:right;min-width:0}
+  .handoff{
+    text-align:center;font-size:13px;color:var(--secondary);margin-top:14px;
+  }
+  .cta{
+    display:block;width:100%;margin-top:10px;
+    border:0;border-radius:12px;background:var(--blue);color:#fff;
+    font-size:17px;font-weight:600;padding:15px;
+  }
+  .cta:active{opacity:.75}
+  .sheet-fine{
+    text-align:center;font-size:12px;color:var(--secondary);
+    margin-top:12px;line-height:1.6;
+  }
+  .blemish{
+    text-align:center;font-size:13px;font-style:italic;color:var(--secondary);
+    margin-top:8px;
+  }
+  .sheet-dismiss{
+    display:block;margin:10px auto 0;border:0;background:none;
+    color:var(--blue);font-size:17px;padding:10px 12px;min-height:44px;
+  }
+  .sheet-dismiss:active{opacity:.4}
+
+  /* ---------- Toast ---------- */
+  .toast{
+    position:fixed;left:50%;bottom:36px;z-index:70;
+    transform:translate(-50%,80px);
+    background:var(--label);color:var(--bg);
+    font-size:14px;font-weight:500;
+    padding:11px 18px;border-radius:22px;white-space:nowrap;
+    opacity:0;transition:transform .3s ease,opacity .3s ease;
+    pointer-events:none;box-shadow:0 6px 20px rgba(0,0,0,.25);
+  }
+  .toast.show{transform:translate(-50%,0);opacity:1}
+
+  /* ---------- Reduced motion ---------- */
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{transition:none !important;animation:none !important}
+    .toast{transform:translate(-50%,0)}
+  }
+
+  /* ---------- Desktop ---------- */
+  @media (min-width:700px){
+    .page{padding-top:64px}
+    .navbar{height:56px}
+    .large-title{font-size:40px}
+    .segmented button{font-size:13px}
+    .sheet{
+      bottom:auto;top:50%;border-radius:14px;
+      transform:translate(0,60vh);
+    }
+    body.modal-open .sheet{transform:translateY(-50%)}
+  }
+</style>
+</head>
+<body>
+
+<nav class="navbar" id="navbar" aria-label="Navigation bar">
+  <span class="nav-lead">ugmi.ca</span>
+  <span class="nav-title" id="navTitle">UGMI</span>
+  <button class="nav-btn" id="navWeekly" type="button">The 10</button>
+</nav>
+
+<main class="page">
+
+  <header class="large-header" id="largeHeader">
+    <h1 class="large-title">UGMI</h1>
+    <p class="large-sub"><strong>1,427 open internships.</strong> Free. No account, no email, no paywall.</p>
+  </header>
+
+  <p class="pulse num">Last checked Wed Aug 6, 7:04am ET &middot; 1,427 open &middot; 31 added this week &middot; 23 closed this week &middot; hand-checked, never invented</p>
+
+  <div class="searchwrap">
+    <div class="search" id="searchBox">
+      <svg viewBox="0 0 20 20" fill="none" stroke-width="1.8" aria-hidden="true">
+        <circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4.5 4.5" stroke-linecap="round"/>
+      </svg>
+      <input type="search" id="searchInput" placeholder="Search company, role, or city" autocomplete="off" aria-label="Search internships">
+      <button class="search-clear" id="searchClear" type="button" aria-label="Clear search">
+        <svg viewBox="0 0 17 17" aria-hidden="true"><path d="M8.5 0a8.5 8.5 0 100 17 8.5 8.5 0 000-17zM5.6 4.5L8.5 7.4l2.9-2.9 1.1 1.1-2.9 2.9 2.9 2.9-1.1 1.1-2.9-2.9-2.9 2.9-1.1-1.1 2.9-2.9-2.9-2.9 1.1-1.1z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="elig">
+    <p class="elig-title">Three taps show what you're eligible for.</p>
+
+    <div class="seg-row">
+      <span class="seg-label" id="qAuth">Work in</span>
+      <div class="segmented" role="group" aria-labelledby="qAuth" data-q="auth">
+        <button type="button" data-v="ca" aria-pressed="false">Canada</button>
+        <button type="button" data-v="us" aria-pressed="false">US</button>
+        <button type="button" data-v="both" aria-pressed="false">Both</button>
+      </div>
+    </div>
+    <div class="seg-row">
+      <span class="seg-label" id="qTerm">Term</span>
+      <div class="segmented" role="group" aria-labelledby="qTerm" data-q="term">
+        <button type="button" data-v="s27" aria-pressed="false">Summer 27</button>
+        <button type="button" data-v="f26" aria-pressed="false">Fall 26</button>
+        <button type="button" data-v="w27" aria-pressed="false">Winter 27</button>
+        <button type="button" data-v="any" aria-pressed="false">Any</button>
+      </div>
+    </div>
+    <div class="seg-row">
+      <span class="seg-label" id="qLoc">Location</span>
+      <div class="segmented" role="group" aria-labelledby="qLoc" data-q="loc">
+        <button type="button" data-v="remote" aria-pressed="false">Remote</button>
+        <button type="button" data-v="toronto" aria-pressed="false">Toronto</button>
+        <button type="button" data-v="vancouver" aria-pressed="false">Vancouver</button>
+        <button type="button" data-v="anywhere" aria-pressed="false">Anywhere</button>
+      </div>
+    </div>
+
+    <div class="elig-status" aria-live="polite">
+      <p class="result-line num" id="resultLine" hidden></p>
+      <div class="zero-row" id="zeroRow" hidden>
+        <span class="zero-line num">0 of 1,427 match all your filters. Loosen one?</span>
+        <button type="button" class="undo-btn" id="undoBtn">Undo last answer</button>
+      </div>
+      <p class="saved-note" id="savedNote" hidden>Showing your filters, saved in this browser only.</p>
+    </div>
+  </div>
+
+  <section class="group" aria-label="Open listings">
+    <h2 class="group-hd">Open listings</h2>
+    <ul class="inset" id="list"></ul>
+    <p class="group-ft">Blue dot = added in the last 48 hours. A sample of the 1,427 live listings.</p>
+  </section>
+
+  <section class="group" aria-label="The UGMI 10">
+    <p class="bridge num">23 internships closed in the last 7 days.</p>
+    <h2 class="group-hd">The one paid thing</h2>
+    <div class="inset" style="border-radius:10px">
+      <button class="upsell" id="upsellBtn" type="button">
+        <span class="upsell-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>
+          </svg>
+        </span>
+        <span class="upsell-body">
+          <span class="upsell-title" style="display:block">The UGMI 10 &middot; $15/month</span>
+          <span class="upsell-sub" style="display:block">10 per week, each with a named contact.</span>
+        </span>
+        <svg class="chevron" viewBox="0 0 8 14" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M1 1l6 6-6 6"/>
+        </svg>
+      </button>
+    </div>
+    <p class="group-ft">The list above stays free either way.</p>
+  </section>
+
+  <section class="group" aria-label="About UGMI">
+    <h2 class="group-hd">About</h2>
+    <div class="inset">
+      <div class="about-cell">
+        <span class="about-icon" style="background:#FF9500" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.9 3.1-6.5 7-6.5s7 2.6 7 6.5"/>
+          </svg>
+        </span>
+        <span class="about-label">Built by</span>
+        <span class="about-value">One student, Waterloo</span>
+      </div>
+      <div class="about-cell">
+        <span class="about-icon" style="background:#34C759" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="6" width="16" height="12" rx="2"/><path d="M8 10h8M8 14h5"/>
+          </svg>
+        </span>
+        <span class="about-label">Payments</span>
+        <span class="about-value">Stripe</span>
+      </div>
+      <a class="about-cell" href="#">
+        <span class="about-icon" style="background:#AF52DE" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="4" width="16" height="16" rx="4.5"/><circle cx="12" cy="12" r="3.5"/><circle cx="17" cy="7" r="1" fill="currentColor" stroke="none"/>
+          </svg>
+        </span>
+        <span class="about-label" style="color:var(--label)">Instagram</span>
+        <span class="about-value">@sleppyeric</span>
+      </a>
+    </div>
+    <p class="group-ft">No account, no email. The list is the product.</p>
+  </section>
+
+  <footer>
+    Dead link? Wrong deadline? DM @sleppyeric, fixed within a day.<br>
+    UGMI &middot; ugmi.ca &middot; internal design mockup &middot; sample listing data
+  </footer>
+
+</main>
+
+<div class="backdrop" id="backdrop"></div>
+
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" hidden>
+  <div class="grabber" aria-hidden="true"></div>
+  <button class="sheet-close" id="sheetClose" type="button" aria-label="Close">
+    <svg viewBox="0 0 12 12" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+      <path d="M1 1l10 10M11 1L1 11"/>
+    </svg>
+  </button>
+
+  <div class="sheet-hero">
+    <div class="sheet-appicon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>
+      </svg>
+    </div>
+    <h2 class="sheet-title" id="sheetTitle">The UGMI 10</h2>
+    <p class="sheet-sub">10 per week, each with a named contact. I read the 1,427 so you read 10.</p>
+  </div>
+
+  <div class="sample">
+    <span class="sample-tag">EXAMPLE PICK, FROM A REAL WEEK</span>
+    <div class="sample-role">PitchBook, Software Engineering Intern</div>
+    <div class="sample-meta num">Toronto &middot; $38/hr CAD &middot; closes Fri &middot; contact: Sarah Chen, campus recruiting</div>
+    <p class="sample-why"><strong>Why this one:</strong> they take first-years, posted 2 days ago, and the recruiter replied to a student DM last month.</p>
+  </div>
+
+  <div class="fee-grid num" aria-label="What $15 buys">
+    <div class="fee"><span class="fee-k">You get</span><span class="fee-v">4 Monday lists, 10 picks each, a named contact per pick</span></div>
+    <div class="fee"><span class="fee-k">Monthly</span><span class="fee-v">$15 CAD</span></div>
+    <div class="fee"><span class="fee-k">Sign-up fee</span><span class="fee-v">$0</span></div>
+    <div class="fee"><span class="fee-k">Cancellation</span><span class="fee-v">anytime, from your Stripe receipt email</span></div>
+    <div class="fee"><span class="fee-k">Your card</span><span class="fee-v">handled by Stripe</span></div>
+  </div>
+
+  <p class="handoff">You'll be taken to Stripe to pay.</p>
+  <button class="cta" id="ctaBtn" type="button">Get my first list</button>
+  <p class="sheet-fine num">$15/mo CAD. Cancel anytime. The full list of 1,427 stays free either way.</p>
+  <p class="blemish">I'm one Waterloo student, not a company.</p>
+  <button class="sheet-dismiss" id="sheetDismiss" type="button">Not now</button>
+</div>
+
+<div class="toast" id="toast" role="status">Design mockup &middot; checkout lives on ugmi.ca</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- Data (sample rows; all counts notionally build-time) ---------------- */
+  var TOTAL = 1427;
+  var LISTINGS = [
+    {company:"Shopify",      role:"Software Engineering Intern",  loc:"Remote, Canada",      seg:"remote",    remote:true,  country:"ca", term:"s27", pay:"$34/hr CAD", closes:"3d left",     warm:true,  added:"added 2d ago", isNew:true,  color:"#5E8E3E"},
+    {company:"Amazon",       role:"SDE Intern",                   loc:"Vancouver",           seg:"vancouver", remote:false, country:"ca", term:"s27", pay:"$41/hr CAD", closes:"5d left",     warm:true,  added:"added 2w ago", isNew:false, color:"#E68A00"},
+    {company:"RBC",          role:"Amplify Developer Intern",     loc:"Toronto",             seg:"toronto",   remote:false, country:"ca", term:"f26", pay:"$31/hr CAD", closes:"6d left",     warm:true,  added:"added today",  isNew:true,  color:"#005DAA"},
+    {company:"Pinterest",    role:"Software Engineer Intern",     loc:"Toronto",             seg:"toronto",   remote:false, country:"ca", term:"s27", pay:null,         closes:null,          warm:false, added:"added 3w ago", isNew:false, color:"#8E8E93", closed:true},
+    {company:"Stripe",       role:"Software Engineer Intern",     loc:"Remote, US",          seg:"remote",    remote:true,  country:"us", term:"s27", pay:null,         closes:"9d left",     warm:false, added:"added 5d ago", isNew:false, color:"#635BFF"},
+    {company:"Wealthsimple", role:"Data Science Intern",          loc:"Toronto, remote ok",  seg:"toronto",   remote:true,  country:"ca", term:"s27", pay:null,         closes:"11d left",    warm:false, added:"added 4d ago", isNew:false, color:"#1E1E1E"},
+    {company:"OpenText",     role:"Software Developer Co-op",     loc:"Waterloo",            seg:"other",     remote:false, country:"ca", term:"f26", pay:"$30/hr CAD", closes:"13d left",    warm:false, added:"added 1w ago", isNew:false, color:"#155C93"},
+    {company:"ecobee",       role:"Embedded Systems Intern",      loc:"Toronto",             seg:"toronto",   remote:false, country:"ca", term:"s27", pay:"$29/hr CAD", closes:"Aug 31",      warm:false, added:"added 1d ago", isNew:true,  color:"#3D8B37"},
+    {company:"Sun Life",     role:"Data Analyst Intern",          loc:"Toronto",             seg:"toronto",   remote:false, country:"ca", term:"f26", pay:null,         closes:null,          warm:false, added:"added 2w ago", isNew:false, color:"#8E8E93", closed:true},
+    {company:"TELUS",        role:"Network Engineering Co-op",    loc:"Vancouver",           seg:"vancouver", remote:false, country:"ca", term:"w27", pay:"$28/hr CAD", closes:"Sep 2",       warm:false, added:"added 6d ago", isNew:false, color:"#4B286D"},
+    {company:"Sanctuary AI", role:"Robotics Software Intern",     loc:"Vancouver",           seg:"vancouver", remote:false, country:"ca", term:"w27", pay:null,         closes:"Sep 8",       warm:false, added:"added 6d ago", isNew:false, color:"#C74634"},
+    {company:"BC Hydro",     role:"Engineering Co-op",            loc:"Vancouver",           seg:"vancouver", remote:false, country:"ca", term:"w27", pay:"$27/hr CAD", closes:"Sep 12",      warm:false, added:"added 3d ago", isNew:false, color:"#0072CE"},
+    {company:"Google",       role:"STEP Intern",                  loc:"Waterloo",            seg:"other",     remote:false, country:"ca", term:"s27", pay:null,         closes:"Sep 19",      warm:false, added:"added 2d ago", isNew:true,  color:"#4285F4"},
+    {company:"Ubisoft",      role:"Gameplay Programmer Intern",   loc:"Montreal",            seg:"other",     remote:false, country:"ca", term:"s27", pay:"$30/hr CAD", closes:"no deadline", warm:false, added:"added 1w ago", isNew:false, color:"#2E2E2E"}
+  ];
+  var OPEN_TOTAL = LISTINGS.filter(function(i){ return !i.closed; }).length;
+
+  var KEY = "ugmi-elig";
+  var state = { auth:null, term:null, loc:null, query:"" };
+  var history = [];
+  var restored = false;
+
+  var list        = document.getElementById("list");
+  var resultLine  = document.getElementById("resultLine");
+  var zeroRow     = document.getElementById("zeroRow");
+  var savedNote   = document.getElementById("savedNote");
+  var searchBox   = document.getElementById("searchBox");
+  var searchInput = document.getElementById("searchInput");
+  var searchClear = document.getElementById("searchClear");
+
+  function esc(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+  function fmt(n){ return n.toLocaleString("en-CA"); }
+  function eligActive(){ return !!(state.auth || state.term || state.loc); }
+
+  function load(){
+    try{
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return;
+      var saved = JSON.parse(raw);
+      ["auth","term","loc"].forEach(function(q){
+        if (saved && saved[q]){ state[q] = saved[q]; history.push(q); }
+      });
+      restored = history.length > 0;
+    }catch(e){ /* file:// or private mode: filters just don't persist */ }
+  }
+  function save(){
+    try{ localStorage.setItem(KEY, JSON.stringify({auth:state.auth, term:state.term, loc:state.loc})); }catch(e){}
+  }
+
+  function matchLoc(item){
+    if (!state.loc || state.loc === "anywhere") return true;
+    if (state.loc === "remote") return item.remote || item.seg === "remote";
+    return item.seg === state.loc || item.remote || item.seg === "remote";
+  }
+  function matches(item){
+    if (state.auth && state.auth !== "both" && item.country !== state.auth) return false;
+    if (state.term && state.term !== "any" && item.term !== state.term) return false;
+    if (!matchLoc(item)) return false;
+    if (state.query){
+      var hay = (item.company + " " + item.role + " " + item.loc).toLowerCase();
+      if (hay.indexOf(state.query) === -1) return false;
+    }
+    return true;
+  }
+
+  function cellHtml(item){
+    if (item.closed){
+      return '<li class="cell closed">' +
+        '<div class="avatar" style="background:' + esc(item.color) + '">' + esc(item.company.charAt(0)) + '</div>' +
+        '<div class="cell-body">' +
+          '<div class="row1">' +
+            '<span class="company">' + esc(item.company) + '</span>' +
+            '<span class="closed-chip">Closed</span>' +
+          '</div>' +
+          '<div class="role">' + esc(item.role) + '</div>' +
+          '<div class="meta">' + esc(item.loc) + ' &middot; ' + esc(item.added) + '</div>' +
+        '</div>' +
+      '</li>';
+    }
+    var meta = esc(item.loc) + (item.pay ? " &middot; " + esc(item.pay) : "") + " &middot; " + esc(item.added);
+    return '<li class="cell">' +
+      '<div class="avatar" style="background:' + esc(item.color) + '">' + esc(item.company.charAt(0)) + '</div>' +
+      '<div class="cell-body">' +
+        '<div class="row1">' +
+          '<span class="company">' + esc(item.company) + (item.isNew ? '<span class="newdot" title="Added in the last 48 hours"></span>' : '') + '</span>' +
+          '<span class="closes' + (item.warm ? ' warm' : '') + '">' + esc(item.closes) + '</span>' +
+        '</div>' +
+        '<div class="role">' + esc(item.role) + '</div>' +
+        '<div class="meta">' + meta + '</div>' +
+      '</div>' +
+    '</li>';
+  }
+
+  function render(){
+    var shown = LISTINGS.filter(matches);
+    var shownOpen = shown.filter(function(i){ return !i.closed; }).length;
+    var html = "";
+
+    if (!shown.length){
+      html = '<li class="empty"><div class="empty-title">No Results</div>' +
+             '<div class="empty-sub">Loosen a filter or clear the search.</div></li>';
+    } else {
+      shown.forEach(function(item){ html += cellHtml(item); });
+    }
+    list.innerHTML = html;
+
+    /* Segmented pressed states */
+    document.querySelectorAll(".segmented").forEach(function(group){
+      var q = group.getAttribute("data-q");
+      group.querySelectorAll("button").forEach(function(b){
+        b.setAttribute("aria-pressed", state[q] === b.getAttribute("data-v") ? "true" : "false");
+      });
+    });
+
+    /* Mockup only: scales the sample-row proportion to the full list.
+       Production computes the real count from the dataset. */
+    var active = eligActive();
+    var est = active ? Math.max(1, Math.round(TOTAL * shownOpen / OPEN_TOTAL)) : TOTAL;
+
+    resultLine.hidden = !(active && shownOpen > 0);
+    zeroRow.hidden = !(active && shownOpen === 0);
+    if (active && shownOpen > 0){
+      resultLine.textContent = "Showing " + fmt(est) + " of " + fmt(TOTAL) + " you're actually eligible for.";
+    }
+    savedNote.hidden = !(restored && active);
+  }
+
+  /* ---------------- Eligibility segmented controls ---------------- */
+  document.querySelectorAll(".segmented").forEach(function(group){
+    var q = group.getAttribute("data-q");
+    group.addEventListener("click", function(e){
+      var btn = e.target.closest("button[data-v]");
+      if (!btn) return;
+      restored = false;
+      var v = btn.getAttribute("data-v");
+      var i = history.indexOf(q);
+      if (i !== -1) history.splice(i, 1);
+      if (state[q] === v){
+        state[q] = null;
+      } else {
+        state[q] = v;
+        history.push(q);
+      }
+      save();
+      render();
+    });
+  });
+
+  document.getElementById("undoBtn").addEventListener("click", function(){
+    var q = history.pop();
+    if (q) state[q] = null;
+    restored = false;
+    save();
+    render();
+  });
+
+  /* ---------------- Search ---------------- */
+  searchInput.addEventListener("input", function(){
+    state.query = searchInput.value.trim().toLowerCase();
+    searchBox.classList.toggle("has-text", state.query.length > 0);
+    render();
+  });
+  searchClear.addEventListener("click", function(){
+    searchInput.value = "";
+    state.query = "";
+    searchBox.classList.remove("has-text");
+    searchInput.focus();
+    render();
+  });
+
+  /* ---------------- Large title condense on scroll ---------------- */
+  var navbar = document.getElementById("navbar");
+  var largeHeader = document.getElementById("largeHeader");
+  var ticking = false;
+
+  function updateNav(){
+    var threshold = largeHeader.offsetTop + largeHeader.offsetHeight - navbar.offsetHeight + 4;
+    navbar.classList.toggle("condensed", window.scrollY > threshold);
+    ticking = false;
+  }
+  window.addEventListener("scroll", function(){
+    if (!ticking){ ticking = true; window.requestAnimationFrame(updateNav); }
+  }, {passive:true});
+  updateNav();
+
+  /* ---------------- Sheet modal (pitch + calm checkout) ---------------- */
+  var sheet     = document.getElementById("sheet");
+  var backdrop  = document.getElementById("backdrop");
+  var lastFocus = null;
+
+  function openSheet(){
+    lastFocus = document.activeElement;
+    sheet.hidden = false;
+    /* force layout so the open transition runs */
+    void sheet.offsetHeight;
+    document.body.classList.add("modal-open");
+    document.getElementById("sheetClose").focus();
+  }
+  function closeSheet(){
+    document.body.classList.remove("modal-open");
+    window.setTimeout(function(){ sheet.hidden = true; }, 400);
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+
+  document.getElementById("upsellBtn").addEventListener("click", openSheet);
+  document.getElementById("navWeekly").addEventListener("click", openSheet);
+  document.getElementById("sheetClose").addEventListener("click", closeSheet);
+  document.getElementById("sheetDismiss").addEventListener("click", closeSheet);
+  backdrop.addEventListener("click", closeSheet);
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape" && document.body.classList.contains("modal-open")) closeSheet();
+  });
+
+  /* ---------------- Toast (mockup notice; production goes to Stripe) ---------------- */
+  var toast = document.getElementById("toast");
+  var toastTimer = null;
+  document.getElementById("ctaBtn").addEventListener("click", function(){
+    toast.classList.add("show");
+    window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(function(){ toast.classList.remove("show"); }, 2400);
+  });
+
+  load();
+  render();
+})();
+</script>
+</body>
+</html>

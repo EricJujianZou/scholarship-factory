@@ -1,0 +1,1189 @@
+<!-- INTERNAL DESIGN MOCKUP - sample listing data -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UGMI — 1,427 internships. Zero coins needed.</title>
+<style>
+  /* ============ RESET & TOKENS ============ */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root{
+    --ink:        #14082b;
+    --panel:      #23104a;
+    --panel-2:    #2e1660;
+    --pink:       #ff2e88;
+    --pink-dk:    #b3005c;
+    --yellow:     #ffd400;
+    --yellow-dk:  #b89400;
+    --cyan:       #21e6ff;
+    --cyan-dk:    #0e8ba1;
+    --lime:       #7dff4f;
+    --lime-dk:    #3fae15;
+    --orange:     #ff7a1a;
+    --purple:     #9d5cff;
+    --white:      #fffdf5;
+    --grid-line:  rgba(157,92,255,.14);
+    --font-stack: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono:       ui-monospace, "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas, monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce){
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: .001s !important; animation-iteration-count: 1 !important; transition-duration: .001s !important; }
+  }
+
+  body{
+    font-family: var(--font-stack);
+    background:
+      linear-gradient(rgba(20,8,43,.92), rgba(20,8,43,.92)),
+      repeating-linear-gradient(0deg, transparent 0 39px, var(--grid-line) 39px 40px),
+      repeating-linear-gradient(90deg, transparent 0 39px, var(--grid-line) 39px 40px),
+      var(--ink);
+    color: var(--white);
+    overflow-x: hidden;
+    line-height: 1.45;
+  }
+
+  img, svg { display:block; max-width:100%; }
+  a { color: var(--cyan); }
+
+  .wrap{ width:100%; max-width: 1060px; margin: 0 auto; padding: 0 16px; }
+
+  /* ============ CHUNKY BUTTON SYSTEM ============ */
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    font-family: var(--font-stack);
+    font-weight: 900; letter-spacing: .06em; text-transform: uppercase;
+    text-decoration:none; cursor:pointer; border:3px solid var(--ink);
+    border-radius: 14px; padding: 14px 22px; font-size: 1rem; color: var(--ink);
+    position: relative; user-select: none;
+    transition: transform .06s ease, box-shadow .06s ease;
+  }
+  .btn-yellow{ background: var(--yellow); box-shadow: 0 6px 0 var(--yellow-dk), 0 10px 18px rgba(0,0,0,.45); }
+  .btn-pink  { background: var(--pink);  color:#fff; box-shadow: 0 6px 0 var(--pink-dk), 0 10px 18px rgba(0,0,0,.45); }
+  .btn-cyan  { background: var(--cyan);  box-shadow: 0 6px 0 var(--cyan-dk), 0 10px 18px rgba(0,0,0,.45); }
+  .btn-lime  { background: var(--lime);  box-shadow: 0 6px 0 var(--lime-dk), 0 10px 18px rgba(0,0,0,.45); }
+  .btn:active{ transform: translateY(6px); box-shadow: 0 0 0 rgba(0,0,0,0), 0 2px 6px rgba(0,0,0,.4); }
+  .btn-big{ font-size: 1.15rem; padding: 18px 28px; border-radius: 16px; }
+
+  /* ============ BADGES ============ */
+  .badge{
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:.68rem; font-weight:900; letter-spacing:.08em; text-transform:uppercase;
+    padding: 4px 10px; border-radius: 999px; border: 2px solid var(--ink);
+    box-shadow: 0 2px 0 rgba(0,0,0,.5);
+    color: var(--ink); line-height: 1.2; white-space: nowrap;
+  }
+  .badge-yellow{ background: var(--yellow); }
+  .badge-pink  { background: var(--pink); color:#fff; }
+  .badge-cyan  { background: var(--cyan); }
+  .badge-lime  { background: var(--lime); }
+  .badge-purple{ background: var(--purple); color:#fff; }
+  .badge-orange{ background: var(--orange); color:#fff; }
+  .badge-ghost { background: var(--panel-2); color: var(--cyan); border-color: var(--cyan); }
+
+  .blink{ animation: blink 1.1s steps(2, start) infinite; }
+  @keyframes blink{ to{ visibility: hidden; } }
+
+  /* ============ HUD HEADER ============ */
+  .hud{
+    position: sticky; top:0; z-index: 50;
+    background: var(--panel);
+    border-bottom: 4px solid var(--pink);
+    box-shadow: 0 4px 0 rgba(0,0,0,.4);
+  }
+  .hud-inner{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding: 10px 16px; max-width: 1060px; margin: 0 auto;
+  }
+  .logo{
+    display:flex; align-items:center; gap:10px; text-decoration:none;
+  }
+  .logo-mark{
+    width:38px; height:38px; flex:none;
+    background: var(--pink);
+    border: 3px solid var(--ink);
+    border-radius: 10px;
+    box-shadow: 0 3px 0 var(--pink-dk);
+    display:grid; place-items:center;
+  }
+  .logo-word{
+    font-weight: 900; font-size: 1.35rem; letter-spacing: .1em; color: var(--white);
+    text-shadow: 2px 2px 0 var(--pink);
+  }
+  .hud-right{ display:flex; align-items:center; gap:8px; }
+  .coin-counter{
+    font-family: var(--mono); font-weight: 700; font-size: .8rem;
+    display:flex; align-items:center; gap:6px;
+    background: var(--ink); border: 2px solid var(--yellow);
+    color: var(--yellow); padding: 5px 10px; border-radius: 999px;
+  }
+  .coin{
+    width:14px; height:14px; border-radius:50%; flex:none;
+    background: radial-gradient(circle at 35% 30%, #fff08a, var(--yellow) 55%, var(--yellow-dk));
+    border: 2px solid var(--yellow-dk);
+    animation: coinspin 2.4s linear infinite;
+  }
+  @keyframes coinspin{
+    0%,100%{ transform: scaleX(1);} 25%{ transform: scaleX(.15);} 50%{ transform: scaleX(1);} 75%{ transform: scaleX(.15);}
+  }
+  @media (max-width: 430px){ .hud .badge-freeplay{ display:none; } }
+
+  /* ============ HERO ============ */
+  .hero{ position: relative; padding: 44px 0 30px; text-align:center; overflow:hidden; }
+  .hero .wrap{ position: relative; z-index: 2; }
+  .hiscore{
+    font-family: var(--mono); font-size: .78rem; letter-spacing:.18em;
+    color: var(--yellow); text-transform: uppercase; margin-bottom: 14px;
+  }
+  .hero h1{
+    font-size: clamp(2.1rem, 8.5vw, 4.2rem);
+    line-height: 1.02; font-weight: 900; text-transform: uppercase; letter-spacing: .01em;
+    margin-bottom: 6px;
+  }
+  .hero h1 .l1{ display:block; color: var(--white); text-shadow: 3px 3px 0 var(--pink), 6px 6px 0 var(--ink); }
+  .hero h1 .l2{ display:block; color: var(--yellow); text-shadow: 3px 3px 0 var(--purple), 6px 6px 0 var(--ink); }
+  .hero h1 .l3{ display:block; color: var(--cyan); text-shadow: 3px 3px 0 var(--pink-dk), 6px 6px 0 var(--ink); }
+  .hero-sub{
+    max-width: 34ch; margin: 16px auto 6px; font-size: 1.02rem; color:#e8dcff;
+  }
+  .hero-sub strong{ color: var(--yellow); }
+  .hero-fineprint{
+    font-family: var(--mono); font-size:.72rem; color:#b39ddd; margin-top: 4px;
+  }
+  .hero-ctas{ display:flex; flex-direction:column; align-items:center; gap:14px; margin-top: 24px; }
+  .insert-coin{
+    font-family: var(--mono); font-size:.75rem; letter-spacing:.2em; text-transform:uppercase;
+    color: var(--lime); margin-top: 2px;
+  }
+  .marquee-lights{
+    display:flex; justify-content:center; gap:10px; margin: 0 auto 18px; width: fit-content;
+  }
+  .bulb{
+    width:10px; height:10px; border-radius:50%; background: var(--purple);
+    animation: bulb 1s infinite;
+  }
+  .bulb:nth-child(odd){ animation-delay:.5s; }
+  @keyframes bulb{ 0%,100%{ background:var(--purple);} 50%{ background:var(--yellow); box-shadow:0 0 8px var(--yellow);} }
+
+  /* floating pixels in hero */
+  .px{ position:absolute; border:2px solid var(--ink); z-index:1; opacity:.9; animation: floaty 5s ease-in-out infinite; }
+  @keyframes floaty{ 0%,100%{ transform: translateY(0) rotate(0deg);} 50%{ transform: translateY(-16px) rotate(8deg);} }
+
+  /* ============ TICKER ============ */
+  .ticker{
+    background: var(--yellow); border-top: 3px solid var(--ink); border-bottom: 3px solid var(--ink);
+    overflow: hidden; padding: 8px 0;
+  }
+  .ticker-track{
+    display:flex; width:max-content; gap: 0;
+    animation: ticker 26s linear infinite;
+  }
+  .ticker-track span{
+    font-weight: 900; text-transform: uppercase; letter-spacing:.08em;
+    color: var(--ink); font-size: .82rem; padding: 0 14px; white-space:nowrap;
+  }
+  @keyframes ticker{ from{ transform: translateX(0);} to{ transform: translateX(-50%);} }
+
+  /* ============ SCOREBOARD ============ */
+  .scoreboard{ padding: 30px 0 6px; }
+  .score-grid{ display:grid; grid-template-columns: 1fr; gap: 12px; }
+  @media (min-width: 700px){ .score-grid{ grid-template-columns: repeat(3, 1fr); } }
+  .score-card{
+    background: var(--ink); border: 3px solid var(--cyan); border-radius: 14px;
+    padding: 16px; text-align:center;
+    box-shadow: 0 5px 0 var(--cyan-dk), inset 0 0 24px rgba(33,230,255,.12);
+  }
+  .score-num{
+    font-family: var(--mono); font-weight: 700; font-size: 2rem; color: var(--cyan);
+    text-shadow: 0 0 12px rgba(33,230,255,.6); line-height: 1.1;
+  }
+  .score-label{
+    font-size:.7rem; font-weight: 900; letter-spacing:.14em; text-transform: uppercase; color:#b39ddd; margin-top:4px;
+  }
+
+  /* ============ SECTION HEADINGS ============ */
+  section{ padding: 34px 0; }
+  .sec-head{ text-align:center; margin-bottom: 22px; }
+  .sec-kicker{
+    font-family: var(--mono); font-size:.72rem; letter-spacing:.22em; text-transform:uppercase; color: var(--lime);
+    margin-bottom: 8px;
+  }
+  .sec-title{
+    font-size: clamp(1.5rem, 5.6vw, 2.4rem); font-weight: 900; text-transform: uppercase;
+    text-shadow: 3px 3px 0 var(--pink-dk);
+  }
+  .sec-sub{ color:#cdbdf0; font-size:.95rem; max-width: 46ch; margin: 8px auto 0; }
+
+  /* ============ FILTER CHIPS ============ */
+  .filters{
+    display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom: 20px;
+  }
+  .chip{
+    font-family: var(--font-stack); font-weight: 900; font-size:.78rem; letter-spacing:.05em; text-transform:uppercase;
+    background: var(--panel-2); color: var(--white); border: 3px solid var(--purple);
+    border-radius: 999px; padding: 8px 14px; cursor: pointer;
+    box-shadow: 0 4px 0 rgba(0,0,0,.5);
+    transition: transform .06s ease, box-shadow .06s ease;
+  }
+  .chip:active{ transform: translateY(4px); box-shadow: 0 0 0 rgba(0,0,0,0); }
+  .chip[aria-pressed="true"]{
+    background: var(--lime); color: var(--ink); border-color: var(--ink);
+    box-shadow: 0 4px 0 var(--lime-dk);
+  }
+
+  /* ============ COLLECTIBLE CARDS ============ */
+  .card-grid{ display:grid; grid-template-columns: 1fr; gap: 18px; }
+  @media (min-width: 640px){ .card-grid{ grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 980px){ .card-grid{ grid-template-columns: repeat(3, 1fr); } }
+
+  .card{
+    position: relative;
+    background: var(--panel);
+    border: 3px solid var(--ink);
+    border-radius: 18px;
+    padding: 14px;
+    box-shadow: 0 7px 0 rgba(0,0,0,.55);
+    transition: transform .12s ease, box-shadow .12s ease;
+    display:flex; flex-direction:column; gap: 10px;
+  }
+  .card::before{
+    content:""; position:absolute; inset:-3px; border-radius: 18px; z-index:-1;
+    background: linear-gradient(135deg, var(--rare-a, var(--purple)), var(--rare-b, var(--cyan)));
+  }
+  .card:hover{ transform: translateY(-4px) rotate(-.5deg); box-shadow: 0 11px 0 rgba(0,0,0,.55); }
+  .card.hidden{ display:none; }
+
+  .card[data-rarity="legendary"]{ --rare-a:#ffd400; --rare-b:#ff7a1a; }
+  .card[data-rarity="epic"]     { --rare-a:#ff2e88; --rare-b:#9d5cff; }
+  .card[data-rarity="rare"]     { --rare-a:#21e6ff; --rare-b:#7dff4f; }
+  .card[data-rarity="mystery"]  { --rare-a:#9d5cff; --rare-b:#23104a; }
+
+  .card-top{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .rarity{
+    font-size:.62rem; font-weight:900; letter-spacing:.14em; text-transform:uppercase;
+    padding: 3px 9px; border-radius: 6px; border: 2px solid var(--ink);
+  }
+  .rarity-legendary{ background: linear-gradient(90deg, var(--yellow), var(--orange)); color: var(--ink); }
+  .rarity-epic     { background: linear-gradient(90deg, var(--pink), var(--purple)); color: #fff; }
+  .rarity-rare     { background: linear-gradient(90deg, var(--cyan), var(--lime)); color: var(--ink); }
+  .rarity-mystery  { background: var(--panel-2); color: var(--purple); border-color: var(--purple); }
+
+  .company-row{ display:flex; align-items:center; gap:10px; }
+  .company-tile{
+    width:44px; height:44px; flex:none; display:grid; place-items:center;
+    font-weight: 900; font-size: 1.15rem; color: var(--ink);
+    border: 3px solid var(--ink); border-radius: 12px;
+    box-shadow: 0 3px 0 rgba(0,0,0,.5);
+  }
+  .company-name{ font-weight:900; font-size:.95rem; letter-spacing:.02em; }
+  .role-name{ font-size: 1.08rem; font-weight: 800; line-height: 1.25; color: var(--yellow); }
+
+  .stat-rows{ display:flex; flex-direction:column; gap: 7px; font-size:.85rem; }
+  .stat-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .stat-key{
+    font-family: var(--mono); font-size:.68rem; letter-spacing:.12em; text-transform:uppercase; color:#b39ddd;
+  }
+  .stat-val{ font-weight: 800; text-align:right; }
+  .stat-val.loot{ color: var(--lime); }
+  .stat-val.mystery-loot{ color: var(--purple); font-family: var(--mono); }
+
+  .hp{ margin-top: 2px; }
+  .hp-label{
+    display:flex; justify-content:space-between; font-family: var(--mono);
+    font-size:.66rem; letter-spacing:.1em; text-transform:uppercase; color:#b39ddd; margin-bottom:4px;
+  }
+  .hp-bar{
+    height: 14px; border: 2px solid var(--ink); border-radius: 999px;
+    background: var(--ink); overflow:hidden;
+  }
+  .hp-fill{
+    height:100%; border-radius: 999px;
+    background: repeating-linear-gradient(45deg, var(--hp, var(--lime)) 0 8px, rgba(0,0,0,.18) 8px 16px);
+  }
+  .hp-crit .hp-fill{ --hp: var(--pink); animation: critpulse .8s ease-in-out infinite; }
+  .hp-warn .hp-fill{ --hp: var(--orange); }
+  @keyframes critpulse{ 0%,100%{ filter: brightness(1);} 50%{ filter: brightness(1.6);} }
+
+  .card-foot{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:auto; }
+  .new-badge{ animation: blink 1.1s steps(2,start) infinite; }
+  .card .btn{ padding: 10px 14px; font-size: .8rem; border-radius: 10px; }
+
+  .load-note{
+    text-align:center; margin-top: 20px; font-family: var(--mono); font-size:.78rem; color:#b39ddd;
+  }
+  .load-note strong{ color: var(--cyan); }
+
+  /* ============ POWER-UP (PAID) ============ */
+  .powerup{ position: relative; }
+  .powerup-card{
+    position:relative;
+    background: linear-gradient(160deg, var(--panel-2), var(--panel));
+    border: 4px solid var(--yellow);
+    border-radius: 24px;
+    padding: 26px 18px 24px;
+    max-width: 560px; margin: 0 auto;
+    box-shadow: 0 10px 0 var(--yellow-dk), 0 18px 40px rgba(0,0,0,.5);
+    text-align:center; overflow:hidden;
+  }
+  .powerup-card::before{
+    content:""; position:absolute; inset:-40%;
+    background: conic-gradient(from 0deg, transparent 0 20deg, rgba(255,212,0,.07) 20deg 40deg,
+      transparent 40deg 60deg, rgba(255,212,0,.07) 60deg 80deg, transparent 80deg 100deg,
+      rgba(255,212,0,.07) 100deg 120deg, transparent 120deg 140deg, rgba(255,212,0,.07) 140deg 160deg,
+      transparent 160deg 180deg, rgba(255,212,0,.07) 180deg 200deg, transparent 200deg 220deg,
+      rgba(255,212,0,.07) 220deg 240deg, transparent 240deg 260deg, rgba(255,212,0,.07) 260deg 280deg,
+      transparent 280deg 300deg, rgba(255,212,0,.07) 300deg 320deg, transparent 320deg 340deg,
+      rgba(255,212,0,.07) 340deg 360deg);
+    animation: rays 24s linear infinite; pointer-events:none;
+  }
+  @keyframes rays{ to{ transform: rotate(360deg); } }
+  .powerup-card > *{ position: relative; }
+
+  .powerup-title{
+    font-size: clamp(1.6rem, 6.4vw, 2.3rem); font-weight: 900; text-transform: uppercase;
+    color: var(--yellow); text-shadow: 3px 3px 0 var(--pink-dk); margin: 10px 0 4px;
+  }
+  .price-tag{
+    display:inline-flex; align-items:baseline; gap:4px; margin: 10px 0 2px;
+    font-weight: 900;
+  }
+  .price-tag .cur{ font-size: 1.1rem; color: var(--lime); }
+  .price-tag .amt{ font-size: 3.2rem; line-height:1; color: var(--lime); text-shadow: 0 0 16px rgba(125,255,79,.5); font-family: var(--mono); }
+  .price-tag .per{ font-size: .9rem; color:#cdbdf0; }
+
+  .perk-list{ list-style:none; margin: 18px auto 6px; max-width: 380px; text-align:left; display:flex; flex-direction:column; gap: 10px; }
+  .perk-list li{
+    display:flex; gap:10px; align-items:flex-start; font-size:.95rem; color:#efe6ff;
+    background: rgba(20,8,43,.55); border: 2px solid var(--purple); border-radius: 12px; padding: 10px 12px;
+  }
+  .perk-ico{
+    flex:none; width:26px; height:26px; border-radius: 8px; border:2px solid var(--ink);
+    display:grid; place-items:center; font-size:.8rem; font-weight:900; color:var(--ink);
+    box-shadow: 0 2px 0 rgba(0,0,0,.5); margin-top:1px;
+  }
+  .perk-list strong{ color: var(--yellow); }
+
+  .xp-wrap{ margin: 18px auto 4px; max-width: 380px; }
+  .xp-label{
+    display:flex; justify-content:space-between; font-family: var(--mono);
+    font-size:.68rem; letter-spacing:.12em; text-transform:uppercase; color:#b39ddd; margin-bottom:5px;
+  }
+  .xp-bar{ height: 18px; border:3px solid var(--ink); border-radius:999px; background: var(--ink); overflow:hidden; }
+  .xp-fill{
+    height:100%; width:0%; border-radius:999px;
+    background: repeating-linear-gradient(45deg, var(--yellow) 0 10px, var(--orange) 10px 20px);
+    transition: width 1.4s cubic-bezier(.2,.8,.2,1);
+  }
+
+  .stripe-note{
+    margin-top: 14px; font-family: var(--mono); font-size:.72rem; color:#b39ddd;
+    display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap;
+  }
+
+  .combo-vs{
+    display:grid; grid-template-columns: 1fr; gap: 10px; max-width: 560px; margin: 20px auto 0;
+  }
+  @media (min-width: 640px){ .combo-vs{ grid-template-columns: 1fr 1fr; } }
+  .vs-box{
+    border-radius: 14px; padding: 14px; border: 3px solid var(--purple); background: var(--panel);
+    font-size:.88rem; color:#dcd0f5;
+  }
+  .vs-box h3{
+    font-size:.78rem; letter-spacing:.14em; text-transform:uppercase; margin-bottom:6px;
+  }
+  .vs-box.free h3{ color: var(--cyan); }
+  .vs-box.paid { border-color: var(--yellow); }
+  .vs-box.paid h3{ color: var(--yellow); }
+
+  /* ============ PLAYER 1 ============ */
+  .player1-card{
+    max-width: 560px; margin: 0 auto; background: var(--panel);
+    border: 3px solid var(--cyan); border-radius: 18px; padding: 20px 16px;
+    box-shadow: 0 7px 0 var(--cyan-dk);
+    display:flex; gap: 14px; align-items:flex-start;
+  }
+  .avatar{
+    flex:none; width:64px; height:64px; border-radius: 14px; overflow:hidden;
+    border: 3px solid var(--ink); box-shadow: 0 3px 0 rgba(0,0,0,.5); background: var(--panel-2);
+  }
+  .player1-copy{ font-size:.92rem; color:#e8dcff; }
+  .player1-copy .ptag{
+    font-family: var(--mono); font-size:.68rem; letter-spacing:.16em; text-transform:uppercase; color: var(--lime); margin-bottom: 4px;
+  }
+  .player1-copy strong{ color: var(--yellow); }
+  .ig-link{
+    display:inline-flex; align-items:center; gap:6px; margin-top: 8px;
+    font-weight:800; font-size:.85rem; color: var(--pink); text-decoration:none;
+    border-bottom: 2px dashed var(--pink);
+  }
+
+  /* ============ FAQ ============ */
+  .faq{ max-width: 640px; margin: 0 auto; display:flex; flex-direction:column; gap: 10px; }
+  .faq details{
+    background: var(--panel); border: 3px solid var(--purple); border-radius: 14px;
+    box-shadow: 0 5px 0 rgba(0,0,0,.5);
+  }
+  .faq summary{
+    list-style:none; cursor:pointer; padding: 14px 16px;
+    font-weight: 900; font-size:.92rem; display:flex; align-items:center; gap:10px;
+  }
+  .faq summary::-webkit-details-marker{ display:none; }
+  .q-mark{
+    flex:none; width:24px; height:24px; display:grid; place-items:center;
+    background: var(--purple); color:#fff; border:2px solid var(--ink);
+    border-radius: 7px; font-size:.8rem; box-shadow: 0 2px 0 rgba(0,0,0,.5);
+  }
+  .faq details[open] .q-mark{ background: var(--lime); color: var(--ink); }
+  .faq .a{ padding: 0 16px 14px 50px; font-size:.88rem; color:#dcd0f5; }
+
+  /* ============ FOOTER ============ */
+  footer{
+    border-top: 4px solid var(--pink);
+    background: var(--panel);
+    padding: 26px 0 90px;
+    text-align:center;
+  }
+  .game-over{
+    font-family: var(--mono); font-size: 1.1rem; letter-spacing:.3em; text-transform:uppercase;
+    color: var(--pink); margin-bottom: 8px;
+  }
+  .footer-links{ display:flex; justify-content:center; gap: 16px; flex-wrap:wrap; margin: 10px 0; font-size:.85rem; }
+  .footer-links a{ color: var(--cyan); font-weight:700; }
+  .footer-fine{ font-family: var(--mono); font-size:.68rem; color:#8a76b5; margin-top:10px; }
+
+  /* ============ CONFETTI ============ */
+  .confetti{
+    position: fixed; top:-16px; z-index: 999; pointer-events:none;
+    width: 10px; height: 10px;
+    animation: confall linear forwards;
+  }
+  @keyframes confall{
+    to{ transform: translateY(110vh) rotate(720deg); opacity:.9; }
+  }
+
+  /* toast */
+  .toast{
+    position: fixed; left:50%; bottom: 18px; transform: translateX(-50%) translateY(120px);
+    background: var(--ink); color: var(--yellow); border: 3px solid var(--yellow);
+    border-radius: 14px; padding: 12px 18px; font-weight: 900; font-size:.85rem;
+    letter-spacing:.06em; text-transform:uppercase; z-index: 1000;
+    box-shadow: 0 6px 0 var(--yellow-dk); transition: transform .25s ease;
+    max-width: 90vw; text-align:center;
+  }
+  .toast.show{ transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- ============ HUD ============ -->
+<header class="hud">
+  <div class="hud-inner">
+    <a class="logo" href="#top" aria-label="UGMI home">
+      <span class="logo-mark" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+          <!-- pixel joystick -->
+          <rect x="9" y="8" width="4" height="9" fill="#14082b"/>
+          <rect x="6" y="16" width="10" height="4" rx="1" fill="#14082b"/>
+          <circle cx="11" cy="5" r="4.5" fill="#ffd400" stroke="#14082b" stroke-width="2"/>
+        </svg>
+      </span>
+      <span class="logo-word">UGMI</span>
+    </a>
+    <div class="hud-right">
+      <span class="badge badge-lime badge-freeplay blink">Free play</span>
+      <span class="coin-counter" title="Open listings right now">
+        <span class="coin" aria-hidden="true"></span>
+        <span id="hudCount">1,427</span>
+      </span>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ============ HERO ============ -->
+  <section class="hero" aria-labelledby="heroTitle">
+    <!-- floating decorative pixels -->
+    <span class="px" style="left:6%; top:16%; width:14px; height:14px; background:var(--pink); animation-delay:0s;" aria-hidden="true"></span>
+    <span class="px" style="right:8%; top:10%; width:18px; height:18px; background:var(--cyan); animation-delay:.7s;" aria-hidden="true"></span>
+    <span class="px" style="left:14%; bottom:14%; width:12px; height:12px; background:var(--yellow); animation-delay:1.3s;" aria-hidden="true"></span>
+    <span class="px" style="right:12%; bottom:22%; width:16px; height:16px; background:var(--lime); animation-delay:2s;" aria-hidden="true"></span>
+
+    <div class="wrap">
+      <div class="marquee-lights" aria-hidden="true">
+        <span class="bulb"></span><span class="bulb"></span><span class="bulb"></span>
+        <span class="bulb"></span><span class="bulb"></span><span class="bulb"></span>
+        <span class="bulb"></span>
+      </div>
+      <p class="hiscore">Hi-score: <span id="heroCount">0</span> open internships</p>
+      <h1 id="heroTitle">
+        <span class="l1">1,427 internships.</span>
+        <span class="l2">Zero coins</span>
+        <span class="l3">needed.</span>
+      </h1>
+      <p class="hero-sub">
+        UGMI is a <strong>free, searchable list of internships</strong> — mostly Canadian,
+        updated constantly. No account. No email. No paywall on the list.
+      </p>
+      <p class="hero-fineprint">// no sign-up screen. no boss battle. just the list.</p>
+      <div class="hero-ctas">
+        <a href="#listings" class="btn btn-yellow btn-big" id="pressStart">
+          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2l11 6-11 6z" fill="currentColor"/></svg>
+          Press start — browse free
+        </a>
+        <a href="#powerup" class="btn btn-pink">
+          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M9 1L3 9h4l-1 6 7-9H8l1-5z" fill="currentColor"/></svg>
+          Level up · $15/mo
+        </a>
+        <p class="insert-coin blink">&gt;&gt; insert no coin &lt;&lt;</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TICKER ============ -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track">
+      <span>★ Shopify</span><span>★ Amazon</span><span>★ RBC</span><span>★ Stripe</span>
+      <span>★ Wealthsimple</span><span>★ OpenText</span><span>★ ecobee</span><span>★ TELUS</span>
+      <span>★ Sanctuary AI</span><span>★ BC Hydro</span><span>★ Google</span><span>★ Ubisoft</span>
+      <span>★ Shopify</span><span>★ Amazon</span><span>★ RBC</span><span>★ Stripe</span>
+      <span>★ Wealthsimple</span><span>★ OpenText</span><span>★ ecobee</span><span>★ TELUS</span>
+      <span>★ Sanctuary AI</span><span>★ BC Hydro</span><span>★ Google</span><span>★ Ubisoft</span>
+    </div>
+  </div>
+
+  <!-- ============ SCOREBOARD ============ -->
+  <section class="scoreboard" aria-label="Site stats">
+    <div class="wrap">
+      <div class="score-grid">
+        <div class="score-card">
+          <div class="score-num">1,427</div>
+          <div class="score-label">Open listings right now</div>
+        </div>
+        <div class="score-card">
+          <div class="score-num">$0</div>
+          <div class="score-label">To browse everything</div>
+        </div>
+        <div class="score-card">
+          <div class="score-num">1</div>
+          <div class="score-label">Waterloo student running it</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LISTINGS ============ -->
+  <section id="listings" aria-labelledby="listingsTitle">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="sec-kicker">// stage select</p>
+        <h2 class="sec-title" id="listingsTitle">Choose your quest</h2>
+        <p class="sec-sub">Every listing is a collectible. Rarity = how juicy the pay is. HP bar = time left before it closes. Grab 'em before they despawn.</p>
+      </div>
+
+      <div class="filters" role="group" aria-label="Filter listings">
+        <button class="chip" data-filter="all" aria-pressed="true">All (12)</button>
+        <button class="chip" data-filter="remote" aria-pressed="false">Remote</button>
+        <button class="chip" data-filter="toronto" aria-pressed="false">Toronto</button>
+        <button class="chip" data-filter="vancouver" aria-pressed="false">Vancouver</button>
+        <button class="chip" data-filter="waterloo" aria-pressed="false">Waterloo</button>
+        <button class="chip" data-filter="montreal" aria-pressed="false">Montréal</button>
+        <button class="chip" data-filter="closing" aria-pressed="false">☠ Closing soon</button>
+      </div>
+
+      <div class="card-grid" id="cardGrid">
+
+        <!-- Shopify -->
+        <article class="card" data-rarity="epic" data-loc="remote" data-closing="true">
+          <div class="card-top">
+            <span class="rarity rarity-epic">★★★ Epic</span>
+            <span class="badge badge-pink new-badge">☠ 3 days left</span>
+          </div>
+          <div class="company-row">
+            <span class="company-tile" style="background:var(--lime);" aria-hidden="true">S</span>
+            <div>
+              <div class="company-name">Shopify</div>
+              <div class="stat-key">Remote, Canada</div>
+            </div>
+          </div>
+          <h3 class="role-name">Software Engineering Intern</h3>
+          <div class="stat-rows">
+            <div class="stat-row"><span class="stat-key">Loot</span><span class="stat-val loot">$34/hr CAD</span></div>
+            <div class="stat-row"><span class="stat-key">Added</span><span class="stat-val">2d ago</span></div>
+          </div>
+          <div class="hp hp-crit">
+            <div class="hp-label"><span>Time left</span><span>Closes in 3 days</span></div>
+            <div class="hp-bar"><div class="hp-fill" style="width:14%;"></div></div>
+          </div>
+          <div class="card-foot">
+            <span class="badge badge-ghost">Free to view</span>
+            <button class="btn btn-cyan" type="button">View quest</button>
+          </div>
+        </article>
+
+        <!-- Amazon -->
+        <article class="card" data-rarity="legendary" data-loc="vancouver" data-closing="true">
+          <div class="card-top">
+            <span class="rarity rarity-legendary">★★★★ Legendary</span>
+            <span class="badge badge-orange">☠ 5 days left</span>
+          </div>
+          <div class="company-row">
+            <span class="company-tile" style="background:var(--orange);" aria-hidden="true">A</span>
+            <div>
+              <div class="company-name">Amazon</div>
+              <div class="stat-key">Vancouver</div>
+            </div>
+          </div>
+          <h3 class="role-name">SDE Intern</h3>
+          <div class="stat-rows">
+            <div class="stat-row"><span class="stat-key">Loot</span><span class="stat-val loot">$41/hr CAD</span></div>
+            <div class="stat-row"><span class="stat-key">Added</span><span class="stat-val">2w ago</span></div>
+          </div>
+          <div class="hp hp-warn">
+            <div class="hp-label"><span>Time left</span><span>Closes in 5 days</span></div>
+            <div class="hp-bar"><div class="hp-fill" style="width:24%;"></div></div>
+          </div>
+          <div class="card-foot">
+            <span class="badge badge-ghost">Free to view</span>
+            <button class="btn btn-cyan" type="button">View quest</button>
+          </div>
+        </article>
+
+        <!-- RBC -->
+        <article class="card" data-rarity="rare" data-loc="toronto" data-closing="true">
+          <div class="card-top">
+            <span class="rarity rarity-rare">★★ Rare</span>
+            <span class="badge badge-lime new-badge">New today!</span>
+          </div>
+          <div class="company-row">
+            <span class="company-tile" style="background:var(--cyan);" aria-hidden="true">R</span>
+            <div>
+              <div class="company-name">RBC</div>
+              <div class="stat-key">Toronto</div>
+            </div>
+          </div>
+          <h3 class="role-name">Amplify Developer Intern</h3>
+          <div class="stat-rows">
+            <div class="stat-row"><span class="stat-key">Loot</span><span class="stat-val loot">$31/hr CAD</span></div>
+            <div class="stat-row"><span class="stat-key">Added</span><span class="stat-val">Today</span></div>
+          </div>
+          <div class="hp hp-warn">
+            <div class="hp-label"><span>Time left</span><span>Closes in 6 days</span></div>
+            <div class="hp-bar"><div class="hp-fill" style="width:30%;"></div></div>
+          </div>
+          <div class="card-foot">
+            <span class="badge badge-ghost">Free to view</span>
+            <button class="btn btn-cyan" type="button">View quest</button>
+          </div>
+        </article>
+
+        <!-- Stripe -->
+        <article class="card" data-rarity="mystery" data-loc="remote">
+          <div class="card-top">
+            <span class="rarity rarity-mystery">? Mystery</span>
+            <span class="badge badge-purple">9 days left</span>
+          </div>
+          <div class="company-row">
+            <span class="company-tile" style="background:var(--purple); color:#fff;" aria-hidden="true">S</span>
+            <div>
+              <div class="company-name">Stripe</div>
+              <div class="stat-key">Remote, US</div>
+            </div>
+          </div>
+          <h3 class="role-name">Software Engineer Intern</h3>
+          <div class="stat-rows">
+            <div class="stat-row"><span class="stat-key">Loot</span><span class="stat-val mystery-loot">???</span></div>
+            <div class="stat-row"><span class="stat-key">Added</span><span class="stat-val">5d ago</span></div>
+          </div>
+          <div class="hp">
+            <div class="hp-label"><span>Time left</span><span>Closes in 9 days</span></div>
+            <div class="hp-bar"><div class="hp-fill" style="width:45%;"></div></div>
+          </div>
+          <div class="card-foot">
+            <span class="badge badge-ghost">Free to view</span>
+            <button class="btn btn-cyan" type="button">View quest</button>
+          </div>
+        </article>
+
+        <!-- Wealthsimple -->
+        <article class="card" data-rarity="mystery" data-loc="toronto">
+          <div class="card-top">
+            <span class="rarity rarity-mystery">? Mystery</span>
+            <span class="badge badge-purple">11 days left</span>
+          </div>
+          <div class="company-row">
+            <span class="company-tile" style="background:var(--yellow);" aria-hidden="true">W</span>
+            <div>
+              <div class="company-name">Wealthsimple</div>
+              <div class="stat-key">Toronto</div>
+            </div>
+          </div>
+          <h3 class="role-name">Data Science Intern</h3>
+          <div class="stat-rows">
+            <div class="stat-row"><span class="stat-key">Loot</span><span class="stat-val mystery-loot">???</span></div>
+            <div class="stat-row"><span class="stat-key">Added</span><span class="stat-val">4d ago</span></div>
+          </div>
+          <div class="hp">
+            <div class="hp-label"><span>Time left</span><span>Closes in 11 days</span></div>
+            <div class="hp-bar"><div class="hp-fill" style="width:55%;"></div></div>
+          </div>
+          <div class="card-foot">
+            <span class="badge badge-ghost">Free to view</span>
+            <button class="btn btn-cyan" type="button">View quest</button>
+          </div>
+        </article>
+
+        <!-- OpenText -->
+        <article class="card" data-rarity="rare" data-loc="waterloo">
+          <div class="card-top">
+            <span class="rarity rarity-rare">★★ Rare</span>
+            <span class="badge badge-purple">13 days left</span>
+          </div>
+          <div class="company-row">
+            <span class="company-tile" style="background:var(--pink); color:#fff;" aria-hidden="true">O</span>
+            <div>
+              <div class="company-name">OpenText</div>
+              <div class="stat-key">Waterloo</div>
+            </div>
+          </div>
+          <h3 class="role-name">Software Developer Co-op</h3>
+          <div class="stat-rows">
+            <div class="stat-row"><span class="stat-key">Loot</span><span class="stat-val loot">$30/hr CAD</span></div>
+            <div class="stat-row"><span class="stat-key">Added</span><span class="stat-val">1w ago</span></div>
+          </div>
+          <div class="hp">
+            <div class="hp-label"><span>Time left</span><span>Closes in 13 days</span></div>
+            <div class="hp-bar"><div class="hp-fill" style="width:64%;"></div></div>
+          </div>
+          <div class="card-foot">
+            <span class="badge badge-ghost">Free to view</span>
+            <button class="btn btn-cyan" type="button">View quest</button>
+          </div>
+        </article>
+
+        <!-- ecobee -->
+        <article class="card" data-rarity="rare" data-loc="toronto">
+          <div class="card-top">
+            <span class="rarity rarity-rare">★★ Rare</span>
+            <span class="badge badge-lime new-badge">New! 1d ago</span>
+          </div>
+          <div class="company-row">
+            <span class="company-tile" style="background:var(--lime);" aria-hidden="true">e</span>
+            <div>
+              <div class="company-name">ecobee</div>
+              <div class="stat-key">Toronto</div>
+            </div>
+          </div>
+          <h3 class="role-name">Embedded Systems Intern</h3>
+          <div class="stat-rows">
+            <div class="stat-row"><span class="stat-key">Loot</span><span class="stat-val loot">$29/hr CAD</span></div>
+            <div class="stat-row"><span class="stat-key">Added</span><span class="stat-val">1d ago</span></div>
+          </div>
+          <div class="hp">
+            <div class="hp-label"><span>Time left</span><span>Closes Aug 31</span></div>
+            <div class="hp-bar"><div class="hp-fill" style="width:70%;"></div></div>
+          </div>
+          <div class="card-foot">
+            <span class="badge badge-ghost">Free to view</span>
+            <button class="btn btn-cyan" type="button">View quest</button>
+          </div>
+        </article>
+
+        <!-- TELUS -->
+        <article class="card" data-rarity="rare" data-loc="vancouver">
+          <div class="card-top">
+            <span class="rarity rarity-rare">★★ Rare</span>
+            <span class="badge badge-purple">Closes Sep 2</span>
+          </div>
+          <div class="company-row">
+            <span class="company-tile" style="background:var(--purple); color:#fff;" aria-hidden="true">T</span>
+            <div>
+              <div class="company-name">TELUS</div>
+              <div class="stat-key">Vancouver</div>
+            </div>
+          </div>
+          <h3 class="role-name">Network Engineering Co-op</h3>
+          <div class="stat-rows">
+            <div class="stat-row"><span class="stat-key">Loot</span><span class="stat-val loot">$28/hr CAD</span></div>
+            <div class="stat-row"><span class="stat-key">Added</span><span class="stat-val">6d ago</span></div>
+          </div>
+          <div class="hp">
+            <div class="hp-label"><span>Time left</span><span>Closes Sep 2</span></div>
+            <div class="hp-bar"><div class="hp-fill" style="width:74%;"></div></div>
+          </div>
+          <div class="card-foot">
+            <span class="badge badge-ghost">Free to view</span>
+            <button class="btn btn-cyan" type="button">View quest</button>
+          </div>
+        </article>
+
+        <!-- Sanctuary AI -->
+        <article class="card" data-rarity="mystery" data-loc="vancouver">
+          <div class="card-top">
+            <span class="rarity rarity-mystery">? Mystery</span>
+            <span class="badge badge-purple">Closes Sep 8</span>
+          </div>
+          <div class="company-row">
+            <span class="company-tile" style="background:var(--cyan);" aria-hidden="true">S</span>
+            <div>
+              <div class="company-name">Sanctuary AI</div>
+              <div class="stat-key">Vancouver</div>
+            </div>
+          </div>
+          <h3 class="role-name">Robotics Software Intern</h3>
+          <div class="stat-rows">
+            <div class="stat-row"><span class="stat-key">Loot</span><span class="stat-val mystery-loot">???</span></div>
+            <div class="stat-row"><span class="stat-key">Added</span><span class="stat-val">6d ago</span></div>
+          </div>
+          <div class="hp">
+            <div class="hp-label"><span>Time left</span><span>Closes Sep 8</span></div>
+            <div class="hp-bar"><div class="hp-fill" style="width:80%;"></div></div>
+          </div>
+          <div class="card-foot">
+            <span class="badge badge-ghost">Free to view</span>
+            <button class="btn btn-cyan" type="button">View quest</button>
+          </div>
+        </article>
+
+        <!-- BC Hydro -->
+        <article class="card" data-rarity="rare" data-loc="vancouver">
+          <div class="card-top">
+            <span class="rarity rarity-rare">★★ Rare</span>
+            <span class="badge badge-purple">Closes Sep 12</span>
+          </div>
+          <div class="company-row">
+            <span class="company-tile" style="background:var(--yellow);" aria-hidden="true">B</span>
+            <div>
+              <div class="company-name">BC Hydro</div>
+              <div class="stat-key">Vancouver</div>
+            </div>
+          </div>
+          <h3 class="role-name">Engineering Co-op</h3>
+          <div class="stat-rows">
+            <div class="stat-row"><span class="stat-key">Loot</span><span class="stat-val loot">$27/hr CAD</span></div>
+            <div class="stat-row"><span class="stat-key">Added</span><span class="stat-val">3d ago</span></div>
+          </div>
+          <div class="hp">
+            <div class="hp-label"><span>Time left</span><span>Closes Sep 12</span></div>
+            <div class="hp-bar"><div class="hp-fill" style="width:86%;"></div></div>
+          </div>
+          <div class="card-foot">
+            <span class="badge badge-ghost">Free to view</span>
+            <button class="btn btn-cyan" type="button">View quest</button>
+          </div>
+        </article>
+
+        <!-- Google -->
+        <article class="card" data-rarity="mystery" data-loc="waterloo">
+          <div class="card-top">
+            <span class="rarity rarity-mystery">? Mystery</span>
+            <span class="badge badge-purple">Closes Sep 19</span>
+          </div>
+          <div class="company-row">
+            <span class="company-tile" style="background:var(--pink); color:#fff;" aria-hidden="true">G</span>
+            <div>
+              <div class="company-name">Google</div>
+              <div class="stat-key">Waterloo</div>
+            </div>
+          </div>
+          <h3 class="role-name">STEP Intern</h3>
+          <div class="stat-rows">
+            <div class="stat-row"><span class="stat-key">Loot</span><span class="stat-val mystery-loot">???</span></div>
+            <div class="stat-row"><span class="stat-key">Added</span><span class="stat-val">2d ago</span></div>
+          </div>
+          <div class="hp">
+            <div class="hp-label"><span>Time left</span><span>Closes Sep 19</span></div>
+            <div class="hp-bar"><div class="hp-fill" style="width:92%;"></div></div>
+          </div>
+          <div class="card-foot">
+            <span class="badge badge-ghost">Free to view</span>
+            <button class="btn btn-cyan" type="button">View quest</button>
+          </div>
+        </article>
+
+        <!-- Ubisoft -->
+        <article class="card" data-rarity="rare" data-loc="montreal">
+          <div class="card-top">
+            <span class="rarity rarity-rare">★★ Rare</span>
+            <span class="badge badge-cyan">∞ No close date</span>
+          </div>
+          <div class="company-row">
+            <span class="company-tile" style="background:var(--orange);" aria-hidden="true">U</span>
+            <div>
+              <div class="company-name">Ubisoft</div>
+              <div class="stat-key">Montréal</div>
+            </div>
+          </div>
+          <h3 class="role-name">Gameplay Programmer Intern</h3>
+          <div class="stat-rows">
+            <div class="stat-row"><span class="stat-key">Loot</span><span class="stat-val loot">$30/hr CAD</span></div>
+            <div class="stat-row"><span class="stat-key">Added</span><span class="stat-val">1w ago</span></div>
+          </div>
+          <div class="hp">
+            <div class="hp-label"><span>Time left</span><span>None listed</span></div>
+            <div class="hp-bar"><div class="hp-fill" style="width:100%;"></div></div>
+          </div>
+          <div class="card-foot">
+            <span class="badge badge-ghost">Free to view</span>
+            <button class="btn btn-cyan" type="button">View quest</button>
+          </div>
+        </article>
+
+      </div>
+
+      <p class="load-note">Showing <strong>12</strong> of <strong>1,427</strong> open listings — the full list lives at <strong>ugmi.ca</strong>, free forever, no login screen.</p>
+    </div>
+  </section>
+
+  <!-- ============ POWER-UP ============ -->
+  <section id="powerup" class="powerup" aria-labelledby="powerupTitle">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="sec-kicker">// item shop (one item only)</p>
+        <h2 class="sec-title" id="powerupTitle">The Monday Power-Up</h2>
+        <p class="sec-sub">Browsing 1,427 listings is free forever. But if you'd rather skip the grind…</p>
+      </div>
+
+      <div class="powerup-card">
+        <span class="badge badge-yellow">★ Legendary drop · every Monday</span>
+        <h3 class="powerup-title">10 hand-picked quests, matched to you</h3>
+        <div class="price-tag">
+          <span class="cur">$</span><span class="amt">15</span><span class="per">/month CAD</span>
+        </div>
+
+        <ul class="perk-list">
+          <li><span class="perk-ico" style="background:var(--yellow);">10</span><span><strong>10 internships every Monday</strong> — hand-picked by a human, not a scraper, matched to your profile.</span></li>
+          <li><span class="perk-ico" style="background:var(--cyan);">@</span><span><strong>A named contact person on every single one.</strong> No more yelling into the application void.</span></li>
+          <li><span class="perk-ico" style="background:var(--lime);">✕</span><span><strong>Cancel anytime.</strong> One click. No sad exit survey. No guilt-trip modal.</span></li>
+        </ul>
+
+        <div class="xp-wrap" aria-hidden="true">
+          <div class="xp-label"><span>Application XP</span><span>Cold apply → warm intro</span></div>
+          <div class="xp-bar"><div class="xp-fill" id="xpFill"></div></div>
+        </div>
+
+        <button class="btn btn-yellow btn-big" type="button" id="powerupBtn">
+          <svg width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><path d="M9 1L3 9h4l-1 6 7-9H8l1-5z" fill="currentColor"/></svg>
+          Grab the power-up
+        </button>
+
+        <p class="stripe-note">
+          <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><rect x="1" y="3" width="14" height="10" rx="2" fill="none" stroke="#b39ddd" stroke-width="1.6"/><rect x="1" y="6" width="14" height="2" fill="#b39ddd"/></svg>
+          Checkout runs through Stripe. Your card never touches our server.
+        </p>
+      </div>
+
+      <div class="combo-vs">
+        <div class="vs-box free">
+          <h3>Free play (forever)</h3>
+          All 1,427 listings · search &amp; filters · no account, no email, no paywall. This never changes.
+        </div>
+        <div class="vs-box paid">
+          <h3>Power-up ($15/mo)</h3>
+          Everything in free play + 10 matched picks each Monday, each with a real named contact person.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PLAYER 1 ============ -->
+  <section aria-labelledby="p1Title">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="sec-kicker">// character select</p>
+        <h2 class="sec-title" id="p1Title">Player 1: some guy at Waterloo</h2>
+      </div>
+      <div class="player1-card">
+        <div class="avatar" aria-hidden="true">
+          <svg viewBox="0 0 64 64" width="58" height="58">
+            <!-- pixel avatar -->
+            <rect width="64" height="64" fill="#2e1660"/>
+            <rect x="16" y="10" width="32" height="10" fill="#14082b"/>
+            <rect x="12" y="18" width="40" height="6" fill="#14082b"/>
+            <rect x="16" y="24" width="32" height="22" fill="#ffcf9e"/>
+            <rect x="20" y="30" width="8" height="6" fill="#14082b"/>
+            <rect x="36" y="30" width="8" height="6" fill="#14082b"/>
+            <rect x="26" y="40" width="12" height="3" fill="#b3005c"/>
+            <rect x="14" y="46" width="36" height="14" fill="#ff2e88"/>
+            <rect x="26" y="46" width="12" height="14" fill="#ffd400"/>
+          </svg>
+        </div>
+        <div class="player1-copy">
+          <p class="ptag">Class: CS student · Guild: UWaterloo · Party size: 1</p>
+          <p>UGMI is built and run by <strong>one university student at Waterloo</strong> who got tired of internship boards that hide the good stuff behind logins. No VC. No growth team. Just one player grinding the side quest so you don't have to.</p>
+          <a class="ig-link" href="https://instagram.com/sleppyeric" rel="noopener">
+            <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="1.5" width="13" height="13" rx="4" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="4" r="1.1" fill="currentColor"/></svg>
+            @sleppyeric on Instagram
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section aria-labelledby="faqTitle">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="sec-kicker">// help screen</p>
+        <h2 class="sec-title" id="faqTitle">Continue? (FAQ)</h2>
+      </div>
+      <div class="faq">
+        <details>
+          <summary><span class="q-mark">?</span> Is the list actually free? What's the catch?</summary>
+          <p class="a">Actually free. All 1,427 listings, searchable, no account, no email, no paywall. The only paid thing is the optional Monday power-up — and the free list doesn't get worse if you skip it.</p>
+        </details>
+        <details>
+          <summary><span class="q-mark">?</span> What exactly do I get for $15/month?</summary>
+          <p class="a">Every Monday: 10 internships hand-picked to match you, each with a named contact person you can actually reach out to. It's the difference between cold-applying into a portal and starting a real conversation.</p>
+        </details>
+        <details>
+          <summary><span class="q-mark">?</span> How does payment work?</summary>
+          <p class="a">Through Stripe — the same checkout half the internet uses. Cancel anytime, instantly, no hoops.</p>
+        </details>
+        <details>
+          <summary><span class="q-mark">?</span> Who picks the 10 internships?</summary>
+          <p class="a">A human. Specifically, the one Waterloo student who runs the whole site. Not an algorithm blasting the same list to everyone — your 10 are matched to you.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <p class="game-over blink">Game on</p>
+    <p style="font-size:.9rem; color:#cdbdf0;">No continues needed — the list is free at <strong style="color:var(--yellow);">ugmi.ca</strong></p>
+    <div class="footer-links">
+      <a href="#listings">Browse listings</a>
+      <a href="#powerup">Monday power-up</a>
+      <a href="https://instagram.com/sleppyeric" rel="noopener">@sleppyeric</a>
+    </div>
+    <p class="footer-fine">© UGMI · ugmi.ca · Made by 1 student, 0 investors · Internal design mockup — sample listing data</p>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- Hero counter: 0 -> 1,427 ---------- */
+  var heroCount = document.getElementById("heroCount");
+  var TARGET = 1427;
+  if (reduceMotion) {
+    heroCount.textContent = TARGET.toLocaleString("en-CA");
+  } else {
+    var start = null, DUR = 1400;
+    function tick(ts){
+      if (!start) start = ts;
+      var p = Math.min((ts - start) / DUR, 1);
+      var eased = 1 - Math.pow(1 - p, 3);
+      heroCount.textContent = Math.round(eased * TARGET).toLocaleString("en-CA");
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  /* ---------- Confetti ---------- */
+  var COLORS = ["#ff2e88", "#ffd400", "#21e6ff", "#7dff4f", "#9d5cff", "#ff7a1a"];
+  function confetti(n){
+    if (reduceMotion) return;
+    n = n || 36;
+    for (var i = 0; i < n; i++){
+      var c = document.createElement("span");
+      c.className = "confetti";
+      var size = 6 + Math.random() * 8;
+      c.style.left = (Math.random() * 100) + "vw";
+      c.style.width = size + "px";
+      c.style.height = size + "px";
+      c.style.background = COLORS[Math.floor(Math.random() * COLORS.length)];
+      c.style.borderRadius = Math.random() < 0.4 ? "50%" : "2px";
+      c.style.animationDuration = (1.6 + Math.random() * 1.6) + "s";
+      c.style.animationDelay = (Math.random() * 0.3) + "s";
+      document.body.appendChild(c);
+      (function(el){
+        el.addEventListener("animationend", function(){ el.remove(); });
+        setTimeout(function(){ if (el.parentNode) el.remove(); }, 4000);
+      })(c);
+    }
+  }
+
+  /* ---------- Toast ---------- */
+  var toast = document.getElementById("toast");
+  var toastTimer = null;
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toast.classList.remove("show"); }, 2600);
+  }
+
+  /* ---------- Filters ---------- */
+  var chips = document.querySelectorAll(".chip");
+  var cards = document.querySelectorAll("#cardGrid .card");
+  chips.forEach(function(chip){
+    chip.addEventListener("click", function(){
+      chips.forEach(function(c){ c.setAttribute("aria-pressed", "false"); });
+      chip.setAttribute("aria-pressed", "true");
+      var f = chip.getAttribute("data-filter");
+      var shown = 0;
+      cards.forEach(function(card){
+        var show =
+          f === "all" ||
+          (f === "closing" && card.getAttribute("data-closing") === "true") ||
+          card.getAttribute("data-loc") === f;
+        card.classList.toggle("hidden", !show);
+        if (show) shown++;
+      });
+      showToast(f === "all"
+        ? "All 12 sample quests loaded!"
+        : shown + (shown === 1 ? " quest" : " quests") + " found!");
+    });
+  });
+
+  /* ---------- CTA buttons: confetti + toasts (mockup, no real nav) ---------- */
+  document.getElementById("pressStart").addEventListener("click", function(){
+    confetti(40);
+  });
+
+  document.getElementById("powerupBtn").addEventListener("click", function(){
+    confetti(60);
+    showToast("★ Power-up acquired! (Mockup — Stripe checkout would open here)");
+  });
+
+  document.querySelectorAll(".card .btn").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      confetti(18);
+      showToast("Quest accepted! (Mockup — the real listing would open on ugmi.ca)");
+    });
+  });
+
+  /* ---------- XP bar fills when scrolled into view ---------- */
+  var xp = document.getElementById("xpFill");
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting){
+          xp.style.width = "88%";
+          io.disconnect();
+        }
+      });
+    }, { threshold: 0.4 });
+    io.observe(xp);
+  } else {
+    xp.style.width = "88%";
+  }
+})();
+</script>
+
+</body>
+</html>

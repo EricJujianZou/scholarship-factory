@@ -1,0 +1,719 @@
+<!-- INTERNAL DESIGN MOCKUP - sample listing data -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>UGMI — 1,427 open internships. Free.</title>
+<style>
+  :root{
+    color-scheme: light dark;
+    --blue:#007AFF;
+    --red:#FF3B30;
+    --green:#34C759;
+    --bg:#F2F2F7;
+    --cell:#FFFFFF;
+    --label:#000000;
+    --secondary:rgba(60,60,67,.6);
+    --tertiary:rgba(60,60,67,.3);
+    --sep:rgba(60,60,67,.29);
+    --seg-track:rgba(118,118,128,.12);
+    --seg-sel:#FFFFFF;
+    --search-bg:rgba(118,118,128,.12);
+    --nav-bg:rgba(249,249,249,.82);
+    --sheet-bg:#F2F2F7;
+    --sheet-cell:#FFFFFF;
+    --grabber:rgba(60,60,67,.3);
+    --btn-quiet:rgba(118,118,128,.12);
+    --shadow:0 3px 8px rgba(0,0,0,.12), 0 3px 1px rgba(0,0,0,.04);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --blue:#0A84FF;
+      --red:#FF453A;
+      --green:#30D158;
+      --bg:#000000;
+      --cell:#1C1C1E;
+      --label:#FFFFFF;
+      --secondary:rgba(235,235,245,.6);
+      --tertiary:rgba(235,235,245,.3);
+      --sep:rgba(84,84,88,.6);
+      --seg-track:rgba(118,118,128,.24);
+      --seg-sel:#636366;
+      --search-bg:rgba(118,118,128,.24);
+      --nav-bg:rgba(22,22,24,.82);
+      --sheet-bg:#1C1C1E;
+      --sheet-cell:#2C2C2E;
+      --grabber:rgba(235,235,245,.3);
+      --btn-quiet:rgba(118,118,128,.24);
+      --shadow:none;
+    }
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{overflow-x:hidden}
+  body{
+    font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background:var(--bg);
+    color:var(--label);
+    font-size:17px;
+    line-height:1.35;
+    -webkit-font-smoothing:antialiased;
+  }
+  body.modal-open{overflow:hidden}
+  button{font-family:inherit;cursor:pointer}
+  a{color:var(--blue);text-decoration:none}
+
+  /* ---------- Nav bar (condenses on scroll) ---------- */
+  .navbar{
+    position:fixed;top:0;left:0;right:0;z-index:40;
+    height:52px;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 16px;
+    background:transparent;
+    transition:background .25s ease;
+  }
+  .navbar::after{
+    content:"";position:absolute;left:0;right:0;bottom:0;height:.5px;
+    background:var(--sep);opacity:0;transition:opacity .25s ease;
+  }
+  .navbar.condensed{
+    background:var(--nav-bg);
+    -webkit-backdrop-filter:saturate(180%) blur(20px);
+    backdrop-filter:saturate(180%) blur(20px);
+  }
+  .navbar.condensed::after{opacity:1}
+  .nav-title{
+    position:absolute;left:50%;transform:translate(-50%,6px);
+    font-size:17px;font-weight:600;
+    opacity:0;transition:opacity .2s ease, transform .2s ease;
+    pointer-events:none;
+  }
+  .navbar.condensed .nav-title{opacity:1;transform:translate(-50%,0)}
+  .nav-lead{font-size:15px;color:var(--secondary);font-weight:400}
+  .nav-btn{
+    border:0;background:none;color:var(--blue);
+    font-size:17px;font-weight:400;padding:6px 0;
+  }
+  .nav-btn:active{opacity:.4}
+
+  /* ---------- Page shell ---------- */
+  .page{max-width:640px;margin:0 auto;padding:52px 0 40px}
+
+  /* ---------- Large title ---------- */
+  .large-header{padding:10px 16px 4px}
+  .large-title{font-size:34px;font-weight:700;letter-spacing:.01em}
+  .large-sub{font-size:15px;color:var(--secondary);margin-top:2px}
+  .large-sub strong{color:var(--label);font-weight:600}
+
+  /* ---------- Search ---------- */
+  .searchwrap{padding:10px 16px 6px}
+  .search{
+    display:flex;align-items:center;gap:6px;
+    background:var(--search-bg);border-radius:10px;padding:7px 8px;
+  }
+  .search svg{flex:none;width:16px;height:16px;stroke:var(--secondary)}
+  .search input{
+    flex:1;border:0;background:none;outline:none;
+    font-size:17px;font-family:inherit;color:var(--label);min-width:0;
+  }
+  .search input::placeholder{color:var(--secondary)}
+  .search input::-webkit-search-cancel-button,
+  .search input::-webkit-search-decoration{-webkit-appearance:none;appearance:none}
+  .search-clear{
+    border:0;background:none;padding:0;display:none;line-height:0;
+  }
+  .search-clear svg{width:17px;height:17px;stroke:none;fill:var(--tertiary)}
+  .search.has-text .search-clear{display:block}
+
+  /* ---------- Segmented control ---------- */
+  .segwrap{padding:6px 16px 4px}
+  .segmented{
+    display:flex;background:var(--seg-track);border-radius:9px;padding:2px;
+  }
+  .segmented button{
+    flex:1;border:0;background:transparent;border-radius:7px;
+    padding:5px 0;font-size:13px;font-weight:500;color:var(--label);
+    transition:background .15s ease;
+  }
+  .segmented button[aria-selected="true"]{
+    background:var(--seg-sel);font-weight:600;box-shadow:var(--shadow);
+  }
+
+  /* ---------- Grouped inset lists ---------- */
+  .group{margin-top:22px}
+  .group-hd{
+    font-size:13px;font-weight:400;color:var(--secondary);
+    text-transform:uppercase;letter-spacing:.03em;
+    padding:0 32px 7px;
+  }
+  .group-ft{
+    font-size:13px;color:var(--secondary);
+    padding:7px 32px 0;
+  }
+  .inset{
+    background:var(--cell);border-radius:10px;margin:0 16px;
+    list-style:none;overflow:hidden;
+  }
+
+  /* ---------- Stats card ---------- */
+  .stats{display:flex}
+  .stat{
+    flex:1;text-align:center;padding:14px 4px 12px;position:relative;
+  }
+  .stat + .stat::before{
+    content:"";position:absolute;left:0;top:12px;bottom:12px;width:.5px;
+    background:var(--sep);
+  }
+  .stat-num{font-size:22px;font-weight:700;letter-spacing:-.01em}
+  .stat-num.blue{color:var(--blue)}
+  .stat-lbl{font-size:12px;color:var(--secondary);margin-top:1px}
+
+  /* ---------- Listing cells ---------- */
+  .cell{
+    display:flex;gap:12px;padding:11px 16px;position:relative;
+    align-items:flex-start;
+  }
+  .cell:active{background:var(--seg-track)}
+  .cell + .cell::before{
+    content:"";position:absolute;top:0;left:64px;right:0;height:.5px;
+    background:var(--sep);
+  }
+  .avatar{
+    flex:none;width:36px;height:36px;border-radius:8px;margin-top:2px;
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-size:17px;font-weight:600;
+  }
+  .cell-body{flex:1;min-width:0}
+  .row1{display:flex;align-items:baseline;gap:8px}
+  .company{
+    font-size:16px;font-weight:600;flex:1;min-width:0;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    display:flex;align-items:center;gap:6px;
+  }
+  .newdot{
+    flex:none;width:8px;height:8px;border-radius:50%;background:var(--blue);
+  }
+  .closes{flex:none;font-size:13px;color:var(--secondary)}
+  .closes.urgent{color:var(--red);font-weight:600}
+  .role{
+    font-size:15px;margin-top:1px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .meta{
+    font-size:13px;color:var(--secondary);margin-top:1px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .empty{
+    padding:36px 16px;text-align:center;
+  }
+  .empty-title{font-size:17px;font-weight:600}
+  .empty-sub{font-size:14px;color:var(--secondary);margin-top:3px}
+
+  /* ---------- Weekly upsell cell ---------- */
+  .upsell{
+    display:flex;gap:12px;align-items:center;width:100%;
+    border:0;background:var(--cell);text-align:left;
+    padding:13px 16px;font-size:inherit;color:inherit;
+  }
+  .upsell:active{background:var(--seg-track)}
+  .upsell-icon{
+    flex:none;width:42px;height:42px;border-radius:9px;
+    background:linear-gradient(180deg,#3395FF,#007AFF);
+    display:flex;align-items:center;justify-content:center;
+  }
+  @media (prefers-color-scheme: dark){
+    .upsell-icon{background:linear-gradient(180deg,#3BA0FF,#0A84FF)}
+  }
+  .upsell-icon svg{width:24px;height:24px;stroke:#fff}
+  .upsell-body{flex:1;min-width:0}
+  .upsell-title{font-size:16px;font-weight:600}
+  .upsell-sub{font-size:13px;color:var(--secondary);margin-top:1px}
+  .chevron{flex:none;width:8px;height:14px;stroke:var(--tertiary)}
+
+  /* ---------- About cells ---------- */
+  .about-cell{
+    display:flex;align-items:center;gap:12px;padding:11px 16px;position:relative;
+    color:inherit;
+  }
+  .about-cell + .about-cell::before{
+    content:"";position:absolute;top:0;left:58px;right:0;height:.5px;
+    background:var(--sep);
+  }
+  .about-icon{
+    flex:none;width:30px;height:30px;border-radius:7px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .about-icon svg{width:18px;height:18px;stroke:#fff}
+  .about-label{flex:1;font-size:16px}
+  .about-value{font-size:16px;color:var(--secondary)}
+
+  footer{
+    text-align:center;padding:28px 16px 0;
+    font-size:12px;color:var(--tertiary);line-height:1.7;
+  }
+
+  /* ---------- Sheet modal ---------- */
+  .backdrop{
+    position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.4);
+    opacity:0;pointer-events:none;transition:opacity .3s ease;
+  }
+  body.modal-open .backdrop{opacity:1;pointer-events:auto}
+  .sheet{
+    position:fixed;left:0;right:0;bottom:0;z-index:60;
+    max-width:480px;margin:0 auto;
+    max-height:92vh;max-height:92dvh;overflow-y:auto;
+    background:var(--sheet-bg);
+    border-radius:12px 12px 0 0;
+    transform:translateY(105%);
+    transition:transform .38s cubic-bezier(.32,.72,0,1);
+    padding:6px 16px calc(24px + env(safe-area-inset-bottom,0px));
+  }
+  body.modal-open .sheet{transform:translateY(0)}
+  .grabber{
+    width:36px;height:5px;border-radius:3px;background:var(--grabber);
+    margin:4px auto 6px;
+  }
+  .sheet-close{
+    position:absolute;top:14px;right:16px;
+    width:30px;height:30px;border-radius:50%;border:0;
+    background:var(--btn-quiet);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .sheet-close svg{width:12px;height:12px;stroke:var(--secondary)}
+  .sheet-close:active{opacity:.5}
+  .sheet-hero{text-align:center;padding:14px 8px 4px}
+  .sheet-appicon{
+    width:64px;height:64px;border-radius:14px;margin:0 auto 12px;
+    background:linear-gradient(180deg,#3395FF,#007AFF);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 8px 24px rgba(0,122,255,.35);
+  }
+  @media (prefers-color-scheme: dark){
+    .sheet-appicon{background:linear-gradient(180deg,#3BA0FF,#0A84FF)}
+  }
+  .sheet-appicon svg{width:34px;height:34px;stroke:#fff}
+  .sheet-title{font-size:24px;font-weight:700}
+  .sheet-sub{font-size:15px;color:var(--secondary);margin-top:4px}
+  .sheet-group{
+    background:var(--sheet-cell);border-radius:10px;margin-top:18px;overflow:hidden;
+  }
+  .feature{
+    display:flex;gap:12px;align-items:center;padding:12px 14px;position:relative;
+  }
+  .feature + .feature::before{
+    content:"";position:absolute;top:0;left:56px;right:0;height:.5px;
+    background:var(--sep);
+  }
+  .feature-icon{
+    flex:none;width:30px;height:30px;border-radius:7px;background:var(--blue);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .feature-icon svg{width:17px;height:17px;stroke:#fff}
+  .feature-body{min-width:0}
+  .feature-title{font-size:15px;font-weight:600}
+  .feature-sub{font-size:13px;color:var(--secondary);margin-top:1px}
+  .sample{
+    background:var(--sheet-cell);border-radius:10px;margin-top:12px;
+    padding:12px 14px;
+  }
+  .sample-tag{
+    display:inline-block;font-size:10px;font-weight:700;letter-spacing:.08em;
+    color:var(--blue);background:rgba(0,122,255,.12);
+    border-radius:5px;padding:2px 7px;margin-bottom:7px;
+  }
+  @media (prefers-color-scheme: dark){
+    .sample-tag{background:rgba(10,132,255,.2)}
+  }
+  .sample-role{font-size:15px;font-weight:600}
+  .sample-meta{font-size:13px;color:var(--secondary);margin-top:1px}
+  .sample-contact{
+    display:flex;align-items:center;gap:8px;margin-top:9px;padding-top:9px;
+    border-top:.5px solid var(--sep);font-size:13px;
+  }
+  .sample-contact .pfp{
+    flex:none;width:26px;height:26px;border-radius:50%;background:#AF52DE;
+    color:#fff;font-size:11px;font-weight:600;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .sample-contact strong{font-weight:600}
+  .sample-contact span{color:var(--secondary)}
+  .cta{
+    display:block;width:100%;margin-top:18px;
+    border:0;border-radius:12px;background:var(--blue);color:#fff;
+    font-size:17px;font-weight:600;padding:15px;
+  }
+  .cta:active{opacity:.75}
+  .sheet-fine{
+    text-align:center;font-size:12px;color:var(--secondary);
+    margin-top:12px;line-height:1.6;
+  }
+  .sheet-dismiss{
+    display:block;margin:14px auto 0;border:0;background:none;
+    color:var(--blue);font-size:17px;padding:4px 12px;
+  }
+  .sheet-dismiss:active{opacity:.4}
+
+  /* ---------- Toast ---------- */
+  .toast{
+    position:fixed;left:50%;bottom:36px;z-index:70;
+    transform:translate(-50%,80px);
+    background:var(--label);color:var(--bg);
+    font-size:14px;font-weight:500;
+    padding:11px 18px;border-radius:22px;white-space:nowrap;
+    opacity:0;transition:transform .3s ease,opacity .3s ease;
+    pointer-events:none;box-shadow:0 6px 20px rgba(0,0,0,.25);
+  }
+  .toast.show{transform:translate(-50%,0);opacity:1}
+
+  /* ---------- Desktop ---------- */
+  @media (min-width:700px){
+    .page{padding-top:64px}
+    .navbar{height:56px}
+    .large-title{font-size:40px}
+    .sheet{
+      bottom:auto;top:50%;border-radius:14px;
+      transform:translate(0,60vh);
+    }
+    body.modal-open .sheet{transform:translateY(-50%)}
+  }
+</style>
+</head>
+<body>
+
+<nav class="navbar" id="navbar" aria-label="Navigation bar">
+  <span class="nav-lead">ugmi.ca</span>
+  <span class="nav-title" id="navTitle">UGMI</span>
+  <button class="nav-btn" id="navWeekly" type="button">Weekly</button>
+</nav>
+
+<main class="page">
+
+  <header class="large-header" id="largeHeader">
+    <h1 class="large-title">UGMI</h1>
+    <p class="large-sub"><strong>1,427 open internships.</strong> Free. No account, no email, no paywall — just the list.</p>
+  </header>
+
+  <div class="searchwrap">
+    <div class="search" id="searchBox">
+      <svg viewBox="0 0 20 20" fill="none" stroke-width="1.8" aria-hidden="true">
+        <circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4.5 4.5" stroke-linecap="round"/>
+      </svg>
+      <input type="search" id="searchInput" placeholder="Search company, role, or city" autocomplete="off" aria-label="Search internships">
+      <button class="search-clear" id="searchClear" type="button" aria-label="Clear search">
+        <svg viewBox="0 0 17 17" aria-hidden="true"><path d="M8.5 0a8.5 8.5 0 100 17 8.5 8.5 0 000-17zM5.6 4.5L8.5 7.4l2.9-2.9 1.1 1.1-2.9 2.9 2.9 2.9-1.1 1.1-2.9-2.9-2.9 2.9-1.1-1.1 2.9-2.9-2.9-2.9 1.1-1.1z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="segwrap">
+    <div class="segmented" role="tablist" aria-label="Filter by location" id="segmented">
+      <button role="tab" aria-selected="true"  data-seg="all"       type="button">All</button>
+      <button role="tab" aria-selected="false" data-seg="remote"    type="button">Remote</button>
+      <button role="tab" aria-selected="false" data-seg="toronto"   type="button">Toronto</button>
+      <button role="tab" aria-selected="false" data-seg="vancouver" type="button">Vancouver</button>
+    </div>
+  </div>
+
+  <section class="group" aria-label="Quick stats">
+    <div class="inset stats">
+      <div class="stat"><div class="stat-num">1,427</div><div class="stat-lbl">open now</div></div>
+      <div class="stat"><div class="stat-num blue">$0</div><div class="stat-lbl">to browse</div></div>
+      <div class="stat"><div class="stat-num">Mon</div><div class="stat-lbl">weekly picks</div></div>
+    </div>
+  </section>
+
+  <section class="group" aria-label="Open listings">
+    <h2 class="group-hd" id="countHd">Open listings</h2>
+    <ul class="inset" id="list"></ul>
+    <p class="group-ft">Mostly Canadian. Updated daily by hand. Blue dot = added in the last 48 hours. Showing a sample of the 1,427 live listings.</p>
+  </section>
+
+  <section class="group" aria-label="UGMI Weekly">
+    <h2 class="group-hd">The one paid thing</h2>
+    <div class="inset" style="border-radius:10px">
+      <button class="upsell" id="upsellBtn" type="button">
+        <span class="upsell-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>
+          </svg>
+        </span>
+        <span class="upsell-body">
+          <span class="upsell-title" style="display:block">UGMI Weekly — $15/month</span>
+          <span class="upsell-sub" style="display:block">10 hand-picked matches every Monday, each with a named contact.</span>
+        </span>
+        <svg class="chevron" viewBox="0 0 8 14" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M1 1l6 6-6 6"/>
+        </svg>
+      </button>
+    </div>
+    <p class="group-ft">The list above stays free forever. This is for people who want the searching done for them.</p>
+  </section>
+
+  <section class="group" aria-label="About UGMI">
+    <h2 class="group-hd">About</h2>
+    <div class="inset">
+      <div class="about-cell">
+        <span class="about-icon" style="background:#FF9500" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.9 3.1-6.5 7-6.5s7 2.6 7 6.5"/>
+          </svg>
+        </span>
+        <span class="about-label">Built by</span>
+        <span class="about-value">One student, Waterloo</span>
+      </div>
+      <div class="about-cell">
+        <span class="about-icon" style="background:#34C759" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="6" width="16" height="12" rx="2"/><path d="M8 10h8M8 14h5"/>
+          </svg>
+        </span>
+        <span class="about-label">Payments</span>
+        <span class="about-value">Stripe</span>
+      </div>
+      <a class="about-cell" href="https://instagram.com/sleppyeric">
+        <span class="about-icon" style="background:#AF52DE" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="4" width="16" height="16" rx="4.5"/><circle cx="12" cy="12" r="3.5"/><circle cx="17" cy="7" r="1" fill="currentColor" stroke="none"/>
+          </svg>
+        </span>
+        <span class="about-label" style="color:var(--label)">Instagram</span>
+        <span class="about-value">@sleppyeric</span>
+      </a>
+    </div>
+    <p class="group-ft">No account needed. No email collected. Nothing tracked. The list is the product.</p>
+  </section>
+
+  <footer>
+    UGMI &middot; ugmi.ca &middot; Made in Waterloo, Ontario<br>
+    UGMI 2.4.1 &middot; internal design mockup &middot; sample listing data
+  </footer>
+
+</main>
+
+<div class="backdrop" id="backdrop"></div>
+
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" hidden>
+  <div class="grabber" aria-hidden="true"></div>
+  <button class="sheet-close" id="sheetClose" type="button" aria-label="Close">
+    <svg viewBox="0 0 12 12" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+      <path d="M1 1l10 10M11 1L1 11"/>
+    </svg>
+  </button>
+
+  <div class="sheet-hero">
+    <div class="sheet-appicon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>
+      </svg>
+    </div>
+    <h2 class="sheet-title" id="sheetTitle">UGMI Weekly</h2>
+    <p class="sheet-sub">10 hand-picked internships in your inbox every Monday morning. Matched to you, not scraped for everyone.</p>
+  </div>
+
+  <div class="sheet-group">
+    <div class="feature">
+      <span class="feature-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="8.5"/><path d="M8.5 12.5l2.4 2.4 4.6-5.3"/>
+        </svg>
+      </span>
+      <span class="feature-body">
+        <span class="feature-title" style="display:block">Matched to you</span>
+        <span class="feature-sub" style="display:block">Your program, your term, your cities. Ten picks, zero noise.</span>
+      </span>
+    </div>
+    <div class="feature">
+      <span class="feature-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.9 3.1-6.5 7-6.5s7 2.6 7 6.5"/>
+        </svg>
+      </span>
+      <span class="feature-body">
+        <span class="feature-title" style="display:block">A named contact, every time</span>
+        <span class="feature-sub" style="display:block">A real person at the company — not a careers@ inbox.</span>
+      </span>
+    </div>
+    <div class="feature">
+      <span class="feature-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3l2.5 5.1 5.5.8-4 3.9.9 5.6-4.9-2.6-4.9 2.6.9-5.6-4-3.9 5.5-.8z"/>
+        </svg>
+      </span>
+      <span class="feature-body">
+        <span class="feature-title" style="display:block">Curated by hand</span>
+        <span class="feature-sub" style="display:block">One student reads every posting so you don't have to.</span>
+      </span>
+    </div>
+  </div>
+
+  <div class="sample">
+    <span class="sample-tag">SAMPLE MONDAY PICK</span>
+    <div class="sample-role">Shopify — Software Engineering Intern</div>
+    <div class="sample-meta">Remote, Canada &middot; $34/hr CAD &middot; closes in 3 days</div>
+    <div class="sample-contact">
+      <span class="pfp" aria-hidden="true">PN</span>
+      <div><strong>Priya N.</strong> <span>&middot; University Recruiting — your intro starts here.</span></div>
+    </div>
+  </div>
+
+  <button class="cta" id="ctaBtn" type="button">Subscribe &middot; $15/month</button>
+  <p class="sheet-fine">CAD. Billed monthly via Stripe. Cancel anytime.<br>The full list of 1,427 stays free either way.</p>
+  <button class="sheet-dismiss" id="sheetDismiss" type="button">Not now</button>
+</div>
+
+<div class="toast" id="toast" role="status">Design mockup — checkout lives on ugmi.ca</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- Data ---------------- */
+  var LISTINGS = [
+    {company:"Shopify",      role:"Software Engineering Intern",  loc:"Remote, Canada", seg:"remote",    pay:"$34/hr CAD", closes:"3d left",  urgent:true,  added:"added 2d ago",  isNew:true,  color:"#5E8E3E"},
+    {company:"Amazon",       role:"SDE Intern",                   loc:"Vancouver",      seg:"vancouver", pay:"$41/hr CAD", closes:"5d left",  urgent:true,  added:"added 2w ago",  isNew:false, color:"#E68A00"},
+    {company:"RBC",          role:"Amplify Developer Intern",     loc:"Toronto",        seg:"toronto",   pay:"$31/hr CAD", closes:"6d left",  urgent:false, added:"added today",   isNew:true,  color:"#005DAA"},
+    {company:"Stripe",       role:"Software Engineer Intern",     loc:"Remote, US",     seg:"remote",    pay:null,         closes:"9d left",  urgent:false, added:"added 5d ago",  isNew:false, color:"#635BFF"},
+    {company:"Wealthsimple", role:"Data Science Intern",          loc:"Toronto",        seg:"toronto",   pay:null,         closes:"11d left", urgent:false, added:"added 4d ago",  isNew:false, color:"#1E1E1E"},
+    {company:"OpenText",     role:"Software Developer Co-op",     loc:"Waterloo",       seg:"other",     pay:"$30/hr CAD", closes:"13d left", urgent:false, added:"added 1w ago",  isNew:false, color:"#155C93"},
+    {company:"ecobee",       role:"Embedded Systems Intern",      loc:"Toronto",        seg:"toronto",   pay:"$29/hr CAD", closes:"Aug 31",   urgent:false, added:"added 1d ago",  isNew:true,  color:"#3D8B37"},
+    {company:"TELUS",        role:"Network Engineering Co-op",    loc:"Vancouver",      seg:"vancouver", pay:"$28/hr CAD", closes:"Sep 2",    urgent:false, added:"added 6d ago",  isNew:false, color:"#4B286D"},
+    {company:"Sanctuary AI", role:"Robotics Software Intern",     loc:"Vancouver",      seg:"vancouver", pay:null,         closes:"Sep 8",    urgent:false, added:"added 6d ago",  isNew:false, color:"#C74634"},
+    {company:"BC Hydro",     role:"Engineering Co-op",            loc:"Vancouver",      seg:"vancouver", pay:"$27/hr CAD", closes:"Sep 12",   urgent:false, added:"added 3d ago",  isNew:false, color:"#0072CE"},
+    {company:"Google",       role:"STEP Intern",                  loc:"Waterloo",       seg:"other",     pay:null,         closes:"Sep 19",   urgent:false, added:"added 2d ago",  isNew:true,  color:"#4285F4"},
+    {company:"Ubisoft",      role:"Gameplay Programmer Intern",   loc:"Montreal",       seg:"other",     pay:"$30/hr CAD", closes:"open",     urgent:false, added:"added 1w ago",  isNew:false, color:"#2E2E2E"}
+  ];
+
+  var state = { seg:"all", query:"" };
+
+  var list        = document.getElementById("list");
+  var countHd     = document.getElementById("countHd");
+  var segmented   = document.getElementById("segmented");
+  var searchBox   = document.getElementById("searchBox");
+  var searchInput = document.getElementById("searchInput");
+  var searchClear = document.getElementById("searchClear");
+
+  function esc(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  function matches(item){
+    if (state.seg !== "all" && item.seg !== state.seg) return false;
+    if (!state.query) return true;
+    var hay = (item.company + " " + item.role + " " + item.loc).toLowerCase();
+    return hay.indexOf(state.query) !== -1;
+  }
+
+  function render(){
+    var shown = LISTINGS.filter(matches);
+    var html = "";
+
+    if (!shown.length){
+      html = '<li class="empty"><div class="empty-title">No Results</div>' +
+             '<div class="empty-sub">Try a different search or filter — there are 1,427 listings on the full site.</div></li>';
+    } else {
+      shown.forEach(function(item){
+        var meta = esc(item.loc) + (item.pay ? " &middot; " + esc(item.pay) : "") + " &middot; " + esc(item.added);
+        html += '<li class="cell">' +
+          '<div class="avatar" style="background:' + esc(item.color) + '">' + esc(item.company.charAt(0)) + '</div>' +
+          '<div class="cell-body">' +
+            '<div class="row1">' +
+              '<span class="company">' + esc(item.company) + (item.isNew ? '<span class="newdot" title="Added in the last 48 hours"></span>' : '') + '</span>' +
+              '<span class="closes' + (item.urgent ? ' urgent' : '') + '">' + esc(item.closes) + '</span>' +
+            '</div>' +
+            '<div class="role">' + esc(item.role) + '</div>' +
+            '<div class="meta">' + meta + '</div>' +
+          '</div>' +
+        '</li>';
+      });
+    }
+
+    list.innerHTML = html;
+    countHd.textContent = shown.length
+      ? "Open listings \u00B7 " + shown.length + " of 1,427 shown"
+      : "Open listings";
+  }
+
+  /* ---------------- Segmented control ---------------- */
+  segmented.addEventListener("click", function(e){
+    var btn = e.target.closest("button[data-seg]");
+    if (!btn) return;
+    state.seg = btn.getAttribute("data-seg");
+    Array.prototype.forEach.call(segmented.querySelectorAll("button"), function(b){
+      b.setAttribute("aria-selected", b === btn ? "true" : "false");
+    });
+    render();
+  });
+
+  /* ---------------- Search ---------------- */
+  searchInput.addEventListener("input", function(){
+    state.query = searchInput.value.trim().toLowerCase();
+    searchBox.classList.toggle("has-text", state.query.length > 0);
+    render();
+  });
+  searchClear.addEventListener("click", function(){
+    searchInput.value = "";
+    state.query = "";
+    searchBox.classList.remove("has-text");
+    searchInput.focus();
+    render();
+  });
+
+  /* ---------------- Large title condense on scroll ---------------- */
+  var navbar = document.getElementById("navbar");
+  var largeHeader = document.getElementById("largeHeader");
+  var ticking = false;
+
+  function updateNav(){
+    var threshold = largeHeader.offsetTop + largeHeader.offsetHeight - navbar.offsetHeight + 4;
+    navbar.classList.toggle("condensed", window.scrollY > threshold);
+    ticking = false;
+  }
+  window.addEventListener("scroll", function(){
+    if (!ticking){ ticking = true; window.requestAnimationFrame(updateNav); }
+  }, {passive:true});
+  updateNav();
+
+  /* ---------------- Sheet modal ---------------- */
+  var sheet     = document.getElementById("sheet");
+  var backdrop  = document.getElementById("backdrop");
+  var lastFocus = null;
+
+  function openSheet(){
+    lastFocus = document.activeElement;
+    sheet.hidden = false;
+    // force layout so the open transition runs
+    void sheet.offsetHeight;
+    document.body.classList.add("modal-open");
+    document.getElementById("sheetClose").focus();
+  }
+  function closeSheet(){
+    document.body.classList.remove("modal-open");
+    window.setTimeout(function(){ sheet.hidden = true; }, 400);
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+
+  document.getElementById("upsellBtn").addEventListener("click", openSheet);
+  document.getElementById("navWeekly").addEventListener("click", openSheet);
+  document.getElementById("sheetClose").addEventListener("click", closeSheet);
+  document.getElementById("sheetDismiss").addEventListener("click", closeSheet);
+  backdrop.addEventListener("click", closeSheet);
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape" && document.body.classList.contains("modal-open")) closeSheet();
+  });
+
+  /* ---------------- Toast ---------------- */
+  var toast = document.getElementById("toast");
+  var toastTimer = null;
+  document.getElementById("ctaBtn").addEventListener("click", function(){
+    toast.classList.add("show");
+    window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(function(){ toast.classList.remove("show"); }, 2400);
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

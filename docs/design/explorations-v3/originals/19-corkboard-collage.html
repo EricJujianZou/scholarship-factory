@@ -1,0 +1,991 @@
+<!-- INTERNAL DESIGN MOCKUP - sample listing data -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="UGMI helps students search 1,427 free, open internships, mostly in Canada, with no account required.">
+  <title>UGMI | Internships without the runaround</title>
+  <style>
+    :root {
+      --ink: #20211d;
+      --muted: #5d5d52;
+      --paper: #fffaf0;
+      --paper-warm: #f5ecd8;
+      --yellow: #f6dc73;
+      --pink: #f1bbb2;
+      --blue: #b9d8dd;
+      --green: #bfd3a9;
+      --orange: #df8d4f;
+      --cork: #a86636;
+      --cork-dark: #78411f;
+      --red: #a94337;
+      --shadow: 0 7px 12px rgba(55, 29, 13, .23), 0 2px 2px rgba(55, 29, 13, .15);
+      --marker: "Comic Sans MS", "Bradley Hand", "Segoe Print", cursive;
+      --body: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-width: 0;
+      overflow-x: hidden;
+      color: var(--ink);
+      font-family: var(--body);
+      background:
+        radial-gradient(circle at 18% 12%, rgba(255,255,255,.12) 0 1px, transparent 1.7px) 0 0 / 11px 13px,
+        radial-gradient(circle at 67% 54%, rgba(79,37,14,.18) 0 .7px, transparent 1.5px) 0 0 / 9px 15px,
+        linear-gradient(115deg, rgba(255,255,255,.05), transparent 40%),
+        var(--cork);
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      opacity: .4;
+      background:
+        repeating-linear-gradient(17deg, transparent 0 17px, rgba(70,36,17,.08) 18px, transparent 19px 29px),
+        repeating-linear-gradient(103deg, transparent 0 23px, rgba(255,240,211,.08) 24px, transparent 25px 35px);
+    }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    a { color: inherit; }
+    svg { display: block; }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    :focus-visible {
+      outline: 3px solid #103f79;
+      outline-offset: 4px;
+      border-radius: 3px;
+    }
+    .skip-link {
+      position: fixed;
+      top: 8px;
+      left: 8px;
+      z-index: 100;
+      padding: 10px 14px;
+      background: #fff;
+      transform: translateY(-150%);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    .board {
+      width: min(1180px, calc(100% - 20px));
+      margin: 10px auto;
+      padding: 12px 10px 60px;
+      position: relative;
+      border: 10px solid #74401f;
+      border-radius: 7px;
+      box-shadow: inset 0 0 0 2px #ba8152, inset 0 0 34px rgba(67,31,10,.32), 0 12px 28px rgba(32,17,8,.28);
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: -3px 0 18px;
+      color: #fffaf0;
+      text-shadow: 0 1px 2px rgba(37,17,7,.8);
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--marker);
+      font-weight: 900;
+      font-size: clamp(1.25rem, 5vw, 1.75rem);
+      letter-spacing: .04em;
+      text-decoration: none;
+    }
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 37px;
+      height: 37px;
+      color: #20211d;
+      background: var(--yellow);
+      border: 2px solid #282720;
+      border-radius: 50% 47% 51% 46%;
+      transform: rotate(-5deg);
+      text-shadow: none;
+    }
+    .topnav { display: flex; align-items: center; gap: 12px; font-size: .8rem; font-weight: 800; }
+    .topnav a { text-underline-offset: 4px; }
+    .topnav .small-hide { display: none; }
+
+    .paper {
+      position: relative;
+      background:
+        linear-gradient(rgba(112,86,52,.028) 1px, transparent 1px) 0 0 / 100% 26px,
+        var(--paper);
+      border: 1px solid rgba(75,51,30,.22);
+      box-shadow: var(--shadow);
+    }
+    .tape {
+      position: absolute;
+      z-index: 4;
+      width: 74px;
+      height: 22px;
+      background: rgba(225,211,168,.8);
+      border-left: 1px dashed rgba(104,84,42,.25);
+      border-right: 1px dashed rgba(104,84,42,.25);
+      box-shadow: 0 1px 2px rgba(52,31,10,.13);
+      transform: rotate(-4deg);
+    }
+    .pin {
+      position: absolute;
+      z-index: 6;
+      width: 13px;
+      height: 13px;
+      border: 0;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 28%, #fff 0 8%, #cf6257 10% 32%, #8f2b24 58%, #561711 100%);
+      box-shadow: 1px 3px 3px rgba(44,20,8,.45);
+    }
+
+    .hero {
+      display: grid;
+      gap: 18px;
+      align-items: start;
+    }
+    .hero-note {
+      padding: 34px 22px 25px;
+      transform: rotate(-.65deg);
+    }
+    .hero-note .tape { left: 50%; top: -9px; transform: translateX(-50%) rotate(2deg); }
+    .eyebrow {
+      margin: 0 0 10px;
+      color: #574b39;
+      font-family: var(--marker);
+      font-size: .93rem;
+      font-weight: 800;
+    }
+    h1 {
+      max-width: 760px;
+      margin: 0;
+      font-family: var(--marker);
+      font-size: clamp(2.2rem, 11vw, 5.9rem);
+      line-height: .95;
+      letter-spacing: -.05em;
+    }
+    .circle-word {
+      position: relative;
+      display: inline-block;
+      color: var(--red);
+      white-space: nowrap;
+    }
+    .circle-word::after {
+      content: "";
+      position: absolute;
+      inset: -4px -9px -2px;
+      border: 3px solid var(--red);
+      border-radius: 50% 43% 48% 45%;
+      transform: rotate(-3deg);
+    }
+    .lede {
+      max-width: 710px;
+      margin: 22px 0 18px;
+      font-size: clamp(1rem, 3.8vw, 1.23rem);
+      line-height: 1.55;
+      font-weight: 650;
+    }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: 10px 16px;
+      border: 2px solid var(--ink);
+      background: var(--yellow);
+      box-shadow: 3px 4px 0 var(--ink);
+      font-weight: 900;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .button:hover { transform: translate(1px, 1px); box-shadow: 2px 3px 0 var(--ink); }
+    .button.secondary { background: transparent; box-shadow: none; }
+    .button.secondary:hover { background: #f5ecd8; }
+    .plain-link { font-weight: 850; text-underline-offset: 4px; }
+    .fact-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 24px;
+      padding-top: 17px;
+      border-top: 2px dashed #aaa18e;
+    }
+    .fact { font-size: .72rem; line-height: 1.25; color: var(--muted); }
+    .fact strong { display: block; color: var(--ink); font-size: 1.02rem; }
+
+    .builder-note {
+      width: min(92%, 330px);
+      justify-self: end;
+      padding: 19px 17px 18px 68px;
+      background: var(--blue);
+      transform: rotate(2deg);
+    }
+    .builder-note .pin { top: 8px; right: 12px; }
+    .doodle-portrait {
+      position: absolute;
+      left: 14px;
+      top: 18px;
+      width: 42px;
+      height: 48px;
+      border: 2px solid #2b3839;
+      border-radius: 48% 52% 45% 47%;
+      transform: rotate(-5deg);
+    }
+    .doodle-portrait::before {
+      content: "";
+      position: absolute;
+      left: 9px;
+      top: 14px;
+      width: 20px;
+      height: 11px;
+      border: solid #2b3839;
+      border-width: 0 0 2px;
+      border-radius: 50%;
+      transform: rotate(6deg);
+    }
+    .doodle-portrait::after {
+      content: "";
+      position: absolute;
+      left: -7px;
+      right: -8px;
+      top: -8px;
+      height: 18px;
+      border-top: 4px solid #2b3839;
+      border-radius: 50%;
+      transform: rotate(-10deg);
+    }
+    .builder-note p { margin: 0; font-family: var(--marker); font-weight: 700; line-height: 1.35; }
+    .builder-note small { display: block; margin-top: 7px; font-family: var(--body); font-weight: 750; }
+
+    .route-line { display: none; }
+
+    .search-sheet {
+      margin: 28px 0 20px;
+      padding: 23px 16px 20px;
+      transform: rotate(.25deg);
+    }
+    .search-sheet .tape { top: -10px; right: 12%; transform: rotate(5deg); }
+    .section-heading {
+      margin: 0 0 5px;
+      font-family: var(--marker);
+      font-size: clamp(1.6rem, 7vw, 2.4rem);
+      line-height: 1.05;
+    }
+    .section-kicker { margin: 0 0 16px; color: var(--muted); font-size: .9rem; line-height: 1.5; }
+    .search-box { position: relative; }
+    .search-box svg {
+      position: absolute;
+      left: 13px;
+      top: 50%;
+      width: 20px;
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+    #search {
+      width: 100%;
+      min-height: 50px;
+      padding: 10px 42px 10px 42px;
+      border: 2px solid var(--ink);
+      border-radius: 0;
+      background: #fffefa;
+      color: var(--ink);
+      box-shadow: inset 2px 2px 0 #e4dfd1;
+    }
+    #search::placeholder { color: #77756d; }
+    .clear-search {
+      position: absolute;
+      right: 7px;
+      top: 50%;
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      transform: translateY(-50%);
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+    .filter-label { margin: 15px 0 8px; font-size: .76rem; font-weight: 900; letter-spacing: .09em; text-transform: uppercase; }
+    .filters { display: flex; flex-wrap: wrap; gap: 7px; }
+    .filter-chip {
+      min-height: 38px;
+      padding: 7px 11px;
+      border: 1.5px solid #403b31;
+      border-radius: 999px;
+      background: #f7f1e5;
+      font-size: .8rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .filter-chip[aria-pressed="true"] { color: #fff; background: #343830; box-shadow: inset 0 0 0 2px #fff, 0 0 0 1px #343830; }
+    .results-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 15px;
+      padding-top: 12px;
+      border-top: 1px dashed #8e8778;
+      font-size: .8rem;
+      font-weight: 750;
+    }
+    .reset-button {
+      border: 0;
+      padding: 3px;
+      background: transparent;
+      font-size: .78rem;
+      font-weight: 850;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      cursor: pointer;
+    }
+
+    .listing-board { margin-top: 8px; }
+    .listing-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 14px;
+      margin: 0 3px 13px;
+      color: #fffaf0;
+      text-shadow: 0 1px 2px rgba(37,17,7,.8);
+    }
+    .listing-head h2 { margin: 0; font-family: var(--marker); font-size: clamp(1.55rem, 7vw, 2.35rem); }
+    .listing-head p { max-width: 360px; margin: 0; font-size: .72rem; font-weight: 750; text-align: right; }
+    .listings {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .listing {
+      --tilt: 0deg;
+      position: relative;
+      min-width: 0;
+      transform: rotate(var(--tilt));
+      transition: transform .18s ease, opacity .18s ease;
+    }
+    .listing:nth-child(3n+1) { --tilt: -.6deg; }
+    .listing:nth-child(3n+2) { --tilt: .7deg; }
+    .listing:nth-child(3n) { --tilt: -.25deg; }
+    .listing[hidden] { display: none; }
+    .listing.dragging { opacity: .55; transform: rotate(2deg) scale(.98); }
+    .listing.drag-over .listing-card { outline: 3px dashed #113e75; outline-offset: 5px; }
+    .listing-card {
+      position: relative;
+      height: 100%;
+      min-height: 252px;
+      padding: 29px 17px 15px;
+      background: var(--paper);
+      border: 1px solid rgba(74,49,27,.26);
+      box-shadow: var(--shadow);
+    }
+    .listing:nth-child(4n+2) .listing-card { background: #fff5c7; }
+    .listing:nth-child(4n+3) .listing-card { background: #eef3e5; }
+    .listing .pin { top: 8px; left: 50%; transform: translateX(-50%); }
+    .listing-top { display: flex; justify-content: space-between; gap: 12px; align-items: start; }
+    .company {
+      margin: 0 0 4px;
+      color: #5b594f;
+      font-size: .72rem;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .listing h3 { margin: 0; font-family: var(--marker); font-size: 1.32rem; line-height: 1.08; }
+    .save {
+      flex: 0 0 auto;
+      display: inline-grid;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      margin-top: -4px;
+      border: 1.5px solid #34342e;
+      border-radius: 50%;
+      background: transparent;
+      cursor: pointer;
+    }
+    .save svg { width: 18px; height: 18px; fill: transparent; }
+    .save[aria-pressed="true"] { background: var(--pink); transform: rotate(7deg); }
+    .save[aria-pressed="true"] svg { fill: currentColor; }
+    .listing-meta { display: flex; flex-wrap: wrap; gap: 6px 12px; margin: 15px 0 12px; font-size: .77rem; font-weight: 750; }
+    .listing-meta span { display: inline-flex; align-items: center; gap: 4px; }
+    .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--red); }
+    .tags { display: flex; flex-wrap: wrap; gap: 5px; margin: 0 0 15px; }
+    .tag { padding: 4px 7px; background: rgba(65,70,56,.09); border: 1px solid rgba(47,48,41,.18); font-size: .68rem; font-weight: 800; }
+    .listing-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 1px dashed #aaa18e;
+    }
+    .posted { color: var(--muted); font-size: .7rem; font-weight: 700; }
+    .apply-link { font-size: .78rem; font-weight: 950; text-underline-offset: 4px; }
+    .move-controls { display: flex; gap: 4px; margin-top: 13px; }
+    .move-controls button {
+      min-height: 34px;
+      padding: 5px 8px;
+      border: 1px solid #6c6659;
+      background: rgba(255,255,255,.42);
+      font-size: .68rem;
+      font-weight: 850;
+      cursor: pointer;
+    }
+    .drag-hint { margin-left: auto; align-self: center; color: #6a675e; font-size: .64rem; font-weight: 750; }
+    .empty-state {
+      margin: 12px 0;
+      padding: 24px;
+      background: var(--pink);
+      border: 1px solid #6d4740;
+      box-shadow: var(--shadow);
+      text-align: center;
+      transform: rotate(-.5deg);
+    }
+    .empty-state h3 { margin: 0 0 6px; font-family: var(--marker); font-size: 1.4rem; }
+    .empty-state p { margin: 0; }
+
+    .saved-strip {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin: 22px 4px 6px;
+      padding: 12px 15px 12px 24px;
+      color: #322f28;
+      background:
+        radial-gradient(circle at 7px 10px, transparent 0 3px, #e9e2d4 3.5px 4.5px, transparent 5px) 0 0 / 100% 22px,
+        repeating-linear-gradient(#faf7ed 0 24px, #b9d4de 25px, #faf7ed 26px);
+      border: 1px solid #c8bca6;
+      box-shadow: var(--shadow);
+      transform: rotate(.45deg);
+      font-family: var(--marker);
+      font-weight: 800;
+    }
+    .saved-strip strong { font-family: var(--body); }
+
+    .how-grid { display: grid; gap: 18px; margin-top: 36px; }
+    .how-note { padding: 24px 18px 21px; }
+    .how-note .tape { top: -10px; left: 16%; transform: rotate(-7deg); }
+    .how-note h2, .match-note h2 { margin: 0 0 13px; font-family: var(--marker); font-size: clamp(1.6rem, 7vw, 2.3rem); }
+    .steps { display: grid; gap: 14px; counter-reset: steps; }
+    .step { display: grid; grid-template-columns: 37px 1fr; gap: 10px; align-items: start; }
+    .step::before {
+      counter-increment: steps;
+      content: counter(steps);
+      display: grid;
+      place-items: center;
+      width: 35px;
+      height: 35px;
+      border: 2px solid var(--red);
+      border-radius: 46% 52% 43% 55%;
+      color: var(--red);
+      font-family: var(--marker);
+      font-size: 1.2rem;
+      font-weight: 900;
+      transform: rotate(-5deg);
+    }
+    .step h3 { margin: 0 0 3px; font-size: .95rem; }
+    .step p { margin: 0; color: var(--muted); font-size: .82rem; line-height: 1.5; }
+
+    .match-note {
+      padding: 27px 19px 23px;
+      background: var(--yellow);
+      transform: rotate(-1deg);
+    }
+    .match-note .pin { top: 9px; right: 14px; }
+    .price { margin: 0 0 12px; font-family: var(--marker); font-size: 2rem; font-weight: 900; }
+    .price small { font-family: var(--body); font-size: .75rem; }
+    .match-list { display: grid; gap: 10px; margin: 15px 0 20px; padding: 0; list-style: none; }
+    .match-list li { position: relative; padding-left: 23px; font-size: .86rem; font-weight: 750; line-height: 1.4; }
+    .match-list li::before { content: "✓"; position: absolute; left: 0; color: #31551f; font-weight: 1000; }
+    .stripe-note { margin: 13px 0 0; font-size: .7rem; color: #595344; }
+
+    .footer {
+      display: grid;
+      gap: 18px;
+      align-items: end;
+      margin-top: 35px;
+    }
+    .footer-note {
+      padding: 20px 19px;
+      transform: rotate(.6deg);
+    }
+    .footer-note h2 { margin: 0 0 7px; font-family: var(--marker); font-size: 1.45rem; }
+    .footer-note p { margin: 0; font-size: .82rem; line-height: 1.5; }
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 16px;
+      color: #fffaf0;
+      font-size: .8rem;
+      font-weight: 800;
+      text-shadow: 0 1px 2px rgba(37,17,7,.8);
+    }
+    .footer-links a { text-underline-offset: 4px; }
+    .footer-signoff { color: #fffaf0; font-family: var(--marker); font-size: .85rem; text-shadow: 0 1px 2px rgba(37,17,7,.8); }
+
+    @media (min-width: 680px) {
+      .board { width: min(1180px, calc(100% - 34px)); margin: 17px auto; padding: 22px 24px 72px; border-width: 13px; }
+      .topnav { font-size: .88rem; }
+      .topnav .small-hide { display: inline; }
+      .hero { grid-template-columns: minmax(0, 1fr) 260px; }
+      .hero-note { padding: 44px 38px 31px; }
+      .builder-note { align-self: end; width: 260px; margin-bottom: 15px; }
+      .search-sheet { padding: 27px 26px 22px; }
+      .listings { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 18px; }
+      .how-grid { grid-template-columns: minmax(0, 1.2fr) minmax(260px, .8fr); align-items: start; }
+      .footer { grid-template-columns: minmax(260px, .7fr) 1fr; }
+      .footer-links { justify-content: end; }
+      .footer-signoff { grid-column: 1 / -1; text-align: right; }
+    }
+
+    @media (min-width: 980px) {
+      .board { padding-inline: 38px; }
+      .hero { grid-template-columns: minmax(0, 1fr) 310px; gap: 32px; }
+      .hero-note { transform: rotate(-.8deg); }
+      .builder-note { width: 295px; }
+      .route-line {
+        display: block;
+        position: absolute;
+        z-index: -1;
+        top: 230px;
+        right: 235px;
+        width: 180px;
+        height: 155px;
+        overflow: visible;
+        color: #483324;
+        filter: drop-shadow(1px 2px 1px rgba(30,15,6,.5));
+      }
+      .listings { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 27px 22px; }
+      .listing-card { min-height: 272px; }
+      .steps { grid-template-columns: repeat(3, 1fr); }
+      .step { grid-template-columns: 1fr; }
+      .how-note { padding: 31px 27px 29px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#internships">Skip to internships</a>
+  <main class="board">
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="UGMI home">
+        <span class="brand-mark" aria-hidden="true">U</span>
+        <span>UGMI</span>
+      </a>
+      <nav class="topnav" aria-label="Main navigation">
+        <a href="#internships">Browse</a>
+        <a class="small-hide" href="#how">How it works</a>
+        <a href="#matches">Monday matches</a>
+      </nav>
+    </header>
+
+    <section class="hero" id="top" aria-labelledby="hero-title">
+      <div class="paper hero-note">
+        <span class="tape" aria-hidden="true"></span>
+        <p class="eyebrow">for students who have better things to do than open 47 tabs</p>
+        <h1 id="hero-title">Find the internship. <span class="circle-word">Skip the runaround.</span></h1>
+        <p class="lede">Search 1,427 open internships, mostly across Canada. Free to browse. No account, no email gate, no paywall.</p>
+        <div class="hero-actions">
+          <a class="button" href="#internships">Search internships</a>
+          <a class="plain-link" href="#matches">Get picks every Monday</a>
+        </div>
+        <div class="fact-row" aria-label="UGMI facts">
+          <div class="fact"><strong>1,427</strong> open roles</div>
+          <div class="fact"><strong>$0</strong> to search</div>
+          <div class="fact"><strong>0</strong> sign-up forms</div>
+        </div>
+      </div>
+
+      <aside class="paper builder-note" aria-label="Note from the builder">
+        <span class="pin" aria-hidden="true"></span>
+        <span class="doodle-portrait" aria-hidden="true"></span>
+        <p>Hi, I am Eric. I am one Waterloo student building the internship board I wanted to use.</p>
+        <small>built between classes + co-op apps</small>
+      </aside>
+      <svg class="route-line" viewBox="0 0 180 155" aria-hidden="true">
+        <path d="M5 10 C70 0 45 72 106 69 S139 116 173 145" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="5" cy="10" r="5" fill="#d9c2a1" stroke="#3c291d" stroke-width="2"/>
+        <circle cx="173" cy="145" r="5" fill="#d9c2a1" stroke="#3c291d" stroke-width="2"/>
+      </svg>
+    </section>
+
+    <section class="paper search-sheet" id="internships" aria-labelledby="search-title">
+      <span class="tape" aria-hidden="true"></span>
+      <h2 class="section-heading" id="search-title">What are you looking for?</h2>
+      <p class="section-kicker">Try a role, company, city, or skill. These sample listings update as you type.</p>
+      <label class="sr-only" for="search">Search internships</label>
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8" fill="none" stroke="currentColor" stroke-width="2"/><path d="m16 16 5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input id="search" type="search" autocomplete="off" placeholder="Search product, Shopify, Toronto...">
+        <button class="clear-search" type="button" aria-label="Clear search" title="Clear search">×</button>
+      </div>
+      <p class="filter-label" id="filter-label">Pin down a type</p>
+      <div class="filters" role="group" aria-labelledby="filter-label">
+        <button class="filter-chip" type="button" data-filter="all" aria-pressed="true">All roles</button>
+        <button class="filter-chip" type="button" data-filter="software" aria-pressed="false">Software</button>
+        <button class="filter-chip" type="button" data-filter="design" aria-pressed="false">Design</button>
+        <button class="filter-chip" type="button" data-filter="data" aria-pressed="false">Data</button>
+        <button class="filter-chip" type="button" data-filter="business" aria-pressed="false">Business</button>
+        <button class="filter-chip" type="button" data-filter="remote" aria-pressed="false">Remote</button>
+        <button class="filter-chip" type="button" data-filter="saved" aria-pressed="false">Pinned</button>
+      </div>
+      <div class="results-meta" aria-live="polite">
+        <span id="result-count">6 sample roles</span>
+        <button class="reset-button" id="reset" type="button">Reset board</button>
+      </div>
+    </section>
+
+    <section class="listing-board" aria-labelledby="listing-title">
+      <div class="listing-head">
+        <h2 id="listing-title">Fresh on the board</h2>
+        <p>Drag notes to sort. Keyboard users can use the move buttons.</p>
+      </div>
+      <ul class="listings" id="listing-list" aria-label="Internship listings">
+        <li class="listing" draggable="true" data-id="shopify" data-category="software remote" data-search="shopify backend developer intern remote canada ruby api software">
+          <article class="listing-card">
+            <span class="pin" aria-hidden="true"></span>
+            <div class="listing-top">
+              <div><p class="company">Shopify</p><h3>Backend Developer Intern</h3></div>
+              <button class="save" type="button" aria-pressed="false" aria-label="Pin Backend Developer Intern at Shopify" title="Pin listing">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v18l-5-3.6L7 21V3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+            <div class="listing-meta"><span><i class="dot"></i>Remote, Canada</span><span>Fall 2025</span></div>
+            <div class="tags"><span class="tag">Software</span><span class="tag">Ruby</span><span class="tag">APIs</span></div>
+            <div class="listing-foot"><span class="posted">Added today</span><a class="apply-link" href="#apply-note">View details →</a></div>
+            <div class="move-controls" aria-label="Rearrange this listing">
+              <button type="button" data-move="up" aria-label="Move Backend Developer Intern earlier">↑ Earlier</button>
+              <button type="button" data-move="down" aria-label="Move Backend Developer Intern later">↓ Later</button>
+              <span class="drag-hint" aria-hidden="true">grab + move</span>
+            </div>
+          </article>
+        </li>
+        <li class="listing" draggable="true" data-id="figma" data-category="design remote" data-search="figma product design intern remote canada ux ui prototyping design">
+          <article class="listing-card">
+            <span class="pin" aria-hidden="true"></span>
+            <div class="listing-top">
+              <div><p class="company">Figma</p><h3>Product Design Intern</h3></div>
+              <button class="save" type="button" aria-pressed="false" aria-label="Pin Product Design Intern at Figma" title="Pin listing">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v18l-5-3.6L7 21V3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+            <div class="listing-meta"><span><i class="dot"></i>Remote, Canada</span><span>Summer 2026</span></div>
+            <div class="tags"><span class="tag">Design</span><span class="tag">UX</span><span class="tag">Prototyping</span></div>
+            <div class="listing-foot"><span class="posted">Added 1 day ago</span><a class="apply-link" href="#apply-note">View details →</a></div>
+            <div class="move-controls" aria-label="Rearrange this listing">
+              <button type="button" data-move="up" aria-label="Move Product Design Intern earlier">↑ Earlier</button>
+              <button type="button" data-move="down" aria-label="Move Product Design Intern later">↓ Later</button>
+              <span class="drag-hint" aria-hidden="true">grab + move</span>
+            </div>
+          </article>
+        </li>
+        <li class="listing" draggable="true" data-id="wealthsimple" data-category="data business" data-search="wealthsimple data analyst intern toronto ontario sql python analytics business">
+          <article class="listing-card">
+            <span class="pin" aria-hidden="true"></span>
+            <div class="listing-top">
+              <div><p class="company">Wealthsimple</p><h3>Data Analyst Intern</h3></div>
+              <button class="save" type="button" aria-pressed="false" aria-label="Pin Data Analyst Intern at Wealthsimple" title="Pin listing">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v18l-5-3.6L7 21V3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+            <div class="listing-meta"><span><i class="dot"></i>Toronto, ON</span><span>Winter 2026</span></div>
+            <div class="tags"><span class="tag">Data</span><span class="tag">SQL</span><span class="tag">Python</span></div>
+            <div class="listing-foot"><span class="posted">Added 2 days ago</span><a class="apply-link" href="#apply-note">View details →</a></div>
+            <div class="move-controls" aria-label="Rearrange this listing">
+              <button type="button" data-move="up" aria-label="Move Data Analyst Intern earlier">↑ Earlier</button>
+              <button type="button" data-move="down" aria-label="Move Data Analyst Intern later">↓ Later</button>
+              <span class="drag-hint" aria-hidden="true">grab + move</span>
+            </div>
+          </article>
+        </li>
+        <li class="listing" draggable="true" data-id="faire" data-category="business" data-search="faire growth marketing intern kitchener ontario business marketing ecommerce">
+          <article class="listing-card">
+            <span class="pin" aria-hidden="true"></span>
+            <div class="listing-top">
+              <div><p class="company">Faire</p><h3>Growth Marketing Intern</h3></div>
+              <button class="save" type="button" aria-pressed="false" aria-label="Pin Growth Marketing Intern at Faire" title="Pin listing">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v18l-5-3.6L7 21V3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+            <div class="listing-meta"><span><i class="dot"></i>Kitchener, ON</span><span>Fall 2025</span></div>
+            <div class="tags"><span class="tag">Business</span><span class="tag">Marketing</span><span class="tag">E-commerce</span></div>
+            <div class="listing-foot"><span class="posted">Added 2 days ago</span><a class="apply-link" href="#apply-note">View details →</a></div>
+            <div class="move-controls" aria-label="Rearrange this listing">
+              <button type="button" data-move="up" aria-label="Move Growth Marketing Intern earlier">↑ Earlier</button>
+              <button type="button" data-move="down" aria-label="Move Growth Marketing Intern later">↓ Later</button>
+              <span class="drag-hint" aria-hidden="true">grab + move</span>
+            </div>
+          </article>
+        </li>
+        <li class="listing" draggable="true" data-id="geotab" data-category="software data" data-search="geotab machine learning intern oakville ontario software data python ml">
+          <article class="listing-card">
+            <span class="pin" aria-hidden="true"></span>
+            <div class="listing-top">
+              <div><p class="company">Geotab</p><h3>Machine Learning Intern</h3></div>
+              <button class="save" type="button" aria-pressed="false" aria-label="Pin Machine Learning Intern at Geotab" title="Pin listing">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v18l-5-3.6L7 21V3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+            <div class="listing-meta"><span><i class="dot"></i>Oakville, ON</span><span>Winter 2026</span></div>
+            <div class="tags"><span class="tag">Software</span><span class="tag">Data</span><span class="tag">Python</span></div>
+            <div class="listing-foot"><span class="posted">Added 3 days ago</span><a class="apply-link" href="#apply-note">View details →</a></div>
+            <div class="move-controls" aria-label="Rearrange this listing">
+              <button type="button" data-move="up" aria-label="Move Machine Learning Intern earlier">↑ Earlier</button>
+              <button type="button" data-move="down" aria-label="Move Machine Learning Intern later">↓ Later</button>
+              <span class="drag-hint" aria-hidden="true">grab + move</span>
+            </div>
+          </article>
+        </li>
+        <li class="listing" draggable="true" data-id="rbc" data-category="software business" data-search="rbc mobile developer co-op vancouver british columbia swift kotlin software business">
+          <article class="listing-card">
+            <span class="pin" aria-hidden="true"></span>
+            <div class="listing-top">
+              <div><p class="company">RBC</p><h3>Mobile Developer Co-op</h3></div>
+              <button class="save" type="button" aria-pressed="false" aria-label="Pin Mobile Developer Co-op at RBC" title="Pin listing">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v18l-5-3.6L7 21V3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+            <div class="listing-meta"><span><i class="dot"></i>Vancouver, BC</span><span>Summer 2026</span></div>
+            <div class="tags"><span class="tag">Software</span><span class="tag">Swift</span><span class="tag">Kotlin</span></div>
+            <div class="listing-foot"><span class="posted">Added 4 days ago</span><a class="apply-link" href="#apply-note">View details →</a></div>
+            <div class="move-controls" aria-label="Rearrange this listing">
+              <button type="button" data-move="up" aria-label="Move Mobile Developer Co-op earlier">↑ Earlier</button>
+              <button type="button" data-move="down" aria-label="Move Mobile Developer Co-op later">↓ Later</button>
+              <span class="drag-hint" aria-hidden="true">grab + move</span>
+            </div>
+          </article>
+        </li>
+      </ul>
+      <div class="empty-state" id="empty-state" hidden>
+        <h3>No notes match that yet.</h3>
+        <p>Try another word or clear the filters.</p>
+      </div>
+      <div class="saved-strip" id="saved-strip" aria-live="polite"><span aria-hidden="true">✦</span> <strong>0 pinned</strong> Keep a shortlist on this board.</div>
+    </section>
+
+    <section class="how-grid" id="how" aria-label="How UGMI works and optional matches">
+      <div class="paper how-note">
+        <span class="tape" aria-hidden="true"></span>
+        <h2>Less hunting. More applying.</h2>
+        <div class="steps">
+          <div class="step"><div><h3>Search openly</h3><p>Browse all 1,427 roles without handing over your email.</p></div></div>
+          <div class="step"><div><h3>Pin the good ones</h3><p>Make a quick shortlist, then put the best fit first.</p></div></div>
+          <div class="step"><div><h3>Apply at the source</h3><p>Go straight to the employer when you are ready.</p></div></div>
+        </div>
+      </div>
+
+      <aside class="paper match-note" id="matches" aria-labelledby="match-title">
+        <span class="pin" aria-hidden="true"></span>
+        <p class="eyebrow">optional shortcut</p>
+        <h2 id="match-title">Your Monday matches</h2>
+        <p class="price">$15 <small>CAD / month</small></p>
+        <p>Ten hand-picked internships every Monday, chosen around what you actually want.</p>
+        <ul class="match-list">
+          <li>10 relevant matches each Monday</li>
+          <li>A named contact with every listing</li>
+          <li>Cancel whenever you want</li>
+        </ul>
+        <button class="button" type="button" id="checkout-button">Start Monday matches</button>
+        <p class="stripe-note" id="checkout-note">Payments are handled securely with Stripe. Demo button only.</p>
+      </aside>
+    </section>
+
+    <footer class="footer" id="apply-note">
+      <div class="paper footer-note">
+        <h2>One last sticky note</h2>
+        <p>The roles above are seed samples for this design. On UGMI, every listing links to the original employer application.</p>
+      </div>
+      <div class="footer-links">
+        <a href="#internships">Browse roles</a>
+        <a href="#matches">Monday matches</a>
+        <span>Instagram @sleppyeric</span>
+      </div>
+      <div class="footer-signoff">Made by one Waterloo student. No growth squad hiding behind the corkboard.</div>
+    </footer>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const search = document.getElementById("search");
+      const clearSearch = document.querySelector(".clear-search");
+      const chips = Array.from(document.querySelectorAll(".filter-chip"));
+      const list = document.getElementById("listing-list");
+      const count = document.getElementById("result-count");
+      const empty = document.getElementById("empty-state");
+      const savedStrip = document.getElementById("saved-strip");
+      const reset = document.getElementById("reset");
+      const checkout = document.getElementById("checkout-button");
+      const checkoutNote = document.getElementById("checkout-note");
+      let activeFilter = "all";
+      let dragged = null;
+      const saved = new Set();
+
+      function cards() {
+        return Array.from(list.querySelectorAll(".listing"));
+      }
+
+      function updateSaved() {
+        const total = saved.size;
+        savedStrip.innerHTML = '<span aria-hidden="true">✦</span> <strong>' + total + " pinned</strong> " + (total === 1 ? "That role is" : total > 1 ? "Those roles are" : "Keep a shortlist") + (total ? " staying on this board." : " on this board.");
+      }
+
+      function filterListings() {
+        const term = search.value.trim().toLowerCase();
+        let shown = 0;
+        cards().forEach(function (item) {
+          const textMatch = !term || item.dataset.search.includes(term);
+          const tagMatch = activeFilter === "all" || (activeFilter === "saved" ? saved.has(item.dataset.id) : item.dataset.category.split(" ").includes(activeFilter));
+          const visible = textMatch && tagMatch;
+          item.hidden = !visible;
+          if (visible) shown += 1;
+        });
+        count.textContent = shown + (shown === 1 ? " sample role" : " sample roles");
+        empty.hidden = shown !== 0;
+      }
+
+      chips.forEach(function (chip) {
+        chip.addEventListener("click", function () {
+          activeFilter = chip.dataset.filter;
+          chips.forEach(function (other) {
+            other.setAttribute("aria-pressed", String(other === chip));
+          });
+          filterListings();
+        });
+      });
+
+      search.addEventListener("input", filterListings);
+      clearSearch.addEventListener("click", function () {
+        search.value = "";
+        filterListings();
+        search.focus();
+      });
+
+      list.addEventListener("click", function (event) {
+        const saveButton = event.target.closest(".save");
+        const moveButton = event.target.closest("[data-move]");
+
+        if (saveButton) {
+          const item = saveButton.closest(".listing");
+          const id = item.dataset.id;
+          const willSave = !saved.has(id);
+          if (willSave) saved.add(id); else saved.delete(id);
+          saveButton.setAttribute("aria-pressed", String(willSave));
+          saveButton.title = willSave ? "Unpin listing" : "Pin listing";
+          updateSaved();
+          filterListings();
+          return;
+        }
+
+        if (moveButton) {
+          const item = moveButton.closest(".listing");
+          const direction = moveButton.dataset.move;
+          const visibleCards = cards().filter(function (card) { return !card.hidden; });
+          const index = visibleCards.indexOf(item);
+          const target = direction === "up" ? visibleCards[index - 1] : visibleCards[index + 1];
+          if (!target) {
+            moveButton.setAttribute("aria-label", moveButton.getAttribute("aria-label") + ", already at the edge");
+            return;
+          }
+          if (direction === "up") list.insertBefore(item, target);
+          else list.insertBefore(target, item);
+          moveButton.focus();
+          count.textContent = "Order updated. " + visibleCards.length + (visibleCards.length === 1 ? " sample role" : " sample roles");
+        }
+      });
+
+      list.addEventListener("dragstart", function (event) {
+        const item = event.target.closest(".listing");
+        if (!item) return;
+        dragged = item;
+        item.classList.add("dragging");
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData("text/plain", item.dataset.id);
+      });
+
+      list.addEventListener("dragover", function (event) {
+        const item = event.target.closest(".listing");
+        if (!item || item === dragged || item.hidden) return;
+        event.preventDefault();
+        cards().forEach(function (card) { card.classList.remove("drag-over"); });
+        item.classList.add("drag-over");
+      });
+
+      list.addEventListener("drop", function (event) {
+        const target = event.target.closest(".listing");
+        if (!target || !dragged || target === dragged) return;
+        event.preventDefault();
+        const box = target.getBoundingClientRect();
+        const after = event.clientY > box.top + box.height / 2;
+        list.insertBefore(dragged, after ? target.nextSibling : target);
+        count.textContent = "Order updated. " + cards().filter(function (card) { return !card.hidden; }).length + " sample roles";
+      });
+
+      list.addEventListener("dragend", function () {
+        cards().forEach(function (card) { card.classList.remove("dragging", "drag-over"); });
+        dragged = null;
+      });
+
+      reset.addEventListener("click", function () {
+        search.value = "";
+        activeFilter = "all";
+        saved.clear();
+        chips.forEach(function (chip) { chip.setAttribute("aria-pressed", String(chip.dataset.filter === "all")); });
+        cards().sort(function (a, b) {
+          const order = ["shopify", "figma", "wealthsimple", "faire", "geotab", "rbc"];
+          return order.indexOf(a.dataset.id) - order.indexOf(b.dataset.id);
+        }).forEach(function (item) {
+          list.appendChild(item);
+          const saveButton = item.querySelector(".save");
+          saveButton.setAttribute("aria-pressed", "false");
+          saveButton.title = "Pin listing";
+        });
+        updateSaved();
+        filterListings();
+        search.focus();
+      });
+
+      checkout.addEventListener("click", function () {
+        checkoutNote.textContent = "This offline design mockup does not open Stripe. On the live site, this button would continue to secure checkout.";
+        checkoutNote.setAttribute("role", "status");
+        checkout.textContent = "Demo checkout noted";
+      });
+
+      updateSaved();
+      filterListings();
+    }());
+  </script>
+</body>
+</html>

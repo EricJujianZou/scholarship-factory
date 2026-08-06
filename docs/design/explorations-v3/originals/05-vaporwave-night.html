@@ -1,0 +1,1291 @@
+<!-- INTERNAL DESIGN MOCKUP - sample listing data -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UGMI — the internship list ⁂ 1,427 open</title>
+<style>
+  /* ================================================================
+     UGMI — VAPORWAVE NIGHT
+     deep purple void · neon horizon · chrome type · glow everything
+     ================================================================ */
+
+  :root{
+    --void:      #0a0118;
+    --void-2:    #120631;
+    --void-3:    #1b0a45;
+    --neon-pink: #ff2ec4;
+    --neon-soft: #ff71ce;
+    --neon-cyan: #01cdfe;
+    --neon-mint: #05ffa1;
+    --neon-purp: #b967ff;
+    --sun-hi:    #ffd319;
+    --sun-mid:   #ff2975;
+    --sun-lo:    #8c1eff;
+    --ink:       #e8dcff;
+    --ink-dim:   #9a86c8;
+    --card:      rgba(20, 8, 52, .72);
+    --line:      rgba(185,103,255,.35);
+    --mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
+    --disp: -apple-system, "Segoe UI", system-ui, Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+
+  html{ scroll-behavior:smooth; }
+
+  body{
+    background: var(--void);
+    color: var(--ink);
+    font-family: var(--disp);
+    font-size: 16px;
+    line-height: 1.55;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---- CRT scanlines over everything ---- */
+  body::after{
+    content:"";
+    position:fixed; inset:0;
+    pointer-events:none;
+    z-index: 9000;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(0,0,0,.14) 0px, rgba(0,0,0,.14) 1px,
+      transparent 1px, transparent 3px
+    );
+    mix-blend-mode: multiply;
+    opacity:.55;
+  }
+  /* faint magenta/cyan vignette haze */
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    pointer-events:none;
+    z-index: 8999;
+    background:
+      radial-gradient(120% 60% at 50% -10%, rgba(255,46,196,.10), transparent 60%),
+      radial-gradient(120% 60% at 50% 110%, rgba(1,205,254,.10), transparent 60%);
+  }
+
+  a{ color: var(--neon-cyan); text-decoration:none; }
+  a:hover{ text-shadow: 0 0 8px rgba(1,205,254,.9); }
+
+  ::selection{ background: var(--neon-pink); color: var(--void); }
+
+  .wrap{ width:100%; max-width: 960px; margin:0 auto; padding:0 20px; }
+
+  /* ================= TOP BAR ================= */
+  .topbar{
+    position: sticky; top:0; z-index:100;
+    background: rgba(10,1,24,.82);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(255,46,196,.25);
+  }
+  .topbar-in{
+    display:flex; align-items:center; justify-content:space-between;
+    height:54px; max-width:960px; margin:0 auto; padding:0 20px;
+  }
+  .wordmark{
+    font-family: var(--mono);
+    font-weight:800; font-size:18px; letter-spacing:.28em;
+    color:#fff;
+    text-shadow: 0 0 6px var(--neon-pink), 0 0 18px rgba(255,46,196,.6);
+  }
+  .wordmark .tld{ color: var(--neon-cyan); text-shadow: 0 0 6px var(--neon-cyan); }
+  .topbar .free-tag{
+    font-family: var(--mono); font-size:10px; letter-spacing:.2em;
+    color: var(--neon-mint);
+    border:1px solid rgba(5,255,161,.45);
+    border-radius:2px;
+    padding:4px 8px;
+    text-shadow: 0 0 6px rgba(5,255,161,.8);
+    box-shadow: 0 0 10px rgba(5,255,161,.18), inset 0 0 8px rgba(5,255,161,.08);
+    white-space:nowrap;
+  }
+
+  /* ================= HERO ================= */
+  .hero{
+    position:relative;
+    min-height: 92vh;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    text-align:center;
+    overflow:hidden;
+    padding: 64px 20px 150px;
+    background: linear-gradient(180deg, var(--void) 0%, var(--void-2) 55%, #2a0a5e 100%);
+  }
+
+  /* -- the sun -- */
+  .sun{
+    position:absolute;
+    left:50%; bottom: 26%;
+    width: 240px; height: 240px;
+    transform: translateX(-50%);
+    border-radius:50%;
+    background: linear-gradient(180deg, var(--sun-hi) 0%, var(--sun-mid) 55%, var(--sun-lo) 100%);
+    filter: drop-shadow(0 0 40px rgba(255,41,117,.55)) drop-shadow(0 0 90px rgba(140,30,255,.4));
+    -webkit-mask-image: linear-gradient(#000 0 52%, transparent 52% 56%, #000 56% 63%, transparent 63% 66%, #000 66% 72%, transparent 72% 75%, #000 75% 80%, transparent 80% 83%, #000 83% 88%, transparent 88% 91%, #000 91% 100%);
+            mask-image: linear-gradient(#000 0 52%, transparent 52% 56%, #000 56% 63%, transparent 63% 66%, #000 66% 72%, transparent 72% 75%, #000 75% 80%, transparent 80% 83%, #000 83% 88%, transparent 88% 91%, #000 91% 100%);
+    z-index:1;
+    animation: sunrise 14s ease-in-out infinite alternate;
+  }
+  @keyframes sunrise{
+    from{ transform: translateX(-50%) translateY(0); }
+    to  { transform: translateX(-50%) translateY(-14px); }
+  }
+
+  /* -- the grid floor -- */
+  .gridfloor-clip{
+    position:absolute; left:0; right:0; bottom:0;
+    height: 34%;
+    overflow:hidden;
+    z-index:2;
+  }
+  .gridfloor{
+    position:absolute; left:-60%; right:-60%; top:0; bottom:-40%;
+    background-image:
+      repeating-linear-gradient(to right,  rgba(255,46,196,.55) 0 2px, transparent 2px 64px),
+      repeating-linear-gradient(to bottom, rgba(1,205,254,.55)  0 2px, transparent 2px 64px);
+    transform: perspective(320px) rotateX(62deg);
+    transform-origin: top center;
+    animation: gridrun 2.8s linear infinite;
+  }
+  @keyframes gridrun{
+    from{ background-position: 0 0, 0 0; }
+    to  { background-position: 0 0, 0 64px; }
+  }
+  /* horizon glow line */
+  .gridfloor-clip::before{
+    content:"";
+    position:absolute; left:0; right:0; top:-2px; height:4px;
+    background: linear-gradient(90deg, transparent, var(--neon-pink) 30%, var(--neon-cyan) 70%, transparent);
+    box-shadow: 0 0 22px 4px rgba(255,46,196,.6);
+    z-index:3;
+  }
+  /* fade grid into distance */
+  .gridfloor-clip::after{
+    content:"";
+    position:absolute; inset:0;
+    background: linear-gradient(180deg, rgba(42,10,94,.9) 0%, transparent 45%);
+    z-index:2;
+    pointer-events:none;
+  }
+
+  .hero-inner{ position:relative; z-index:5; width:100%; max-width:640px; }
+
+  .kicker{
+    font-family: var(--mono);
+    font-size:11px; letter-spacing:.42em;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px rgba(1,205,254,.9);
+    text-transform: uppercase;
+    margin-bottom:14px;
+  }
+  .kicker .jp{ color: var(--neon-soft); text-shadow: 0 0 10px rgba(255,113,206,.9); letter-spacing:.2em; }
+
+  .hero h1{
+    font-family: var(--mono);
+    font-size: clamp(64px, 22vw, 150px);
+    font-weight: 800;
+    line-height: .9;
+    letter-spacing: .06em;
+    background: linear-gradient(180deg, #ffffff 8%, #9be9ff 38%, #b967ff 62%, #ff71ce 92%);
+    -webkit-background-clip: text;
+            background-clip: text;
+    color: transparent;
+    filter:
+      drop-shadow(0 0 12px rgba(185,103,255,.55))
+      drop-shadow(0 4px 0 rgba(255,46,196,.35));
+    position:relative;
+  }
+
+  .glitch{ position:relative; display:inline-block; }
+  .glitch::before, .glitch::after{
+    content: attr(data-txt);
+    position:absolute; left:0; top:0;
+    width:100%;
+    background: inherit;
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent;
+    pointer-events:none;
+  }
+  .glitch::before{
+    transform: translate(-3px, 0);
+    filter: none;
+    opacity:.55;
+    text-shadow: -2px 0 var(--neon-cyan);
+    animation: glitchA 3.4s steps(1) infinite;
+  }
+  .glitch::after{
+    transform: translate(3px, 0);
+    opacity:.55;
+    text-shadow: 2px 0 var(--neon-pink);
+    animation: glitchB 2.9s steps(1) infinite;
+  }
+  @keyframes glitchA{
+    0%,94%,100%{ clip-path: inset(100% 0 0 0); }
+    95%{ clip-path: inset(12% 0 62% 0); }
+    97%{ clip-path: inset(60% 0 18% 0); }
+  }
+  @keyframes glitchB{
+    0%,91%,100%{ clip-path: inset(100% 0 0 0); }
+    92%{ clip-path: inset(40% 0 40% 0); }
+    96%{ clip-path: inset(4% 0 78% 0); }
+  }
+
+  .hero .sub{
+    margin: 20px auto 8px;
+    font-size: 17px;
+    color: var(--ink);
+    max-width: 34ch;
+  }
+  .hero .sub b{
+    color:#fff;
+    text-shadow: 0 0 10px rgba(255,113,206,.8);
+  }
+  .hero .sub-dim{
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing:.14em;
+    color: var(--ink-dim);
+    margin-bottom: 30px;
+  }
+
+  .counter{
+    font-family: var(--mono);
+    font-size: clamp(34px, 9vw, 52px);
+    font-weight:800;
+    letter-spacing:.08em;
+    color: var(--neon-mint);
+    text-shadow: 0 0 14px rgba(5,255,161,.9), 0 0 42px rgba(5,255,161,.4);
+    margin-bottom: 4px;
+  }
+  .counter-label{
+    font-family: var(--mono);
+    font-size: 11px; letter-spacing:.4em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-bottom: 30px;
+  }
+
+  .cta-row{
+    display:flex; flex-direction:column; gap:14px;
+    align-items:center;
+  }
+  .btn{
+    display:inline-block;
+    font-family: var(--mono);
+    font-weight:800;
+    font-size: 14px;
+    letter-spacing:.18em;
+    text-transform: uppercase;
+    padding: 15px 30px;
+    border-radius: 3px;
+    cursor:pointer;
+    border:none;
+    transition: transform .15s ease, box-shadow .15s ease;
+    width:100%;
+    max-width:320px;
+    text-align:center;
+  }
+  .btn:active{ transform: translateY(2px); }
+  .btn-neon{
+    background: linear-gradient(90deg, var(--neon-pink), var(--neon-purp) 55%, var(--neon-cyan));
+    color:#08010f;
+    box-shadow:
+      0 0 18px rgba(255,46,196,.55),
+      0 0 44px rgba(1,205,254,.35);
+  }
+  .btn-neon:hover{
+    box-shadow:
+      0 0 26px rgba(255,46,196,.85),
+      0 0 70px rgba(1,205,254,.55);
+  }
+  .btn-ghost{
+    background: transparent;
+    color: var(--neon-cyan);
+    border: 1px solid rgba(1,205,254,.6);
+    box-shadow: inset 0 0 14px rgba(1,205,254,.12), 0 0 12px rgba(1,205,254,.18);
+    text-shadow: 0 0 8px rgba(1,205,254,.8);
+  }
+  .btn-ghost:hover{
+    box-shadow: inset 0 0 20px rgba(1,205,254,.2), 0 0 24px rgba(1,205,254,.4);
+  }
+
+  /* ================= TICKER ================= */
+  .ticker{
+    border-top: 1px solid rgba(255,46,196,.4);
+    border-bottom: 1px solid rgba(1,205,254,.4);
+    background: rgba(10,1,24,.9);
+    overflow:hidden;
+    position:relative;
+    z-index:6;
+  }
+  .ticker-track{
+    display:flex;
+    width:max-content;
+    animation: tick 36s linear infinite;
+  }
+  .ticker span{
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing:.16em;
+    text-transform: uppercase;
+    padding: 12px 26px;
+    white-space:nowrap;
+    color: var(--ink-dim);
+  }
+  .ticker span b{ color: var(--neon-soft); font-weight:800; text-shadow:0 0 8px rgba(255,113,206,.7); }
+  .ticker span i{ font-style:normal; color: var(--neon-cyan); }
+  @keyframes tick{
+    from{ transform: translateX(0); }
+    to  { transform: translateX(-50%); }
+  }
+
+  /* ================= SECTION SCAFFOLD ================= */
+  section{ position:relative; padding: 72px 0; }
+
+  .sec-head{
+    text-align:center;
+    margin-bottom: 36px;
+  }
+  .sec-head .jp-side{
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing:.5em;
+    color: var(--neon-purp);
+    text-shadow: 0 0 10px rgba(185,103,255,.8);
+    margin-bottom:10px;
+  }
+  .sec-head h2{
+    font-family: var(--mono);
+    font-size: clamp(26px, 7vw, 40px);
+    font-weight:800;
+    letter-spacing:.3em;
+    text-transform:uppercase;
+    color:#fff;
+    text-shadow:
+      0 0 10px rgba(255,46,196,.8),
+      0 0 34px rgba(255,46,196,.4);
+  }
+  .sec-head p{
+    margin-top:10px;
+    color: var(--ink-dim);
+    font-size:14px;
+    max-width: 44ch;
+    margin-left:auto; margin-right:auto;
+  }
+
+  /* ================= THE LIST ================= */
+  #list{ background: linear-gradient(180deg, #0a0118, #100428 40%, #0a0118); }
+
+  .searchbox{
+    position:relative;
+    margin-bottom:16px;
+  }
+  .searchbox input{
+    width:100%;
+    background: rgba(12,3,32,.9);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: 15px;
+    letter-spacing:.06em;
+    padding: 15px 16px 15px 44px;
+    outline:none;
+    box-shadow: inset 0 0 18px rgba(185,103,255,.08);
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .searchbox input:focus{
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 16px rgba(1,205,254,.35), inset 0 0 18px rgba(1,205,254,.08);
+  }
+  .searchbox input::placeholder{ color: var(--ink-dim); }
+  .searchbox svg{
+    position:absolute; left:14px; top:50%;
+    transform: translateY(-50%);
+    width:18px; height:18px;
+    stroke: var(--neon-cyan);
+    filter: drop-shadow(0 0 4px rgba(1,205,254,.8));
+  }
+
+  .chips{
+    display:flex; flex-wrap:wrap; gap:8px;
+    margin-bottom:22px;
+  }
+  .chip{
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color: var(--ink-dim);
+    background: transparent;
+    border: 1px solid rgba(154,134,200,.4);
+    border-radius: 999px;
+    padding: 7px 14px;
+    cursor:pointer;
+    transition: all .15s ease;
+  }
+  .chip:hover{ color: var(--neon-soft); border-color: rgba(255,113,206,.6); }
+  .chip.on{
+    color: #08010f;
+    background: linear-gradient(90deg, var(--neon-pink), var(--neon-purp));
+    border-color: transparent;
+    box-shadow: 0 0 14px rgba(255,46,196,.55);
+    font-weight:800;
+  }
+
+  .list-meta{
+    display:flex; justify-content:space-between; align-items:baseline;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color: var(--ink-dim);
+    margin-bottom:14px;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .list-meta b{ color: var(--neon-mint); text-shadow:0 0 8px rgba(5,255,161,.7); }
+
+  .cards{ display:grid; grid-template-columns: 1fr; gap:14px; }
+
+  .card{
+    position:relative;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 18px 18px 16px;
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    overflow:hidden;
+  }
+  .card::before{
+    content:"";
+    position:absolute; left:0; top:0; bottom:0;
+    width:3px;
+    background: linear-gradient(180deg, var(--neon-pink), var(--neon-cyan));
+    box-shadow: 0 0 10px rgba(255,46,196,.7);
+  }
+  .card:hover{
+    transform: translateY(-3px);
+    border-color: rgba(255,113,206,.7);
+    box-shadow:
+      0 0 22px rgba(255,46,196,.28),
+      0 0 46px rgba(1,205,254,.14);
+  }
+  .card .co{
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing:.3em;
+    text-transform:uppercase;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 8px rgba(1,205,254,.7);
+    margin-bottom:6px;
+  }
+  .card .role{
+    font-size: 17px;
+    font-weight: 700;
+    color:#fff;
+    line-height:1.3;
+    margin-bottom:12px;
+  }
+  .card .meta{
+    display:flex; flex-wrap:wrap;
+    gap:6px 14px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing:.06em;
+    color: var(--ink-dim);
+  }
+  .card .meta .pay{ color: var(--neon-mint); text-shadow:0 0 6px rgba(5,255,161,.5); }
+  .card .meta .close{ color: var(--neon-soft); }
+  .card .added{
+    position:absolute; top:16px; right:14px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing:.12em;
+    color: var(--ink-dim);
+    opacity:.8;
+  }
+  .tag-soon{
+    display:inline-block;
+    font-family: var(--mono);
+    font-size: 9.5px;
+    font-weight:800;
+    letter-spacing:.2em;
+    color: var(--void);
+    background: linear-gradient(90deg, var(--sun-hi), var(--sun-mid));
+    border-radius:2px;
+    padding: 3px 7px;
+    margin-bottom: 8px;
+    box-shadow: 0 0 12px rgba(255,41,117,.6);
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{ opacity:1; }
+    50%{ opacity:.65; }
+  }
+
+  .no-results{
+    display:none;
+    text-align:center;
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing:.2em;
+    color: var(--ink-dim);
+    padding: 40px 0;
+  }
+  .no-results b{ color: var(--neon-pink); text-shadow:0 0 8px rgba(255,46,196,.8); }
+
+  .list-foot{
+    text-align:center;
+    margin-top:26px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing:.14em;
+    color: var(--ink-dim);
+  }
+  .list-foot b{ color: var(--neon-cyan); }
+
+  /* ================= MONDAY DROP ================= */
+  #drop{
+    background:
+      radial-gradient(90% 60% at 50% 0%, rgba(140,30,255,.22), transparent 70%),
+      linear-gradient(180deg, #0a0118, #170838 50%, #0a0118);
+  }
+
+  .drop-card{
+    position:relative;
+    border-radius:10px;
+    padding: 2px; /* gradient border thickness */
+    background: linear-gradient(135deg, var(--neon-pink), var(--neon-purp) 40%, var(--neon-cyan) 80%, var(--neon-mint));
+    box-shadow:
+      0 0 34px rgba(255,46,196,.35),
+      0 0 80px rgba(1,205,254,.2);
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .drop-in{
+    background: linear-gradient(180deg, #140636, #0d0224);
+    border-radius: 8px;
+    padding: 30px 24px 28px;
+    text-align:center;
+  }
+  .drop-badge{
+    display:inline-block;
+    font-family: var(--mono);
+    font-size:10px;
+    letter-spacing:.4em;
+    text-transform:uppercase;
+    color: var(--neon-mint);
+    border:1px solid rgba(5,255,161,.5);
+    border-radius:2px;
+    padding: 5px 12px 5px 14px;
+    margin-bottom:18px;
+    text-shadow: 0 0 8px rgba(5,255,161,.8);
+  }
+  .drop-in h3{
+    font-family: var(--mono);
+    font-size: clamp(24px, 7vw, 34px);
+    letter-spacing:.2em;
+    font-weight:800;
+    text-transform:uppercase;
+    background: linear-gradient(180deg, #fff 15%, #9be9ff 45%, #ff71ce 90%);
+    -webkit-background-clip:text; background-clip:text;
+    color:transparent;
+    filter: drop-shadow(0 0 12px rgba(255,113,206,.5));
+    margin-bottom: 6px;
+  }
+  .drop-in .jp{
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing:.4em;
+    color: var(--neon-purp);
+    margin-bottom: 22px;
+  }
+  .price{
+    font-family: var(--mono);
+    font-size: 54px;
+    font-weight:800;
+    line-height:1;
+    color:#fff;
+    text-shadow: 0 0 18px rgba(1,205,254,.9), 0 0 60px rgba(1,205,254,.4);
+  }
+  .price small{
+    font-size: 15px;
+    font-weight:400;
+    letter-spacing:.14em;
+    color: var(--ink-dim);
+    text-shadow:none;
+  }
+  .price-note{
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing:.2em;
+    color: var(--ink-dim);
+    margin: 8px 0 24px;
+  }
+  .drop-list{
+    list-style:none;
+    text-align:left;
+    max-width: 340px;
+    margin: 0 auto 26px;
+    display:grid; gap:12px;
+  }
+  .drop-list li{
+    position:relative;
+    padding-left: 30px;
+    font-size: 14.5px;
+    color: var(--ink);
+  }
+  .drop-list li b{ color:#fff; }
+  .drop-list li::before{
+    content:"▸";
+    position:absolute; left:6px; top:0;
+    color: var(--neon-pink);
+    text-shadow: 0 0 8px rgba(255,46,196,.9);
+  }
+  .drop-in .btn{ max-width:100%; }
+  .stripe-note{
+    margin-top:14px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing:.16em;
+    color: var(--ink-dim);
+  }
+  .stripe-note b{ color: var(--neon-purp); }
+  .next-drop{
+    margin-top:20px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    color: var(--neon-mint);
+    text-shadow: 0 0 8px rgba(5,255,161,.7);
+  }
+
+  .drop-vs{
+    max-width:480px;
+    margin: 30px auto 0;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing:.1em;
+    color: var(--ink-dim);
+    text-align:center;
+    line-height:2;
+  }
+  .drop-vs b{ color: var(--neon-cyan); }
+
+  /* ================= OPERATOR ================= */
+  #operator{
+    background: linear-gradient(180deg, #0a0118, #0e0322);
+  }
+  .op-card{
+    max-width: 520px;
+    margin:0 auto;
+    text-align:center;
+    border:1px solid var(--line);
+    border-radius:8px;
+    background: var(--card);
+    padding: 34px 24px;
+    box-shadow: 0 0 30px rgba(185,103,255,.14);
+    position:relative;
+    overflow:hidden;
+  }
+  .op-card::before{
+    content:"";
+    position:absolute; left:0; right:0; top:0; height:2px;
+    background: linear-gradient(90deg, transparent, var(--neon-purp), transparent);
+    box-shadow: 0 0 14px rgba(185,103,255,.8);
+  }
+  .avatar{
+    width:76px; height:76px;
+    margin: 0 auto 16px;
+    border-radius:50%;
+    background:
+      radial-gradient(circle at 35% 30%, #ff71ce 0 18%, transparent 19%),
+      radial-gradient(circle at 65% 30%, #01cdfe 0 18%, transparent 19%),
+      linear-gradient(180deg, #2a0a5e, #140636);
+    border: 2px solid var(--neon-purp);
+    box-shadow: 0 0 20px rgba(185,103,255,.55);
+    position:relative;
+  }
+  .avatar::after{
+    content:"";
+    position:absolute;
+    left:50%; bottom:16px;
+    width:26px; height:10px;
+    transform:translateX(-50%);
+    border-radius: 0 0 20px 20px;
+    border:2px solid var(--neon-mint);
+    border-top:none;
+    box-shadow: 0 0 8px rgba(5,255,161,.6);
+  }
+  .op-card h3{
+    font-family: var(--mono);
+    letter-spacing:.24em;
+    text-transform:uppercase;
+    font-size:15px;
+    color:#fff;
+    text-shadow: 0 0 10px rgba(255,46,196,.6);
+    margin-bottom:12px;
+  }
+  .op-card p{
+    color: var(--ink-dim);
+    font-size:14.5px;
+    max-width: 40ch;
+    margin: 0 auto 8px;
+  }
+  .op-card p b{ color: var(--ink); }
+  .ig{
+    display:inline-block;
+    margin-top:14px;
+    font-family: var(--mono);
+    font-size:12px;
+    letter-spacing:.16em;
+    color: var(--neon-soft);
+    border-bottom:1px dashed rgba(255,113,206,.5);
+    padding-bottom:2px;
+    text-shadow: 0 0 8px rgba(255,113,206,.6);
+  }
+
+  /* ================= FAQ ================= */
+  #faq .wrap{ max-width: 620px; }
+  details{
+    border:1px solid rgba(154,134,200,.3);
+    border-radius:6px;
+    background: rgba(14,4,36,.7);
+    margin-bottom:12px;
+    overflow:hidden;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  details[open]{
+    border-color: rgba(1,205,254,.55);
+    box-shadow: 0 0 18px rgba(1,205,254,.18);
+  }
+  summary{
+    cursor:pointer;
+    list-style:none;
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing:.1em;
+    color: var(--ink);
+    padding: 16px 44px 16px 16px;
+    position:relative;
+    user-select:none;
+  }
+  summary::-webkit-details-marker{ display:none; }
+  summary::after{
+    content:"+";
+    position:absolute; right:16px; top:50%;
+    transform: translateY(-50%);
+    font-family: var(--mono);
+    font-size: 18px;
+    color: var(--neon-pink);
+    text-shadow: 0 0 8px rgba(255,46,196,.8);
+    transition: transform .2s;
+  }
+  details[open] summary::after{ transform: translateY(-50%) rotate(45deg); }
+  details .a{
+    padding: 0 16px 16px;
+    font-size: 14px;
+    color: var(--ink-dim);
+    line-height:1.65;
+  }
+  details .a b{ color: var(--neon-mint); }
+
+  /* ================= FOOTER ================= */
+  footer{
+    position:relative;
+    padding: 70px 20px 40px;
+    text-align:center;
+    overflow:hidden;
+    background: linear-gradient(0deg, #1c0940 0%, var(--void) 80%);
+  }
+  .foot-grid-clip{
+    position:absolute; left:0; right:0; bottom:0;
+    height: 120px;
+    overflow:hidden;
+    opacity:.5;
+    pointer-events:none;
+  }
+  .foot-grid{
+    position:absolute; left:-60%; right:-60%; top:0; bottom:-50%;
+    background-image:
+      repeating-linear-gradient(to right,  rgba(255,46,196,.4) 0 1px, transparent 1px 56px),
+      repeating-linear-gradient(to bottom, rgba(1,205,254,.4)  0 1px, transparent 1px 56px);
+    transform: perspective(280px) rotateX(62deg);
+    transform-origin: top center;
+  }
+  footer .fm{
+    position:relative; z-index:2;
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight:800;
+    letter-spacing:.3em;
+    color:#fff;
+    text-shadow: 0 0 10px var(--neon-pink), 0 0 30px rgba(255,46,196,.5);
+    margin-bottom:10px;
+  }
+  footer .creed{
+    position:relative; z-index:2;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing:.24em;
+    text-transform:uppercase;
+    color: var(--ink-dim);
+    margin-bottom:20px;
+  }
+  footer .creed i{ font-style:normal; color: var(--neon-cyan); }
+  footer .links{
+    position:relative; z-index:2;
+    display:flex;
+    justify-content:center;
+    gap:22px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing:.12em;
+    margin-bottom:26px;
+    flex-wrap:wrap;
+  }
+  footer .fine{
+    position:relative; z-index:2;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing:.14em;
+    color: rgba(154,134,200,.55);
+  }
+
+  /* ================= MOTION SAFETY ================= */
+  @media (prefers-reduced-motion: reduce){
+    *{ animation: none !important; transition: none !important; }
+    html{ scroll-behavior:auto; }
+  }
+
+  /* ================= DESKTOP ================= */
+  @media (min-width: 720px){
+    .cards{ grid-template-columns: 1fr 1fr; }
+    .cta-row{ flex-direction:row; justify-content:center; }
+    .btn{ width:auto; }
+    .hero{ padding-bottom: 190px; }
+    .sun{ width: 320px; height: 320px; bottom: 24%; }
+    .card .role{ font-size:18px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===================== TOP BAR ===================== -->
+  <header class="topbar">
+    <div class="topbar-in">
+      <div class="wordmark">UGMI<span class="tld">.ca</span></div>
+      <div class="free-tag">FREE ⁂ NO ACCOUNT ⁂ NO PAYWALL</div>
+    </div>
+  </header>
+
+  <!-- ===================== HERO ===================== -->
+  <section class="hero">
+    <div class="sun" aria-hidden="true"></div>
+    <div class="gridfloor-clip" aria-hidden="true"><div class="gridfloor"></div></div>
+
+    <div class="hero-inner">
+      <div class="kicker">▚ THE INTERNSHIP LIST <span class="jp">／ インターンシップ</span> ▞</div>
+      <h1><span class="glitch" data-txt="UGMI">UGMI</span></h1>
+      <p class="sub">Every open internship, one searchable list. <b>No account. No email. No paywall.</b></p>
+      <p class="sub-dim">// mostly Canadian · updated constantly · built at Waterloo</p>
+
+      <div class="counter" id="counter">0</div>
+      <div class="counter-label">open listings right now</div>
+
+      <div class="cta-row">
+        <a class="btn btn-neon" href="#list">BROWSE THE LIST ▸</a>
+        <a class="btn btn-ghost" href="#drop">THE MONDAY DROP</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TICKER ===================== -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track">
+      <span><b>SHOPIFY</b> swe intern <i>$34/hr</i> closes in 3d</span>
+      <span><b>AMAZON</b> sde intern <i>$41/hr</i> closes in 5d</span>
+      <span><b>RBC</b> amplify dev <i>$31/hr</i> closes in 6d</span>
+      <span><b>GOOGLE</b> step intern · waterloo · sep 19</span>
+      <span><b>UBISOFT</b> gameplay programmer <i>$30/hr</i> · montreal</span>
+      <span><b>WEALTHSIMPLE</b> data science · toronto · closes in 11d</span>
+      <span><b>SHOPIFY</b> swe intern <i>$34/hr</i> closes in 3d</span>
+      <span><b>AMAZON</b> sde intern <i>$41/hr</i> closes in 5d</span>
+      <span><b>RBC</b> amplify dev <i>$31/hr</i> closes in 6d</span>
+      <span><b>GOOGLE</b> step intern · waterloo · sep 19</span>
+      <span><b>UBISOFT</b> gameplay programmer <i>$30/hr</i> · montreal</span>
+      <span><b>WEALTHSIMPLE</b> data science · toronto · closes in 11d</span>
+    </div>
+  </div>
+
+  <!-- ===================== THE LIST ===================== -->
+  <section id="list">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="jp-side">リ ス ト</div>
+        <h2>The List</h2>
+        <p>A live sample of what's on ugmi.ca right now. Search it. Filter it. Apply. That's the whole product.</p>
+      </div>
+
+      <div class="searchbox">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"></circle>
+          <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
+        </svg>
+        <input id="q" type="search" placeholder="search company, role, city…" autocomplete="off" aria-label="Search listings">
+      </div>
+
+      <div class="chips" id="chips" role="group" aria-label="Filter by location">
+        <button class="chip on" data-loc="all">ALL</button>
+        <button class="chip" data-loc="remote">REMOTE</button>
+        <button class="chip" data-loc="toronto">TORONTO</button>
+        <button class="chip" data-loc="vancouver">VANCOUVER</button>
+        <button class="chip" data-loc="waterloo">WATERLOO</button>
+        <button class="chip" data-loc="montreal">MONTREAL</button>
+      </div>
+
+      <div class="list-meta">
+        <div>SHOWING <b id="shown">12</b> SAMPLE / <b>1,427</b> TOTAL</div>
+        <div>SORT: CLOSING ▾</div>
+      </div>
+
+      <div class="cards" id="cards">
+
+        <article class="card" data-loc="remote" data-txt="shopify software engineering intern remote canada">
+          <div class="added">2d ago</div>
+          <span class="tag-soon">⚠ CLOSES IN 3 DAYS</span>
+          <div class="co">Shopify</div>
+          <div class="role">Software Engineering Intern</div>
+          <div class="meta">
+            <span>◈ Remote, Canada</span>
+            <span class="pay">$34/hr CAD</span>
+            <span class="close">closes in 3d</span>
+          </div>
+        </article>
+
+        <article class="card" data-loc="vancouver" data-txt="amazon sde intern vancouver">
+          <div class="added">2w ago</div>
+          <span class="tag-soon">⚠ CLOSES IN 5 DAYS</span>
+          <div class="co">Amazon</div>
+          <div class="role">SDE Intern</div>
+          <div class="meta">
+            <span>◈ Vancouver</span>
+            <span class="pay">$41/hr CAD</span>
+            <span class="close">closes in 5d</span>
+          </div>
+        </article>
+
+        <article class="card" data-loc="toronto" data-txt="rbc amplify developer intern toronto">
+          <div class="added">today</div>
+          <span class="tag-soon">⚠ CLOSES IN 6 DAYS</span>
+          <div class="co">RBC</div>
+          <div class="role">Amplify Developer Intern</div>
+          <div class="meta">
+            <span>◈ Toronto</span>
+            <span class="pay">$31/hr CAD</span>
+            <span class="close">closes in 6d</span>
+          </div>
+        </article>
+
+        <article class="card" data-loc="remote" data-txt="stripe software engineer intern remote us">
+          <div class="added">5d ago</div>
+          <div class="co">Stripe</div>
+          <div class="role">Software Engineer Intern</div>
+          <div class="meta">
+            <span>◈ Remote, US</span>
+            <span>pay not listed</span>
+            <span class="close">closes in 9d</span>
+          </div>
+        </article>
+
+        <article class="card" data-loc="toronto" data-txt="wealthsimple data science intern toronto">
+          <div class="added">4d ago</div>
+          <div class="co">Wealthsimple</div>
+          <div class="role">Data Science Intern</div>
+          <div class="meta">
+            <span>◈ Toronto</span>
+            <span>pay not listed</span>
+            <span class="close">closes in 11d</span>
+          </div>
+        </article>
+
+        <article class="card" data-loc="waterloo" data-txt="opentext software developer co-op waterloo">
+          <div class="added">1w ago</div>
+          <div class="co">OpenText</div>
+          <div class="role">Software Developer Co-op</div>
+          <div class="meta">
+            <span>◈ Waterloo</span>
+            <span class="pay">$30/hr CAD</span>
+            <span class="close">closes in 13d</span>
+          </div>
+        </article>
+
+        <article class="card" data-loc="toronto" data-txt="ecobee embedded systems intern toronto">
+          <div class="added">1d ago</div>
+          <div class="co">ecobee</div>
+          <div class="role">Embedded Systems Intern</div>
+          <div class="meta">
+            <span>◈ Toronto</span>
+            <span class="pay">$29/hr CAD</span>
+            <span class="close">closes Aug 31</span>
+          </div>
+        </article>
+
+        <article class="card" data-loc="vancouver" data-txt="telus network engineering co-op vancouver">
+          <div class="added">6d ago</div>
+          <div class="co">TELUS</div>
+          <div class="role">Network Engineering Co-op</div>
+          <div class="meta">
+            <span>◈ Vancouver</span>
+            <span class="pay">$28/hr CAD</span>
+            <span class="close">closes Sep 2</span>
+          </div>
+        </article>
+
+        <article class="card" data-loc="vancouver" data-txt="sanctuary ai robotics software intern vancouver">
+          <div class="added">6d ago</div>
+          <div class="co">Sanctuary AI</div>
+          <div class="role">Robotics Software Intern</div>
+          <div class="meta">
+            <span>◈ Vancouver</span>
+            <span>pay not listed</span>
+            <span class="close">closes Sep 8</span>
+          </div>
+        </article>
+
+        <article class="card" data-loc="vancouver" data-txt="bc hydro engineering co-op vancouver">
+          <div class="added">3d ago</div>
+          <div class="co">BC Hydro</div>
+          <div class="role">Engineering Co-op</div>
+          <div class="meta">
+            <span>◈ Vancouver</span>
+            <span class="pay">$27/hr CAD</span>
+            <span class="close">closes Sep 12</span>
+          </div>
+        </article>
+
+        <article class="card" data-loc="waterloo" data-txt="google step intern waterloo">
+          <div class="added">2d ago</div>
+          <div class="co">Google</div>
+          <div class="role">STEP Intern</div>
+          <div class="meta">
+            <span>◈ Waterloo</span>
+            <span>pay not listed</span>
+            <span class="close">closes Sep 19</span>
+          </div>
+        </article>
+
+        <article class="card" data-loc="montreal" data-txt="ubisoft gameplay programmer intern montreal">
+          <div class="added">1w ago</div>
+          <div class="co">Ubisoft</div>
+          <div class="role">Gameplay Programmer Intern</div>
+          <div class="meta">
+            <span>◈ Montreal</span>
+            <span class="pay">$30/hr CAD</span>
+            <span>no close date</span>
+          </div>
+        </article>
+
+      </div>
+
+      <div class="no-results" id="noresults">
+        <b>NO SIGNAL</b><br><br>nothing matches — clear the search and try again
+      </div>
+
+      <div class="list-foot">…plus <b>1,415 more</b> on the full list. Still free. Still no account.</div>
+    </div>
+  </section>
+
+  <!-- ===================== MONDAY DROP ===================== -->
+  <section id="drop">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="jp-side">月 曜 日</div>
+        <h2>Monday Drop</h2>
+        <p>The list is free forever. This is the one paid thing — for people who'd rather apply than scroll.</p>
+      </div>
+
+      <div class="drop-card">
+        <div class="drop-in">
+          <div class="drop-badge">⁂ THE ONLY PAID THING ⁂</div>
+          <h3>10 FOR YOU</h3>
+          <div class="jp">エブリ・マンデー</div>
+
+          <div class="price">$15<small>/mo CAD</small></div>
+          <div class="price-note">CANCEL WHENEVER · NO CONTRACT</div>
+
+          <ul class="drop-list">
+            <li><b>10 hand-picked internships</b> in your inbox every Monday</li>
+            <li><b>Matched to you</b> — your program, your stack, your city</li>
+            <li><b>A named contact person</b> at every single one. A human. With a name.</li>
+            <li>Picked by a person, not a scraper</li>
+          </ul>
+
+          <button class="btn btn-neon" id="drop-cta" type="button">GET THE DROP ▸ $15/MO</button>
+          <div class="stripe-note">SECURE CHECKOUT VIA <b>STRIPE</b> — MOCKUP, NOT WIRED</div>
+          <div class="next-drop" id="nextdrop">NEXT DROP: MONDAY</div>
+        </div>
+      </div>
+
+      <div class="drop-vs">
+        <b>FREE</b> = the whole list, search it yourself<br>
+        <b>DROP</b> = ten doors, each with a name on it
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== OPERATOR ===================== -->
+  <section id="operator">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="jp-side">運 営 者</div>
+        <h2>One Human</h2>
+      </div>
+      <div class="op-card">
+        <div class="avatar" aria-hidden="true"></div>
+        <h3>BUILT BY A STUDENT</h3>
+        <p>UGMI is built and run by <b>one university student at Waterloo</b> — between lectures, co-op applications, and not enough sleep.</p>
+        <p>No company. No growth team. Just someone who got tired of internship boards that make you sign up to see the jobs.</p>
+        <a class="ig" href="#operator" title="Instagram — mockup link">◈ @sleppyeric on Instagram</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FAQ ===================== -->
+  <section id="faq">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="jp-side">質 問</div>
+        <h2>FAQ</h2>
+      </div>
+
+      <details>
+        <summary>&gt; is the list actually free?</summary>
+        <div class="a">Yes. All <b>1,427 listings</b> are open to anyone. No account, no email wall, no "unlock 3 more results" nonsense. The Monday Drop is the only paid thing, and the list doesn't get worse if you skip it.</div>
+      </details>
+
+      <details>
+        <summary>&gt; what exactly do i get for $15/month?</summary>
+        <div class="a">Every Monday: <b>10 internships</b>, hand-picked to match your program, skills, and location — each with a <b>named contact person</b> so you're not applying into the void. Payment goes through Stripe; cancel any time.</div>
+      </details>
+
+      <details>
+        <summary>&gt; who picks the 10?</summary>
+        <div class="a">A human — the same Waterloo student who built the site. Not an algorithm, not a keyword scraper. That's why it's ten, not ten thousand.</div>
+      </details>
+
+      <details>
+        <summary>&gt; is it only canadian internships?</summary>
+        <div class="a">Mostly Canadian, with some remote-friendly US roles (like Stripe above). If it's a real, open internship a student can apply to, it belongs on the list.</div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer>
+    <div class="foot-grid-clip" aria-hidden="true"><div class="foot-grid"></div></div>
+    <div class="fm">U G M I</div>
+    <div class="creed">no account <i>⁂</i> no email <i>⁂</i> no paywall</div>
+    <div class="links">
+      <a href="#list">the list</a>
+      <a href="#drop">monday drop</a>
+      <a href="#operator">@sleppyeric</a>
+    </div>
+    <div class="fine">ugmi.ca · internal design mockup · sample data only · est. waterloo</div>
+  </footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- animated counter in hero ---------- */
+  var TARGET = 1427;
+  var counterEl = document.getElementById("counter");
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function fmt(n){
+    return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+
+  if (reduced){
+    counterEl.textContent = fmt(TARGET);
+  } else {
+    var t0 = null, DUR = 1600;
+    function tickCount(ts){
+      if (t0 === null) t0 = ts;
+      var p = Math.min((ts - t0) / DUR, 1);
+      var eased = 1 - Math.pow(1 - p, 3);
+      counterEl.textContent = fmt(Math.round(TARGET * eased));
+      if (p < 1) requestAnimationFrame(tickCount);
+    }
+    requestAnimationFrame(tickCount);
+  }
+
+  /* ---------- search + location filter ---------- */
+  var q = document.getElementById("q");
+  var chips = document.getElementById("chips");
+  var cards = Array.prototype.slice.call(document.querySelectorAll("#cards .card"));
+  var shownEl = document.getElementById("shown");
+  var noResults = document.getElementById("noresults");
+  var activeLoc = "all";
+
+  function applyFilters(){
+    var term = q.value.trim().toLowerCase();
+    var shown = 0;
+    cards.forEach(function(card){
+      var okLoc = (activeLoc === "all") || (card.getAttribute("data-loc") === activeLoc);
+      var okTxt = !term || card.getAttribute("data-txt").indexOf(term) !== -1;
+      var show = okLoc && okTxt;
+      card.style.display = show ? "" : "none";
+      if (show) shown++;
+    });
+    shownEl.textContent = shown;
+    noResults.style.display = shown === 0 ? "block" : "none";
+  }
+
+  q.addEventListener("input", applyFilters);
+
+  chips.addEventListener("click", function(e){
+    var btn = e.target.closest(".chip");
+    if (!btn) return;
+    activeLoc = btn.getAttribute("data-loc");
+    Array.prototype.forEach.call(chips.querySelectorAll(".chip"), function(c){
+      c.classList.toggle("on", c === btn);
+    });
+    applyFilters();
+  });
+
+  /* ---------- countdown to next Monday drop ---------- */
+  var nd = document.getElementById("nextdrop");
+  var now = new Date();
+  var day = now.getDay();               /* 0 = Sun … 6 = Sat */
+  var until = (1 - day + 7) % 7;        /* days until Monday */
+  if (until === 0){
+    nd.textContent = "NEXT DROP: TODAY — IT'S MONDAY";
+  } else {
+    nd.textContent = "NEXT DROP: MONDAY — IN " + until + " DAY" + (until === 1 ? "" : "S");
+  }
+
+  /* ---------- mock checkout button ---------- */
+  var cta = document.getElementById("drop-cta");
+  var ctaOriginal = cta.textContent;
+  cta.addEventListener("click", function(){
+    cta.textContent = "▚▞ MOCKUP — STRIPE NOT WIRED ▚▞";
+    cta.disabled = true;
+    setTimeout(function(){
+      cta.textContent = ctaOriginal;
+      cta.disabled = false;
+    }, 2200);
+  });
+})();
+</script>
+</body>
+</html>

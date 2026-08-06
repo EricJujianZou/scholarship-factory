@@ -81,6 +81,36 @@ calm-plus-precision is what it cannot pattern-match to a scam. Corollary
    switching. Five themed mockups commissioned to `theme-explorations/`
    (institutional-calm, data-brutal, editorial-zine, tactile-consumer,
    terminal-dark) for the taste pick, to be weighed against the research.
+   **Taste pick landed (owner, Aug 6, 2026):** tactile + calm, merged.
+   data-brutal vetoed permanently ("never again"); terminal-dark vetoed
+   (black/gray/white feels depressing, accent arrives too late). Cards beat
+   the table. Less scrolling to reach the list; filters compressed.
+   Synthesis mockup: `theme-explorations/tactile-calm-v2.html`.
 4. **Build priority** — DECIDED: ship everything; make the site
    commercial-ready (UI, UX, trust). Implementation follows the theme pick.
 5. **IG broadcast channel** — not yet addressed by owner.
+6. **Owner engagement ideas, reviewed against the research (Aug 6, 2026):**
+   - Paid pitch at the Apply moment — ADOPTED as the per-card contact wedge
+     ("who to contact" beside Apply, opening a sheet). The Apply link itself
+     is never intercepted (free-core rule; effort-wall bounce risk).
+   - "Top 20 emails get 5 contacts" — KILLED (owner confirmed Aug 6): a live
+     counter can't be honest on a static site, and email-for-prize reads as
+     the sweepstakes pattern this audience is trained on. Substitute: one
+     real pick with contact is free every week, for everyone, no email (the
+     standing demo), plus the Monday email as the value-first capture.
+   - Referral explicitness (owner follow-up) — the referral outcome is now
+     named in the sheet ("The referral path at {Company}") and rows with a
+     researched contact carry a build-time "recruiter found" badge. Blurred
+     names REJECTED: blurred content sits on the audience's trained
+     grift-pattern list (audience.md §6); the badge carries possession
+     honestly and may only render where a real contact exists.
+   - Email-gated outreach template — REJECTED (regresses "no email"
+     load-bearing trust copy; template stays on-page + copy button).
+     PENDING owner ok.
+   - Stats to justify emotions — ADOPTED with the claims discipline: real,
+     scoped, linked stats only (NY Fed referral shares, Handshake volume).
+     "Our plan cuts X applications to Y / saves N hours" stays banned
+     (outcome delta, standing rule 3).
+   - Week-1 analytics — ADOPTED: cookieless event tracking, spec in
+     `analytics-plan.md`. PENDING tool confirmation (Umami free vs
+     Plausible $9/mo).

@@ -1,0 +1,996 @@
+<!-- INTERNAL DESIGN MOCKUP - sample listing data -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UGMI · La Maison des Stages</title>
+<style>
+  /* ============================================================
+     MAISON UGMI, redesigned per REDESIGN-SPEC.
+     black / white / one gold. thin serif display. hairlines.
+     whitespace compressed so the list lands near the 390px fold.
+     zero motion anywhere: the checkout must be the quietest block.
+     ============================================================ */
+
+  :root{
+    --black:#0b0b0b;
+    --white:#fdfdfb;
+    --gold:#b39554;      /* hairlines, borders, decoration, text on black */
+    --gold-ink:#8a6d2f;  /* gold-toned text on white, AA */
+    --amber:#96660a;     /* warm deadline ramp on white, AA, never red */
+    --muted:#4a4842;
+    --faded:#6f6c64;
+    --hairline:rgba(11,11,11,.16);
+    --hairline-mid:rgba(11,11,11,.35);
+    --hairline-inv:rgba(253,253,251,.25);
+    --serif:"Bodoni MT","Didot","Didot LT STD","Playfair","Georgia","Times New Roman",serif;
+    --sans:"Helvetica Neue",Helvetica,"Segoe UI",Arial,sans-serif;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{overflow-x:hidden;}
+  body{
+    background:var(--white);
+    color:var(--black);
+    font-family:var(--sans);
+    font-weight:300;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+
+  ::selection{background:var(--gold);color:var(--white);}
+  a{color:inherit;text-decoration:none;}
+  button{font:inherit;background:none;border:none;cursor:pointer;color:inherit;}
+  :focus-visible{outline:2px solid var(--gold-ink);outline-offset:3px;}
+  footer :focus-visible{outline-color:var(--gold);}
+  [hidden]{display:none !important;}
+  .num{font-variant-numeric:tabular-nums;}
+
+  .eyebrow{
+    font-size:.625rem;
+    letter-spacing:.42em;
+    text-transform:uppercase;
+    font-weight:400;
+  }
+  .eyebrow--gold{color:var(--gold-ink);}
+
+  .wrap{width:100%;max-width:760px;margin:0 auto;padding:0 20px;}
+
+  /* ============ HEADER ============ */
+  header{
+    position:sticky;
+    top:0;
+    z-index:50;
+    background:var(--white);
+    border-bottom:1px solid var(--hairline);
+  }
+  .masthead{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:13px 20px;
+    max-width:1120px;
+    margin:0 auto;
+  }
+  .wordmark{
+    font-family:var(--serif);
+    font-weight:400;
+    font-size:1.125rem;
+    letter-spacing:.55em;
+    text-transform:uppercase;
+    margin-right:-.55em;
+  }
+  .masthead nav{display:none;}
+  .masthead .menu-note{
+    font-size:.5625rem;
+    letter-spacing:.35em;
+    text-transform:uppercase;
+    color:var(--gold-ink);
+  }
+  @media (min-width:760px){
+    .masthead .menu-note{display:none;}
+    .masthead nav{display:flex;gap:40px;}
+    .masthead nav a{
+      font-size:.625rem;
+      letter-spacing:.34em;
+      text-transform:uppercase;
+      padding:14px 0 2px;
+      border-bottom:1px solid transparent;
+    }
+    .masthead nav a:hover{border-color:var(--gold-ink);color:var(--gold-ink);}
+  }
+
+  /* ============ HERO, compressed ============ */
+  .hero{padding:30px 20px 20px;text-align:center;}
+  .hero .eyebrow{margin-bottom:14px;display:block;}
+  .hero h1{
+    font-family:var(--serif);
+    font-weight:200;
+    font-size:clamp(1.75rem,8vw,3.25rem);
+    line-height:1.12;
+    letter-spacing:.04em;
+  }
+  .hero h1 em{font-style:italic;}
+  .hero .sub{
+    margin-top:10px;
+    font-size:.6875rem;
+    letter-spacing:.3em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+
+  /* ============ PULSE STRIP (static; replaces the marquee) ============ */
+  .pulse{
+    border-top:1px solid var(--black);
+    border-bottom:1px solid var(--black);
+    padding:10px 20px;
+    text-align:center;
+  }
+  .pulse p{
+    font-size:.6875rem;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--muted);
+    line-height:1.9;
+  }
+  .pulse .dot{color:var(--gold-ink);padding:0 .4em;}
+
+  /* ============ ELIGIBILITY, three tight rows ============ */
+  .elig{padding:16px 0 4px;}
+  .elig-title{display:block;margin-bottom:8px;}
+  .q-row{
+    display:flex;
+    align-items:center;
+    gap:8px 12px;
+    padding:7px 0;
+    border-top:1px solid var(--hairline);
+    flex-wrap:wrap;
+  }
+  .q-label{
+    flex:0 0 68px;
+    font-size:.625rem;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    color:var(--faded);
+  }
+  .pills{display:flex;flex-wrap:wrap;gap:6px 8px;}
+  .pill{
+    min-height:44px;
+    padding:10px 13px;
+    border:1px solid var(--hairline-mid);
+    background:var(--white);
+    font-size:.6875rem;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+  .pill:hover{color:var(--black);border-color:var(--black);}
+  .pill[aria-pressed="true"]{
+    background:var(--black);
+    border-color:var(--black);
+    color:var(--white);
+  }
+  .elig-status{padding:8px 0 2px;min-height:30px;}
+  .result-line{
+    font-size:.9375rem;
+    font-weight:400;
+    letter-spacing:.05em;
+  }
+  .zero-line{font-size:.875rem;font-weight:400;letter-spacing:.05em;}
+  .text-btn{
+    font-size:.6875rem;
+    font-weight:400;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--muted);
+    border-bottom:1px solid var(--hairline-mid);
+    min-height:44px;
+    padding:0 2px;
+  }
+  .text-btn:hover{color:var(--gold-ink);border-color:var(--gold-ink);}
+  .saved-note{font-size:.75rem;color:var(--faded);letter-spacing:.04em;margin-top:2px;}
+
+  /* ============ THE LIST ============ */
+  .lookbook{padding:4px 0 8px;}
+  .look{
+    padding:16px 0;
+    border-top:1px solid var(--hairline);
+  }
+  .look:last-of-type{border-bottom:1px solid var(--hairline);}
+  .look h3{
+    font-family:var(--serif);
+    font-weight:300;
+    font-size:1.375rem;
+    line-height:1.2;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+  }
+  .chip-new{
+    font-size:.5625rem;
+    letter-spacing:.3em;
+    text-transform:uppercase;
+    color:var(--gold-ink);
+    margin-left:12px;
+    vertical-align:.3em;
+    font-family:var(--sans);
+    font-weight:400;
+  }
+  .look .role{
+    margin-top:2px;
+    font-size:.6875rem;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+  .facts{
+    display:flex;
+    align-items:center;
+    gap:6px 24px;
+    flex-wrap:wrap;
+    margin-top:10px;
+  }
+  .fact .k{
+    display:block;
+    font-size:.5625rem;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    color:var(--faded);
+  }
+  .fact .v{
+    display:block;
+    font-size:.8125rem;
+    letter-spacing:.05em;
+  }
+  .fact .v.warm{color:var(--amber);}
+  .apply{
+    margin-left:auto;
+    display:inline-flex;
+    align-items:center;
+    min-height:44px;
+    padding:0 2px;
+    font-size:.6875rem;
+    letter-spacing:.34em;
+    text-transform:uppercase;
+    border-bottom:1px solid var(--black);
+  }
+  .apply:hover{color:var(--gold-ink);border-color:var(--gold-ink);}
+  .look.closed h3,
+  .look.closed .role,
+  .look.closed .fact .k,
+  .look.closed .fact .v{color:var(--faded);}
+  .chip-closed{
+    margin-left:auto;
+    font-size:.625rem;
+    letter-spacing:.3em;
+    text-transform:uppercase;
+    color:var(--faded);
+    border:1px solid var(--hairline);
+    padding:6px 12px;
+  }
+  .also-line{
+    padding:14px 0 0;
+    font-size:.75rem;
+    letter-spacing:.06em;
+    color:var(--muted);
+  }
+  @media (min-width:700px){
+    .look{display:flex;justify-content:space-between;align-items:center;gap:24px;}
+    .look-main{flex:1 1 auto;}
+    .facts{margin-top:0;justify-content:flex-end;flex:0 0 auto;}
+  }
+
+  /* ============ THE UGMI 10 ============ */
+  .pitch{padding:52px 0 12px;text-align:center;}
+  .closings{
+    font-family:var(--serif);
+    font-weight:200;
+    font-size:clamp(1.375rem,5.6vw,2rem);
+    line-height:1.25;
+    letter-spacing:.03em;
+  }
+  .bridge{
+    margin:8px auto 40px;
+    max-width:46ch;
+    font-size:.8125rem;
+    letter-spacing:.05em;
+    color:var(--muted);
+  }
+  .pitch h2{
+    font-family:var(--serif);
+    font-weight:200;
+    font-size:clamp(1.9rem,7.5vw,3.25rem);
+    line-height:1.05;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+  }
+  .pitch .lede{
+    margin:14px auto 30px;
+    max-width:44ch;
+    font-family:var(--serif);
+    font-style:italic;
+    font-size:1.0625rem;
+    letter-spacing:.03em;
+    color:var(--muted);
+  }
+  .example-label{
+    font-size:.625rem;
+    letter-spacing:.34em;
+    text-transform:uppercase;
+    color:var(--gold-ink);
+    margin-bottom:10px;
+  }
+  .example-pick{
+    max-width:460px;
+    margin:0 auto 26px;
+    border:1px solid var(--hairline-mid);
+    padding:18px 18px 16px;
+    text-align:left;
+  }
+  .pick-head{
+    font-family:var(--serif);
+    font-weight:300;
+    font-size:1.0625rem;
+    letter-spacing:.04em;
+  }
+  .pick-meta{
+    margin-top:4px;
+    font-size:.75rem;
+    letter-spacing:.08em;
+    color:var(--muted);
+  }
+  .pick-why{margin-top:10px;font-size:.8125rem;letter-spacing:.03em;}
+  .pick-why em{font-style:italic;color:var(--gold-ink);}
+  .pitch .how{
+    font-size:.8125rem;
+    letter-spacing:.06em;
+    color:var(--muted);
+    margin-bottom:24px;
+  }
+  .btn-ghost{
+    display:inline-block;
+    font-size:.6875rem;
+    letter-spacing:.34em;
+    text-transform:uppercase;
+    padding:15px 26px 14px 32px;
+    border:1px solid var(--black);
+  }
+  .btn-ghost:hover{background:var(--black);color:var(--white);}
+
+  /* ============ CALM CHECKOUT (quietest block, zero motion) ============ */
+  .checkout{padding:52px 0 56px;}
+  .checkout-card{
+    max-width:460px;
+    margin:0 auto;
+    border:1px solid var(--gold);
+    padding:34px 26px 30px;
+    background:var(--white);
+  }
+  .checkout-card .crest{width:40px;height:40px;display:block;margin:0 auto 18px;}
+  .checkout-card .crest *{stroke:var(--gold);fill:none;stroke-width:1;}
+  .checkout-card h2{
+    font-family:var(--serif);
+    font-weight:200;
+    font-size:1.375rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    text-align:center;
+    margin-bottom:20px;
+  }
+  .fee-grid{list-style:none;margin-bottom:18px;}
+  .fee-grid li{
+    display:flex;
+    justify-content:space-between;
+    gap:16px;
+    padding:9px 0;
+    border-bottom:1px solid var(--hairline);
+    align-items:baseline;
+  }
+  .fee-grid li:last-child{border-bottom:0;}
+  .fee-k{
+    font-size:.625rem;
+    letter-spacing:.26em;
+    text-transform:uppercase;
+    color:var(--faded);
+    flex:0 0 auto;
+  }
+  .fee-v{
+    font-size:.8125rem;
+    letter-spacing:.04em;
+    text-align:right;
+    max-width:62%;
+    line-height:1.5;
+  }
+  .firewall{font-size:.8125rem;letter-spacing:.04em;margin-bottom:12px;}
+  .handoff{font-size:.75rem;letter-spacing:.05em;color:var(--muted);margin-bottom:18px;}
+  .checkout .cta{
+    display:block;
+    width:100%;
+    text-align:center;
+    background:var(--black);
+    color:var(--white);
+    padding:16px 10px;
+    font-size:.6875rem;
+    letter-spacing:.34em;
+    text-transform:uppercase;
+  }
+  .blemish{
+    margin-top:16px;
+    font-family:var(--serif);
+    font-style:italic;
+    font-size:.9375rem;
+    letter-spacing:.03em;
+    color:var(--muted);
+    text-align:center;
+  }
+
+  /* ============ MONDAY EMAIL (optional decline path, after checkout) ============ */
+  .monday{padding:0 0 56px;}
+  .monday-card{
+    max-width:460px;
+    margin:0 auto;
+    border:1px solid var(--hairline-mid);
+    padding:22px 20px;
+  }
+  .monday h2{
+    font-size:.6875rem;
+    letter-spacing:.34em;
+    text-transform:uppercase;
+    font-weight:400;
+    margin-bottom:8px;
+  }
+  .monday .note{font-size:.8125rem;letter-spacing:.04em;color:var(--muted);margin-bottom:14px;}
+  .email-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .email-row input{
+    flex:1 1 180px;
+    min-height:46px;
+    padding:8px 12px;
+    font:inherit;
+    font-size:.875rem;
+    border:1px solid var(--hairline-mid);
+    background:var(--white);
+    color:var(--black);
+  }
+  .email-row button{
+    min-height:46px;
+    padding:0 18px;
+    border:1px solid var(--black);
+    font-size:.625rem;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+  }
+  .email-row button:hover{background:var(--black);color:var(--white);}
+  .email-note{font-size:.75rem;color:var(--faded);margin-top:8px;}
+
+  /* ============ FOOTER ============ */
+  footer{
+    background:var(--black);
+    color:var(--white);
+    padding:52px 20px 44px;
+    text-align:center;
+  }
+  footer .foot-mark{
+    font-family:var(--serif);
+    font-weight:200;
+    font-size:clamp(2.4rem,10vw,4rem);
+    letter-spacing:.14em;
+    margin-right:-.14em;
+    line-height:1;
+    text-transform:uppercase;
+  }
+  footer .foot-tag{
+    margin-top:12px;
+    font-family:var(--serif);
+    font-style:italic;
+    font-size:.9375rem;
+    color:rgba(253,253,251,.75);
+    letter-spacing:.05em;
+  }
+  footer .foot-fix{
+    margin:26px auto 4px;
+    max-width:44ch;
+    font-size:.875rem;
+    letter-spacing:.04em;
+    color:rgba(253,253,251,.9);
+  }
+  footer .foot-check{
+    font-size:.75rem;
+    letter-spacing:.08em;
+    color:rgba(253,253,251,.7);
+  }
+  footer .foot-links{
+    margin-top:30px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    align-items:center;
+  }
+  footer .foot-links a{
+    display:inline-flex;
+    align-items:center;
+    min-height:44px;
+    font-size:.625rem;
+    letter-spacing:.34em;
+    text-transform:uppercase;
+    border-bottom:1px solid transparent;
+  }
+  footer .foot-links a:hover{color:var(--gold);border-color:var(--gold);}
+  footer .legal{
+    margin-top:26px;
+    font-size:.625rem;
+    letter-spacing:.24em;
+    text-transform:uppercase;
+    color:rgba(253,253,251,.6);
+    line-height:2.4;
+  }
+  @media (min-width:760px){
+    footer .foot-links{flex-direction:row;justify-content:center;gap:44px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= HEADER ================= -->
+<header>
+  <div class="masthead">
+    <a class="wordmark" href="#top">UGMI</a>
+    <nav aria-label="Primary">
+      <a href="#list">The List</a>
+      <a href="#ten">The UGMI 10</a>
+      <a href="#checkout">Checkout</a>
+    </nav>
+    <span class="menu-note">Est. Waterloo</span>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ================= HERO, compressed ================= -->
+  <section class="hero">
+    <span class="eyebrow eyebrow--gold">Maison de Stages &middot; Waterloo, Canada</span>
+    <h1>Every internship, <em>one list</em>.</h1>
+    <p class="sub">Free &middot; No account &middot; No email</p>
+  </section>
+
+  <!-- ================= PULSE STRIP ================= -->
+  <div class="pulse">
+    <p class="num">Last checked Wed Aug 6, 7:04am ET<span class="dot">&middot;</span>1,427 open<span class="dot">&middot;</span>31 added this week<span class="dot">&middot;</span>23 closed this week<span class="dot">&middot;</span>hand-checked, never invented</p>
+  </div>
+
+  <!-- ================= ELIGIBILITY ================= -->
+  <section class="elig">
+    <div class="wrap">
+      <span class="elig-title eyebrow eyebrow--gold">Three taps show what you're eligible for</span>
+
+      <div class="q-row">
+        <span class="q-label" id="q-auth">Work in</span>
+        <div class="pills" role="group" aria-labelledby="q-auth" data-q="auth">
+          <button type="button" class="pill" data-v="ca" aria-pressed="false">Canada</button>
+          <button type="button" class="pill" data-v="us" aria-pressed="false">US</button>
+          <button type="button" class="pill" data-v="both" aria-pressed="false">Both</button>
+        </div>
+      </div>
+      <div class="q-row">
+        <span class="q-label" id="q-term">Term</span>
+        <div class="pills" role="group" aria-labelledby="q-term" data-q="term">
+          <button type="button" class="pill" data-v="s27" aria-pressed="false">Summer 2027</button>
+          <button type="button" class="pill" data-v="f26" aria-pressed="false">Fall 2026</button>
+          <button type="button" class="pill" data-v="w27" aria-pressed="false">Winter 2027</button>
+          <button type="button" class="pill" data-v="any" aria-pressed="false">Any</button>
+        </div>
+      </div>
+      <div class="q-row">
+        <span class="q-label" id="q-loc">Location</span>
+        <div class="pills" role="group" aria-labelledby="q-loc" data-q="loc">
+          <button type="button" class="pill" data-v="remote" aria-pressed="false">Remote OK</button>
+          <button type="button" class="pill" data-v="toronto" aria-pressed="false">Toronto/GTA</button>
+          <button type="button" class="pill" data-v="vancouver" aria-pressed="false">Vancouver</button>
+          <button type="button" class="pill" data-v="anywhere" aria-pressed="false">Anywhere</button>
+        </div>
+      </div>
+
+      <div class="elig-status" aria-live="polite">
+        <p class="result-line num" id="resultLine" hidden></p>
+        <div class="zero-row" id="zeroRow" hidden>
+          <p class="zero-line num">0 of 1,427 match all your filters. Loosen one?</p>
+          <button type="button" class="text-btn" id="undoBtn">Undo last answer</button>
+        </div>
+        <p class="saved-note" id="savedNote" hidden>Showing your filters, saved in this browser only.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= THE LIST ================= -->
+  <section class="lookbook" id="list">
+    <div class="wrap" id="jobList">
+
+      <article class="look" data-country="ca" data-term="s27" data-loc="remote">
+        <div class="look-main">
+          <h3>Shopify<span class="chip-new">New</span></h3>
+          <p class="role">Software Engineering Intern &middot; Remote, Canada &middot; Summer 2027</p>
+        </div>
+        <div class="facts">
+          <div class="fact"><span class="k">Pay</span><span class="v num">$34/hr CAD</span></div>
+          <div class="fact"><span class="k">Closes</span><span class="v warm num">in 3 days</span></div>
+          <div class="fact"><span class="k">Added</span><span class="v num">2 days ago</span></div>
+          <a class="apply" href="#">Apply</a>
+        </div>
+      </article>
+
+      <article class="look" data-country="ca" data-term="s27" data-loc="vancouver">
+        <div class="look-main">
+          <h3>Amazon</h3>
+          <p class="role">SDE Intern &middot; Vancouver &middot; Summer 2027</p>
+        </div>
+        <div class="facts">
+          <div class="fact"><span class="k">Pay</span><span class="v num">$41/hr CAD</span></div>
+          <div class="fact"><span class="k">Closes</span><span class="v warm num">in 5 days</span></div>
+          <div class="fact"><span class="k">Added</span><span class="v num">2 weeks ago</span></div>
+          <a class="apply" href="#">Apply</a>
+        </div>
+      </article>
+
+      <article class="look" data-country="ca" data-term="f26" data-loc="toronto">
+        <div class="look-main">
+          <h3>RBC<span class="chip-new">New</span></h3>
+          <p class="role">Amplify Developer Intern &middot; Toronto &middot; Fall 2026</p>
+        </div>
+        <div class="facts">
+          <div class="fact"><span class="k">Pay</span><span class="v num">$31/hr CAD</span></div>
+          <div class="fact"><span class="k">Closes</span><span class="v warm num">in 6 days</span></div>
+          <div class="fact"><span class="k">Added</span><span class="v">today</span></div>
+          <a class="apply" href="#">Apply</a>
+        </div>
+      </article>
+
+      <article class="look closed" data-country="ca" data-term="s27" data-loc="toronto">
+        <div class="look-main">
+          <h3>Pinterest</h3>
+          <p class="role">Software Engineer Intern &middot; Toronto &middot; Summer 2027</p>
+        </div>
+        <div class="facts">
+          <div class="fact"><span class="k">Added</span><span class="v num">3 weeks ago</span></div>
+          <span class="chip-closed">Closed</span>
+        </div>
+      </article>
+
+      <article class="look" data-country="us" data-term="s27" data-loc="remote">
+        <div class="look-main">
+          <h3>Stripe</h3>
+          <p class="role">Software Engineer Intern &middot; Remote, US &middot; Summer 2027</p>
+        </div>
+        <div class="facts">
+          <div class="fact"><span class="k">Pay</span><span class="v">not listed</span></div>
+          <div class="fact"><span class="k">Closes</span><span class="v num">in 9 days</span></div>
+          <div class="fact"><span class="k">Added</span><span class="v num">5 days ago</span></div>
+          <a class="apply" href="#">Apply</a>
+        </div>
+      </article>
+
+      <article class="look" data-country="ca" data-term="s27" data-loc="toronto remote">
+        <div class="look-main">
+          <h3>Wealthsimple</h3>
+          <p class="role">Data Science Intern &middot; Toronto, remote OK &middot; Summer 2027</p>
+        </div>
+        <div class="facts">
+          <div class="fact"><span class="k">Pay</span><span class="v">not listed</span></div>
+          <div class="fact"><span class="k">Closes</span><span class="v num">in 11 days</span></div>
+          <div class="fact"><span class="k">Added</span><span class="v num">4 days ago</span></div>
+          <a class="apply" href="#">Apply</a>
+        </div>
+      </article>
+
+      <article class="look" data-country="ca" data-term="f26" data-loc="other">
+        <div class="look-main">
+          <h3>OpenText</h3>
+          <p class="role">Software Developer Co-op &middot; Waterloo &middot; Fall 2026</p>
+        </div>
+        <div class="facts">
+          <div class="fact"><span class="k">Pay</span><span class="v num">$30/hr CAD</span></div>
+          <div class="fact"><span class="k">Closes</span><span class="v num">in 13 days</span></div>
+          <div class="fact"><span class="k">Added</span><span class="v num">1 week ago</span></div>
+          <a class="apply" href="#">Apply</a>
+        </div>
+      </article>
+
+      <article class="look" data-country="ca" data-term="s27" data-loc="toronto">
+        <div class="look-main">
+          <h3>ecobee<span class="chip-new">New</span></h3>
+          <p class="role">Embedded Systems Intern &middot; Toronto &middot; Summer 2027</p>
+        </div>
+        <div class="facts">
+          <div class="fact"><span class="k">Pay</span><span class="v num">$29/hr CAD</span></div>
+          <div class="fact"><span class="k">Closes</span><span class="v num">Aug 31</span></div>
+          <div class="fact"><span class="k">Added</span><span class="v num">1 day ago</span></div>
+          <a class="apply" href="#">Apply</a>
+        </div>
+      </article>
+
+      <article class="look closed" data-country="ca" data-term="f26" data-loc="toronto">
+        <div class="look-main">
+          <h3>Sun Life</h3>
+          <p class="role">Data Analyst Intern &middot; Toronto &middot; Fall 2026</p>
+        </div>
+        <div class="facts">
+          <div class="fact"><span class="k">Added</span><span class="v num">2 weeks ago</span></div>
+          <span class="chip-closed">Closed</span>
+        </div>
+      </article>
+
+      <article class="look" data-country="ca" data-term="w27" data-loc="vancouver">
+        <div class="look-main">
+          <h3>TELUS</h3>
+          <p class="role">Network Engineering Co-op &middot; Vancouver &middot; Winter 2027</p>
+        </div>
+        <div class="facts">
+          <div class="fact"><span class="k">Pay</span><span class="v num">$28/hr CAD</span></div>
+          <div class="fact"><span class="k">Closes</span><span class="v num">Sep 2</span></div>
+          <div class="fact"><span class="k">Added</span><span class="v num">6 days ago</span></div>
+          <a class="apply" href="#">Apply</a>
+        </div>
+      </article>
+
+      <article class="look" data-country="ca" data-term="w27" data-loc="vancouver">
+        <div class="look-main">
+          <h3>Sanctuary AI</h3>
+          <p class="role">Robotics Software Intern &middot; Vancouver &middot; Winter 2027</p>
+        </div>
+        <div class="facts">
+          <div class="fact"><span class="k">Pay</span><span class="v">not listed</span></div>
+          <div class="fact"><span class="k">Closes</span><span class="v num">Sep 8</span></div>
+          <div class="fact"><span class="k">Added</span><span class="v num">6 days ago</span></div>
+          <a class="apply" href="#">Apply</a>
+        </div>
+      </article>
+
+      <article class="look" data-country="ca" data-term="w27" data-loc="vancouver">
+        <div class="look-main">
+          <h3>BC Hydro<span class="chip-new">New</span></h3>
+          <p class="role">Engineering Co-op &middot; Vancouver &middot; Winter 2027</p>
+        </div>
+        <div class="facts">
+          <div class="fact"><span class="k">Pay</span><span class="v num">$27/hr CAD</span></div>
+          <div class="fact"><span class="k">Closes</span><span class="v num">Sep 12</span></div>
+          <div class="fact"><span class="k">Added</span><span class="v num">3 days ago</span></div>
+          <a class="apply" href="#">Apply</a>
+        </div>
+      </article>
+
+      <article class="look" data-country="ca" data-term="s27" data-loc="other">
+        <div class="look-main">
+          <h3>Google<span class="chip-new">New</span></h3>
+          <p class="role">STEP Intern &middot; Waterloo &middot; Summer 2027</p>
+        </div>
+        <div class="facts">
+          <div class="fact"><span class="k">Pay</span><span class="v">not listed</span></div>
+          <div class="fact"><span class="k">Closes</span><span class="v num">Sep 19</span></div>
+          <div class="fact"><span class="k">Added</span><span class="v num">2 days ago</span></div>
+          <a class="apply" href="#">Apply</a>
+        </div>
+      </article>
+
+      <article class="look" data-country="ca" data-term="s27" data-loc="other">
+        <div class="look-main">
+          <h3>Ubisoft</h3>
+          <p class="role">Gameplay Programmer Intern &middot; Montr&eacute;al &middot; Summer 2027</p>
+        </div>
+        <div class="facts">
+          <div class="fact"><span class="k">Pay</span><span class="v num">$30/hr CAD</span></div>
+          <div class="fact"><span class="k">Closes</span><span class="v">not listed</span></div>
+          <div class="fact"><span class="k">Added</span><span class="v num">1 week ago</span></div>
+          <a class="apply" href="#">Apply</a>
+        </div>
+      </article>
+
+      <p class="also-line num">Also here: 11 fellowships, 7 scholarships, 3 competitions, 3 grants, 1 award.</p>
+    </div>
+  </section>
+
+  <!-- ================= THE UGMI 10 ================= -->
+  <section class="pitch" id="ten">
+    <div class="wrap">
+      <p class="closings num">23 internships closed in the last 7 days.</p>
+      <p class="bridge">The weekly list exists so you hear about things before they join that number.</p>
+
+      <h2>The UGMI 10</h2>
+      <p class="lede">10 per week, each with a named contact. I read the 1,427 so you read 10.</p>
+
+      <p class="example-label">Example pick, from a real week</p>
+      <div class="example-pick">
+        <p class="pick-head">PitchBook, Software Engineering Intern</p>
+        <p class="pick-meta num">Toronto &middot; $38/hr CAD &middot; closes Fri &middot; contact: Sarah Chen, campus recruiting</p>
+        <p class="pick-why"><em>Why this one:</em> they take first-years, posted 2 days ago, and the recruiter replied to a student DM last month.</p>
+      </div>
+
+      <p class="how num">$15/mo CAD. Cancel anytime. First list within 48 hours, then every Monday.</p>
+      <a class="btn-ghost" href="#checkout">Get my first list</a>
+    </div>
+  </section>
+
+  <!-- ================= CALM CHECKOUT ================= -->
+  <section class="checkout" id="checkout">
+    <div class="wrap">
+      <div class="checkout-card">
+        <svg class="crest" viewBox="0 0 56 56" aria-hidden="true">
+          <circle cx="28" cy="28" r="26"/>
+          <circle cx="28" cy="28" r="19"/>
+          <path d="M28 12 L28 44 M12 28 L44 28"/>
+        </svg>
+        <h2>What $15 buys</h2>
+
+        <ul class="fee-grid num">
+          <li><span class="fee-k">You get</span><span class="fee-v">4 Monday lists, 10 picks each, a named contact per pick</span></li>
+          <li><span class="fee-k">Monthly</span><span class="fee-v">$15 CAD, that's everything</span></li>
+          <li><span class="fee-k">Sign-up fee</span><span class="fee-v">$0</span></li>
+          <li><span class="fee-k">Cancellation</span><span class="fee-v">anytime, from your Stripe receipt email</span></li>
+          <li><span class="fee-k">Your card</span><span class="fee-v">handled by Stripe. I never see it.</span></li>
+        </ul>
+
+        <p class="firewall">The full list stays free either way. $15 is for me doing your reading.</p>
+        <p class="handoff">You'll be taken to Stripe to pay.</p>
+
+        <!-- production: Stripe payment link goes here -->
+        <a class="cta" href="#">Get my first list</a>
+
+        <p class="blemish">I'm one Waterloo student, not a company.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MONDAY EMAIL (optional, after checkout) ================= -->
+  <section class="monday">
+    <div class="wrap">
+      <div class="monday-card">
+        <h2>The Monday Email</h2>
+        <p class="note">What opened, what closed, the week's free pick. Unsubscribe in one click.</p>
+        <!-- production: wire to the email service; static mockup does nothing -->
+        <form class="email-row" id="emailForm">
+          <label for="emailInput" style="position:absolute;left:-9999px;">Email address</label>
+          <input type="email" id="emailInput" placeholder="you@school.ca" autocomplete="email" required>
+          <button type="submit">Send me Mondays</button>
+        </form>
+        <p class="email-note" id="emailNote"></p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ================= FOOTER ================= -->
+<footer>
+  <p class="foot-mark">UGMI</p>
+  <p class="foot-tag">La maison des stages &middot; est. Waterloo</p>
+  <p class="foot-fix">Dead link? Wrong deadline? DM @sleppyeric, fixed within a day.</p>
+  <p class="foot-check num">Last checked Wed Aug 6, 7:04am ET.</p>
+  <div class="foot-links">
+    <a href="#list">The List</a>
+    <a href="#ten">The UGMI 10</a>
+    <a href="#" aria-label="Instagram, @sleppyeric">Instagram &middot; @sleppyeric</a>
+  </div>
+  <p class="legal">&copy; 2025 Maison UGMI &middot; internal design mockup &middot; sample listing data</p>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- eligibility filter ---------- */
+  var KEY = "ugmi-elig-luxe";
+  var TOTAL = 1427;
+  var state = { auth: null, term: null, loc: null };
+  var history = [];
+  var restored = false;
+
+  var rows = Array.prototype.slice.call(document.querySelectorAll("#jobList .look"));
+  var openTotal = rows.filter(function(r){ return !r.classList.contains("closed"); }).length;
+  var resultLine = document.getElementById("resultLine");
+  var zeroRow = document.getElementById("zeroRow");
+  var savedNote = document.getElementById("savedNote");
+  var undoBtn = document.getElementById("undoBtn");
+
+  function fmt(n){ return n.toLocaleString("en-CA"); }
+
+  function load(){
+    try{
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return;
+      var saved = JSON.parse(raw);
+      ["auth","term","loc"].forEach(function(q){
+        if (saved && saved[q]){ state[q] = saved[q]; history.push(q); }
+      });
+      restored = history.length > 0;
+    }catch(e){ /* file:// or private mode: filters just don't persist */ }
+  }
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+  function anyAnswered(){ return !!(state.auth || state.term || state.loc); }
+
+  function rowMatches(row){
+    var c = row.getAttribute("data-country");
+    var t = row.getAttribute("data-term");
+    var l = row.getAttribute("data-loc");
+    if (state.auth && state.auth !== "both" && c !== state.auth) return false;
+    if (state.term && state.term !== "any" && t !== state.term) return false;
+    if (state.loc && state.loc !== "anywhere"){
+      if (state.loc === "remote"){
+        if (l.indexOf("remote") === -1) return false;
+      } else if (l.indexOf(state.loc) === -1 && l.indexOf("remote") === -1){
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function render(){
+    var active = anyAnswered();
+    var visibleOpen = 0;
+
+    rows.forEach(function(row){
+      var show = !active || rowMatches(row);
+      row.hidden = !show;
+      if (show && active && !row.classList.contains("closed")) visibleOpen++;
+    });
+
+    document.querySelectorAll(".pills").forEach(function(group){
+      var q = group.getAttribute("data-q");
+      group.querySelectorAll(".pill").forEach(function(pill){
+        pill.setAttribute("aria-pressed",
+          state[q] === pill.getAttribute("data-v") ? "true" : "false");
+      });
+    });
+
+    /* Mockup only: scales the sample-row proportion to the full list.
+       Production computes the real count from the dataset. */
+    var est = active ? Math.max(1, Math.round(TOTAL * visibleOpen / openTotal)) : TOTAL;
+
+    resultLine.hidden = !(active && visibleOpen > 0);
+    zeroRow.hidden = !(active && visibleOpen === 0);
+    if (active && visibleOpen > 0){
+      resultLine.textContent = "Showing " + fmt(est) + " of " + fmt(TOTAL) + " you're actually eligible for.";
+    }
+
+    savedNote.hidden = !(restored && active);
+  }
+
+  document.querySelectorAll(".pills").forEach(function(group){
+    var q = group.getAttribute("data-q");
+    group.addEventListener("click", function(e){
+      var pill = e.target.closest(".pill");
+      if (!pill) return;
+      restored = false;
+      var v = pill.getAttribute("data-v");
+      var i = history.indexOf(q);
+      if (i !== -1) history.splice(i, 1);
+      if (state[q] === v){
+        state[q] = null;
+      } else {
+        state[q] = v;
+        history.push(q);
+      }
+      save();
+      render();
+    });
+  });
+
+  undoBtn.addEventListener("click", function(){
+    var q = history.pop();
+    if (q) state[q] = null;
+    restored = false;
+    save();
+    render();
+  });
+
+  load();
+  render();
+
+  /* ---------- Monday email (mockup: no backend) ---------- */
+  document.getElementById("emailForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    document.getElementById("emailNote").textContent =
+      "Mockup only. Production wires this to the email service.";
+  });
+})();
+</script>
+
+</body>
+</html>

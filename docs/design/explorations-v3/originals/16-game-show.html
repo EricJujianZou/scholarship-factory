@@ -1,0 +1,957 @@
+<!-- INTERNAL DESIGN MOCKUP - sample listing data -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="UGMI helps Canadian students find open internships for free, with an optional weekly paid shortlist.">
+  <title>UGMI | The Internship Match Show</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #25150f;
+      --cream: #fff2c9;
+      --paper: #fffaf0;
+      --gold: #f5b93f;
+      --amber: #d87a22;
+      --orange: #bd4827;
+      --red: #8f2720;
+      --brown: #51271d;
+      --green: #365e42;
+      --stage: #27130f;
+      --line: #7c3927;
+      --shadow: 0 8px 0 #6b2b1e, 0 15px 28px rgba(38, 18, 12, .24);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--stage);
+    }
+
+    body {
+      margin: 0;
+      min-width: 0;
+      overflow-x: hidden;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 16% 5%, rgba(255, 214, 109, .24), transparent 23rem),
+        radial-gradient(circle at 84% 7%, rgba(255, 214, 109, .18), transparent 22rem),
+        var(--stage);
+      font-family: ui-rounded, "Arial Rounded MT Bold", "Trebuchet MS", Arial, sans-serif;
+      line-height: 1.5;
+    }
+
+    button, select, input { font: inherit; }
+    button { color: inherit; }
+    a { color: inherit; }
+
+    :focus-visible {
+      outline: 4px solid #fff;
+      outline-offset: 4px;
+      box-shadow: 0 0 0 7px var(--red);
+    }
+
+    .skip-link {
+      position: fixed;
+      z-index: 100;
+      top: 10px;
+      left: 10px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: #fff;
+      color: #111;
+      transform: translateY(-150%);
+    }
+
+    .skip-link:focus { transform: translateY(0); }
+
+    .stage-shell {
+      position: relative;
+      isolation: isolate;
+      min-height: 100vh;
+    }
+
+    .stage-shell::before,
+    .stage-shell::after {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      top: 0;
+      width: 32vw;
+      min-width: 110px;
+      height: 700px;
+      pointer-events: none;
+      opacity: .84;
+    }
+
+    .stage-shell::before {
+      left: -10vw;
+      background: linear-gradient(99deg, rgba(255, 220, 126, .38), rgba(255, 202, 87, 0) 69%);
+      clip-path: polygon(8% 0, 55% 0, 100% 100%, 0 82%);
+    }
+
+    .stage-shell::after {
+      right: -10vw;
+      background: linear-gradient(261deg, rgba(255, 220, 126, .32), rgba(255, 202, 87, 0) 69%);
+      clip-path: polygon(45% 0, 92% 0, 100% 82%, 0 100%);
+    }
+
+    .topbar {
+      width: min(1120px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 18px 0 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--cream);
+      text-decoration: none;
+      font-size: 1.05rem;
+      font-weight: 900;
+      letter-spacing: .08em;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 38px;
+      height: 38px;
+      place-items: center;
+      border: 3px solid var(--cream);
+      border-radius: 50%;
+      background: var(--orange);
+      box-shadow: inset 0 0 0 4px var(--gold);
+    }
+
+    .top-link {
+      padding: 8px 12px;
+      border: 2px solid rgba(255, 242, 201, .62);
+      border-radius: 999px;
+      color: var(--cream);
+      font-size: .8rem;
+      font-weight: 900;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    main { width: 100%; }
+
+    .hero {
+      width: min(1080px, calc(100% - 28px));
+      margin: 18px auto 0;
+      color: var(--cream);
+      text-align: center;
+    }
+
+    .on-air {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 18px;
+      padding: 7px 12px;
+      border: 2px solid rgba(255, 242, 201, .7);
+      border-radius: 999px;
+      background: rgba(64, 23, 17, .74);
+      font-size: .72rem;
+      font-weight: 900;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .on-air::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #ff7446;
+      box-shadow: 0 0 0 4px rgba(255, 116, 70, .17);
+    }
+
+    .show-sign {
+      position: relative;
+      max-width: 850px;
+      margin: 0 auto;
+      padding: 27px 18px 30px;
+      border: 6px solid var(--brown);
+      border-radius: 42px 42px 28px 28px;
+      color: var(--brown);
+      background: var(--gold);
+      box-shadow: 0 0 0 5px #ffd878, 0 12px 0 #7f3221, 0 26px 60px rgba(0, 0, 0, .34);
+      transform: rotate(-.4deg);
+    }
+
+    .show-sign::before {
+      content: "";
+      position: absolute;
+      inset: 8px;
+      border: 3px dashed rgba(104, 44, 27, .7);
+      border-radius: 29px 29px 18px 18px;
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      position: relative;
+      margin: 0 0 8px;
+      font-size: clamp(.72rem, 3vw, .95rem);
+      font-weight: 900;
+      letter-spacing: .17em;
+      text-transform: uppercase;
+    }
+
+    h1, h2, h3, p { overflow-wrap: anywhere; }
+
+    h1 {
+      position: relative;
+      max-width: 760px;
+      margin: 0 auto;
+      font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+      font-size: clamp(3rem, 14vw, 7.3rem);
+      font-weight: 900;
+      letter-spacing: .01em;
+      line-height: .86;
+      text-transform: uppercase;
+      text-shadow: 3px 4px 0 #fff1bd;
+    }
+
+    h1 span { display: block; color: var(--red); }
+
+    .hero-copy {
+      max-width: 700px;
+      margin: 30px auto 0;
+      font-size: clamp(1rem, 3.4vw, 1.25rem);
+      font-weight: 700;
+    }
+
+    .facts-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      max-width: 830px;
+      margin: 22px auto 0;
+    }
+
+    .fact {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 64px;
+      padding: 10px 14px;
+      border: 2px solid rgba(255, 242, 201, .56);
+      border-radius: 16px;
+      background: rgba(89, 37, 25, .78);
+      color: var(--cream);
+      font-size: .87rem;
+      font-weight: 900;
+      box-shadow: inset 0 1px rgba(255, 255, 255, .14);
+    }
+
+    .fact strong {
+      margin-right: 6px;
+      color: #ffd75f;
+      font-size: 1.18rem;
+    }
+
+    .host-prompt {
+      position: relative;
+      width: min(760px, calc(100% - 28px));
+      margin: 38px auto -29px;
+      padding: 19px 18px 44px;
+      border-radius: 80px 80px 18px 18px;
+      background: var(--cream);
+      color: var(--brown);
+      text-align: center;
+      box-shadow: 0 10px 0 var(--red);
+    }
+
+    .host-label {
+      display: inline-block;
+      margin-bottom: 5px;
+      color: var(--red);
+      font-size: .72rem;
+      font-weight: 900;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+
+    .host-prompt p {
+      max-width: 580px;
+      margin: 0 auto;
+      font-weight: 800;
+    }
+
+    .board-wrap {
+      position: relative;
+      z-index: 2;
+      width: min(1140px, calc(100% - 20px));
+      margin: 0 auto;
+      padding: 56px 10px 42px;
+      border: 5px solid #713021;
+      border-radius: 28px;
+      background:
+        linear-gradient(rgba(255, 236, 180, .05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 236, 180, .05) 1px, transparent 1px),
+        #a64227;
+      background-size: 20px 20px;
+      box-shadow: 0 18px 0 #351812, 0 35px 80px rgba(0, 0, 0, .35);
+    }
+
+    .board-heading {
+      margin: 0 auto 20px;
+      color: #fff1c2;
+      text-align: center;
+    }
+
+    .board-heading h2 {
+      margin: 0 0 5px;
+      font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+      font-size: clamp(2rem, 9vw, 4.2rem);
+      font-weight: 900;
+      letter-spacing: .045em;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+
+    .board-heading p { margin: 0; font-size: .88rem; font-weight: 800; }
+
+    .selector-panel {
+      max-width: 940px;
+      margin: 0 auto 20px;
+      padding: 15px;
+      border: 4px solid var(--brown);
+      border-radius: 20px;
+      background: #f2a93a;
+      box-shadow: 0 7px 0 #692b1e;
+    }
+
+    .selector-title {
+      margin: 0 0 10px;
+      color: var(--brown);
+      font-size: .76rem;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .categories {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .category-button {
+      min-height: 48px;
+      padding: 8px 6px;
+      border: 3px solid var(--brown);
+      border-radius: 12px;
+      background: var(--cream);
+      color: var(--brown);
+      cursor: pointer;
+      font-size: .78rem;
+      font-weight: 900;
+      box-shadow: 0 4px 0 var(--brown);
+      transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
+    }
+
+    .category-button:hover { transform: translateY(-2px); }
+    .category-button:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--brown); }
+    .category-button[aria-pressed="true"] { background: var(--green); color: #fff8df; }
+
+    .random-row {
+      display: grid;
+      gap: 10px;
+      margin-top: 13px;
+    }
+
+    .random-button {
+      min-height: 52px;
+      padding: 11px 18px;
+      border: 3px solid #fff2c9;
+      border-radius: 999px;
+      background: var(--red);
+      color: #fff8df;
+      cursor: pointer;
+      font-weight: 900;
+      letter-spacing: .02em;
+      box-shadow: 0 5px 0 var(--brown);
+    }
+
+    .random-button:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--brown); }
+
+    .announcer {
+      min-height: 48px;
+      margin: 0;
+      padding: 11px 13px;
+      border: 2px solid var(--brown);
+      border-radius: 12px;
+      background: #fff8de;
+      color: var(--brown);
+      font-size: .8rem;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .scoreboard {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 13px;
+      max-width: 940px;
+      margin: 0 auto;
+    }
+
+    .listing {
+      position: relative;
+      display: grid;
+      gap: 12px;
+      padding: 17px;
+      border: 4px solid var(--brown);
+      border-radius: 17px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+      transition: transform .2s ease, background .2s ease;
+    }
+
+    .listing[hidden] { display: none; }
+
+    .listing.is-picked {
+      background: #fff0a3;
+      transform: rotate(-.5deg) scale(1.015);
+      box-shadow: 0 0 0 6px #ffd64f, 0 8px 0 var(--brown), 0 18px 30px rgba(42, 19, 13, .35);
+    }
+
+    .listing-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .company {
+      margin: 0 0 2px;
+      color: var(--red);
+      font-size: .76rem;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .role {
+      margin: 0;
+      font-size: 1.12rem;
+      font-weight: 900;
+      line-height: 1.16;
+    }
+
+    .score {
+      flex: 0 0 auto;
+      display: grid;
+      width: 44px;
+      height: 44px;
+      place-items: center;
+      border: 3px solid var(--brown);
+      border-radius: 50%;
+      background: var(--gold);
+      font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+      font-size: 1.18rem;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .chips li {
+      padding: 4px 8px;
+      border: 2px solid #d19b63;
+      border-radius: 999px;
+      background: #ffe4aa;
+      color: #5c2a1c;
+      font-size: .7rem;
+      font-weight: 900;
+    }
+
+    .listing-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding-top: 11px;
+      border-top: 2px dotted #bd8057;
+      color: #6c3a29;
+      font-size: .76rem;
+      font-weight: 800;
+    }
+
+    .board-note {
+      max-width: 940px;
+      margin: 26px auto 0;
+      color: #ffe9ad;
+      font-size: .78rem;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .bonus {
+      position: relative;
+      width: min(1060px, calc(100% - 28px));
+      margin: 74px auto 0;
+      padding: 6px 0 44px;
+      color: var(--cream);
+    }
+
+    .bonus::before {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      inset: -24px -35vw 0;
+      background: linear-gradient(180deg, transparent, rgba(140, 49, 30, .36));
+    }
+
+    .bonus-title {
+      margin-bottom: 22px;
+      text-align: center;
+    }
+
+    .round-label {
+      display: inline-block;
+      padding: 7px 13px;
+      border: 2px solid var(--cream);
+      border-radius: 999px;
+      background: var(--orange);
+      font-size: .72rem;
+      font-weight: 900;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .bonus h2 {
+      margin: 12px 0 8px;
+      font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+      font-size: clamp(2.6rem, 12vw, 5.7rem);
+      font-weight: 900;
+      letter-spacing: .03em;
+      line-height: .94;
+      text-transform: uppercase;
+    }
+
+    .bonus-title p { max-width: 610px; margin: 0 auto; font-weight: 700; }
+
+    .prize-card {
+      position: relative;
+      display: grid;
+      gap: 22px;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px 20px;
+      border: 6px solid var(--brown);
+      border-radius: 28px;
+      background: var(--cream);
+      color: var(--brown);
+      box-shadow: 0 0 0 5px var(--gold), 0 14px 0 #68291d, 0 28px 55px rgba(0, 0, 0, .35);
+    }
+
+    .prize-copy h3 {
+      margin: 0 0 8px;
+      font-size: clamp(1.6rem, 7vw, 2.7rem);
+      line-height: 1;
+    }
+
+    .prize-copy p { margin: 0; font-weight: 700; }
+
+    .checklist {
+      display: grid;
+      gap: 9px;
+      margin: 19px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .checklist li {
+      position: relative;
+      padding-left: 29px;
+      font-size: .9rem;
+      font-weight: 900;
+    }
+
+    .checklist li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      top: 0;
+      display: grid;
+      width: 21px;
+      height: 21px;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--green);
+      color: #fff;
+      font-size: .7rem;
+    }
+
+    .price-box {
+      padding: 20px;
+      border: 4px solid var(--brown);
+      border-radius: 20px;
+      background: var(--gold);
+      text-align: center;
+      box-shadow: inset 0 0 0 3px #ffe396;
+    }
+
+    .price {
+      display: block;
+      font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+      font-size: clamp(3.2rem, 16vw, 5.4rem);
+      line-height: .9;
+    }
+
+    .price small {
+      font-family: ui-rounded, "Arial Rounded MT Bold", "Trebuchet MS", Arial, sans-serif;
+      font-size: .8rem;
+      letter-spacing: .02em;
+    }
+
+    .price-note { display: block; margin-top: 8px; font-size: .76rem; font-weight: 900; }
+
+    .cta {
+      display: block;
+      width: 100%;
+      margin-top: 17px;
+      padding: 14px 16px;
+      border: 3px solid var(--brown);
+      border-radius: 999px;
+      background: var(--red);
+      color: #fff8df;
+      font-weight: 900;
+      text-decoration: none;
+      box-shadow: 0 5px 0 var(--brown);
+    }
+
+    .cta:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--brown); }
+
+    .free-reminder {
+      max-width: 760px;
+      margin: 30px auto 0;
+      padding: 17px;
+      border: 2px solid rgba(255, 242, 201, .55);
+      border-radius: 16px;
+      color: var(--cream);
+      font-size: .86rem;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .free-reminder strong { color: #ffd864; }
+
+    .operator {
+      width: min(900px, calc(100% - 28px));
+      margin: 36px auto 0;
+      padding: 22px 0 36px;
+      border-top: 2px solid rgba(255, 242, 201, .28);
+      color: var(--cream);
+      text-align: center;
+    }
+
+    .operator svg {
+      width: 66px;
+      height: 66px;
+      margin-bottom: 8px;
+      color: var(--gold);
+    }
+
+    .operator h2 { margin: 0 0 7px; font-size: 1.35rem; }
+    .operator p { max-width: 620px; margin: 0 auto; font-size: .88rem; }
+
+    .operator a {
+      display: inline-block;
+      margin-top: 12px;
+      color: #ffd864;
+      font-weight: 900;
+      text-underline-offset: 4px;
+    }
+
+    footer {
+      padding: 22px 18px 30px;
+      border-top: 1px solid rgba(255, 242, 201, .18);
+      color: #dec899;
+      font-size: .73rem;
+      text-align: center;
+    }
+
+    @media (min-width: 560px) {
+      .facts-row { grid-template-columns: repeat(3, 1fr); }
+      .categories { grid-template-columns: repeat(5, 1fr); }
+      .random-row { grid-template-columns: .8fr 1.2fr; align-items: stretch; }
+      .scoreboard { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .prize-card { grid-template-columns: 1.25fr .75fr; align-items: center; padding: 31px; }
+    }
+
+    @media (min-width: 900px) {
+      .scoreboard { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .listing { min-height: 228px; }
+      .topbar { padding-top: 24px; }
+      .board-wrap { padding-inline: 28px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#choices">Skip to internship choices</a>
+  <div class="stage-shell">
+    <header class="topbar" aria-label="Site header">
+      <a class="brand" href="#top" aria-label="UGMI home">
+        <span class="brand-mark" aria-hidden="true">U</span>
+        UGMI
+      </a>
+      <a class="top-link" href="#bonus">See the bonus round</a>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="show-title">
+        <p class="on-air">Now taking applications</p>
+        <div class="show-sign">
+          <p class="eyebrow">Tonight on UGMI</p>
+          <h1 id="show-title">The Internship <span>Match Show</span></h1>
+        </div>
+        <p class="hero-copy">Step into the spotlight. Search real, open internships without handing over your email, making an account, or paying to browse.</p>
+        <div class="facts-row" aria-label="UGMI facts">
+          <div class="fact"><strong>1,427</strong> open roles</div>
+          <div class="fact"><strong>$0</strong> to search</div>
+          <div class="fact"><strong>0</strong> signup gates</div>
+        </div>
+      </section>
+
+      <section class="host-prompt" aria-label="Host prompt">
+        <span class="host-label">Your host asks</span>
+        <p>What kind of internship gets your buzzer going? Pick a category, then let the spotlight choose a role.</p>
+      </section>
+
+      <section class="board-wrap" id="choices" aria-labelledby="board-title">
+        <div class="board-heading">
+          <h2 id="board-title">Choose Your Category</h2>
+          <p>Mostly Canadian roles, arranged for an easy scan.</p>
+        </div>
+
+        <div class="selector-panel">
+          <p class="selector-title">Category selector</p>
+          <div class="categories" role="group" aria-label="Filter internship listings by category">
+            <button class="category-button" type="button" data-category="all" aria-pressed="true">All roles</button>
+            <button class="category-button" type="button" data-category="engineering" aria-pressed="false">Engineering</button>
+            <button class="category-button" type="button" data-category="data" aria-pressed="false">Data</button>
+            <button class="category-button" type="button" data-category="design" aria-pressed="false">Design</button>
+            <button class="category-button" type="button" data-category="business" aria-pressed="false">Business</button>
+          </div>
+          <div class="random-row">
+            <button class="random-button" id="randomPick" type="button">Spin the spotlight</button>
+            <p class="announcer" id="announcement" aria-live="polite">Six sample roles are on the board. Every listing stays readable.</p>
+          </div>
+        </div>
+
+        <div class="scoreboard" id="listings" aria-label="Sample internship listings">
+          <article class="listing" data-category="engineering" tabindex="-1">
+            <div class="listing-top">
+              <div>
+                <p class="company">Shopify</p>
+                <h3 class="role">Backend Developer Intern</h3>
+              </div>
+              <span class="score" aria-label="Board number 1">01</span>
+            </div>
+            <ul class="chips" aria-label="Role details">
+              <li>Engineering</li><li>Remote Canada</li><li>4 months</li>
+            </ul>
+            <div class="listing-meta"><span>Canada</span><span>Open now</span></div>
+          </article>
+
+          <article class="listing" data-category="data" tabindex="-1">
+            <div class="listing-top">
+              <div>
+                <p class="company">RBC</p>
+                <h3 class="role">Data Analyst, Student</h3>
+              </div>
+              <span class="score" aria-label="Board number 2">02</span>
+            </div>
+            <ul class="chips" aria-label="Role details">
+              <li>Data</li><li>Toronto</li><li>Summer</li>
+            </ul>
+            <div class="listing-meta"><span>Ontario</span><span>Open now</span></div>
+          </article>
+
+          <article class="listing" data-category="design" tabindex="-1">
+            <div class="listing-top">
+              <div>
+                <p class="company">Wattpad</p>
+                <h3 class="role">Product Design Intern</h3>
+              </div>
+              <span class="score" aria-label="Board number 3">03</span>
+            </div>
+            <ul class="chips" aria-label="Role details">
+              <li>Design</li><li>Hybrid</li><li>Figma</li>
+            </ul>
+            <div class="listing-meta"><span>Toronto</span><span>Open now</span></div>
+          </article>
+
+          <article class="listing" data-category="business" tabindex="-1">
+            <div class="listing-top">
+              <div>
+                <p class="company">Wealthsimple</p>
+                <h3 class="role">Marketing Co-op</h3>
+              </div>
+              <span class="score" aria-label="Board number 4">04</span>
+            </div>
+            <ul class="chips" aria-label="Role details">
+              <li>Business</li><li>Remote</li><li>Fall term</li>
+            </ul>
+            <div class="listing-meta"><span>Canada</span><span>Open now</span></div>
+          </article>
+
+          <article class="listing" data-category="engineering" tabindex="-1">
+            <div class="listing-top">
+              <div>
+                <p class="company">Arctic Wolf</p>
+                <h3 class="role">Software Developer Co-op</h3>
+              </div>
+              <span class="score" aria-label="Board number 5">05</span>
+            </div>
+            <ul class="chips" aria-label="Role details">
+              <li>Engineering</li><li>Waterloo</li><li>Security</li>
+            </ul>
+            <div class="listing-meta"><span>Ontario</span><span>Open now</span></div>
+          </article>
+
+          <article class="listing" data-category="data" tabindex="-1">
+            <div class="listing-top">
+              <div>
+                <p class="company">Thomson Reuters</p>
+                <h3 class="role">Machine Learning Intern</h3>
+              </div>
+              <span class="score" aria-label="Board number 6">06</span>
+            </div>
+            <ul class="chips" aria-label="Role details">
+              <li>Data</li><li>Hybrid</li><li>Python</li>
+            </ul>
+            <div class="listing-meta"><span>Toronto</span><span>Open now</span></div>
+          </article>
+        </div>
+        <p class="board-note">Sample listing data shown for this design mockup. The real searchable list contains 1,427 open internships.</p>
+      </section>
+
+      <section class="bonus" id="bonus" aria-labelledby="bonus-title">
+        <div class="bonus-title">
+          <span class="round-label">The bonus round</span>
+          <h2 id="bonus-title">Your Paid Shortlist</h2>
+          <p>Browsing stays free. If you want a smaller, sharper list, UGMI can do the sorting for you.</p>
+        </div>
+
+        <div class="prize-card">
+          <div class="prize-copy">
+            <h3>10 hand-picked matches, every Monday.</h3>
+            <p>Roles selected around what you actually want, with a useful human lead attached.</p>
+            <ul class="checklist">
+              <li>10 tailored internship matches</li>
+              <li>A named contact for every role</li>
+              <li>Delivered each Monday</li>
+              <li>Cancel whenever you want</li>
+            </ul>
+          </div>
+          <div class="price-box">
+            <span class="price">$15 <small>CAD / month</small></span>
+            <span class="price-note">Secure checkout powered by Stripe</span>
+            <a class="cta" href="#join-note">Get my weekly shortlist</a>
+          </div>
+        </div>
+
+        <p class="free-reminder" id="join-note"><strong>No trick answer:</strong> the full search remains free, with no account, email, or paywall. The shortlist is simply an optional assist.</p>
+      </section>
+
+      <section class="operator" aria-labelledby="operator-title">
+        <svg viewBox="0 0 80 80" role="img" aria-label="Single spotlight icon">
+          <path d="M31 12h27l8 22-19 10-17-13z" fill="currentColor" stroke="#fff2c9" stroke-width="4" stroke-linejoin="round"/>
+          <path d="M40 42 24 70M52 42l8 28" fill="none" stroke="#fff2c9" stroke-width="5" stroke-linecap="round"/>
+          <circle cx="48" cy="28" r="8" fill="#fff2c9"/>
+        </svg>
+        <h2 id="operator-title">One student behind the curtain</h2>
+        <p>UGMI is built and operated by one University of Waterloo student who got tired of scattered internship searches and decided to make a better list.</p>
+        <span>@sleppyeric</span>
+      </section>
+    </main>
+
+    <footer>
+      <span>UGMI</span> · Built in Waterloo · Search free, shortlist optional
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      const buttons = Array.from(document.querySelectorAll('.category-button'));
+      const listings = Array.from(document.querySelectorAll('.listing'));
+      const randomButton = document.getElementById('randomPick');
+      const announcement = document.getElementById('announcement');
+      let activeCategory = 'all';
+      let lastPick = -1;
+
+      function visibleListings() {
+        return listings.filter(function (listing) { return !listing.hidden; });
+      }
+
+      function clearPick() {
+        listings.forEach(function (listing) { listing.classList.remove('is-picked'); });
+      }
+
+      function setCategory(category, label) {
+        activeCategory = category;
+        clearPick();
+        buttons.forEach(function (button) {
+          button.setAttribute('aria-pressed', String(button.dataset.category === category));
+        });
+        listings.forEach(function (listing) {
+          listing.hidden = category !== 'all' && listing.dataset.category !== category;
+        });
+        const count = visibleListings().length;
+        announcement.textContent = label + ' selected. ' + count + (count === 1 ? ' role is' : ' roles are') + ' on the board.';
+        lastPick = -1;
+      }
+
+      buttons.forEach(function (button) {
+        button.addEventListener('click', function () {
+          setCategory(button.dataset.category, button.textContent.trim());
+        });
+      });
+
+      randomButton.addEventListener('click', function () {
+        const choices = visibleListings();
+        if (!choices.length) return;
+        clearPick();
+        let pick = Math.floor(Math.random() * choices.length);
+        if (choices.length > 1 && pick === lastPick) pick = (pick + 1) % choices.length;
+        lastPick = pick;
+        const selected = choices[pick];
+        selected.classList.add('is-picked');
+        const company = selected.querySelector('.company').textContent.trim();
+        const role = selected.querySelector('.role').textContent.trim();
+        announcement.textContent = 'Spotlight reveal: ' + role + ' at ' + company + '. The rest of the board stays open.';
+        selected.focus({ preventScroll: true });
+        selected.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+      });
+    }());
+  </script>
+</body>
+</html>

@@ -1,0 +1,1285 @@
+<!-- INTERNAL DESIGN MOCKUP - sample listing data -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="UGMI is a free, searchable list of 1,427 open internships, mostly in Canada.">
+  <title>UGMI | Internship field blueprint</title>
+  <style>
+    :root {
+      --paper: #f4f0df;
+      --paper-deep: #e8e0c8;
+      --ink: #103952;
+      --ink-strong: #072a3d;
+      --line: #4f788b;
+      --line-faint: rgba(16, 57, 82, .14);
+      --line-mid: rgba(16, 57, 82, .34);
+      --accent: #b63d29;
+      --accent-soft: #ead0c4;
+      --white: #fffdf5;
+      --green: #2d6652;
+      --shadow: rgba(7, 42, 61, .12);
+      --radius: 2px;
+      --unit: 8px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--paper-deep);
+    }
+
+    body {
+      margin: 0;
+      min-width: 0;
+      color: var(--ink-strong);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 15px;
+      line-height: 1.55;
+      background-color: var(--paper);
+      background-image:
+        linear-gradient(var(--line-faint) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line-faint) 1px, transparent 1px),
+        linear-gradient(rgba(16, 57, 82, .055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16, 57, 82, .055) 1px, transparent 1px);
+      background-size: 40px 40px, 40px 40px, 8px 8px, 8px 8px;
+      overflow-x: hidden;
+    }
+
+    button, input { font: inherit; }
+    button { color: inherit; }
+    a { color: currentColor; text-underline-offset: 3px; }
+    img, svg { display: block; max-width: 100%; }
+
+    :focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 3px;
+    }
+
+    .skip-link {
+      position: fixed;
+      z-index: 99;
+      top: 8px;
+      left: 8px;
+      padding: 8px 12px;
+      color: var(--white);
+      background: var(--ink-strong);
+      transform: translateY(-160%);
+    }
+
+    .skip-link:focus { transform: translateY(0); }
+
+    .sheet {
+      width: min(100%, 1480px);
+      min-height: 100vh;
+      margin: 0 auto;
+      border-inline: 1px solid var(--line-mid);
+      background: rgba(244, 240, 223, .84);
+      box-shadow: 0 0 50px var(--shadow);
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: center;
+      padding: 12px 16px;
+      border-bottom: 2px solid var(--ink);
+      background: rgba(244, 240, 223, .96);
+    }
+
+    .wordmark {
+      display: flex;
+      min-width: 0;
+      gap: 10px;
+      align-items: center;
+      text-decoration: none;
+    }
+
+    .mark {
+      display: grid;
+      width: 38px;
+      height: 38px;
+      flex: 0 0 auto;
+      place-items: center;
+      border: 2px solid var(--ink-strong);
+      background: var(--ink-strong);
+      color: var(--paper);
+      font-weight: 800;
+      letter-spacing: -.08em;
+    }
+
+    .wordmark strong {
+      display: block;
+      font-size: 1.25rem;
+      letter-spacing: .12em;
+      line-height: 1;
+    }
+
+    .wordmark small {
+      display: block;
+      margin-top: 4px;
+      color: var(--line);
+      font-size: .67rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .nav-links { display: none; }
+
+    .sheet-id {
+      color: var(--line);
+      font-size: .68rem;
+      line-height: 1.3;
+      text-align: right;
+      text-transform: uppercase;
+    }
+
+    .sheet-id strong { color: var(--ink-strong); }
+
+    main { min-width: 0; }
+
+    .hero {
+      position: relative;
+      display: grid;
+      gap: 28px;
+      padding: 36px 16px 26px;
+      border-bottom: 1px solid var(--ink);
+    }
+
+    .eyebrow,
+    .drawing-label {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      color: var(--accent);
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      width: 30px;
+      height: 1px;
+      content: "";
+      background: var(--accent);
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+
+    h1 {
+      max-width: 780px;
+      margin: 16px 0 18px;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: clamp(2.6rem, 11vw, 6.7rem);
+      font-weight: 900;
+      letter-spacing: -.065em;
+      line-height: .91;
+    }
+
+    h1 .outline {
+      color: transparent;
+      -webkit-text-stroke: 1.5px var(--ink-strong);
+      text-stroke: 1.5px var(--ink-strong);
+    }
+
+    .hero-copy {
+      max-width: 680px;
+      margin-bottom: 24px;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 1.08rem;
+      line-height: 1.55;
+    }
+
+    .hero-copy strong { color: var(--accent); }
+
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .button {
+      display: inline-flex;
+      min-height: 46px;
+      padding: 10px 15px;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--ink-strong);
+      border-radius: var(--radius);
+      background: var(--ink-strong);
+      color: var(--white);
+      font-weight: 800;
+      text-decoration: none;
+      text-transform: uppercase;
+      box-shadow: 4px 4px 0 var(--line-mid);
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+
+    .button:hover {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 var(--line-mid);
+    }
+
+    .button.secondary {
+      background: transparent;
+      color: var(--ink-strong);
+    }
+
+    .trust-line {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      margin: 26px 0 0;
+      padding: 0;
+      border-block: 1px solid var(--line-mid);
+      list-style: none;
+    }
+
+    .trust-line li {
+      min-width: 0;
+      padding: 9px 6px;
+      color: var(--line);
+      font-size: .65rem;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .trust-line li + li { border-left: 1px solid var(--line-mid); }
+    .trust-line strong { display: block; color: var(--ink-strong); font-size: .76rem; }
+
+    .assembly {
+      position: relative;
+      min-height: 340px;
+      padding: 34px 18px 18px;
+      border: 1px solid var(--ink);
+      background: rgba(255, 253, 245, .42);
+    }
+
+    .assembly::before,
+    .assembly::after {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border-color: var(--accent);
+      content: "";
+    }
+
+    .assembly::before { top: -1px; left: -1px; border-top: 3px solid; border-left: 3px solid; }
+    .assembly::after { right: -1px; bottom: -1px; border-right: 3px solid; border-bottom: 3px solid; }
+
+    .assembly svg { width: 100%; height: auto; }
+
+    .measurement {
+      color: var(--accent);
+      font-size: .65rem;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      transition: opacity .2s ease;
+    }
+
+    .dim-top {
+      position: absolute;
+      top: 8px;
+      left: 18px;
+      right: 18px;
+      display: flex;
+      align-items: center;
+    }
+
+    .dim-top::before, .dim-top::after {
+      height: 1px;
+      flex: 1;
+      content: "";
+      background: var(--accent);
+    }
+
+    .dim-top span { padding: 0 8px; }
+
+    .callout {
+      position: absolute;
+      max-width: 125px;
+      color: var(--ink);
+      font-size: .66rem;
+      line-height: 1.35;
+      text-transform: uppercase;
+    }
+
+    .callout::before {
+      display: block;
+      width: 46px;
+      height: 1px;
+      margin-bottom: 5px;
+      content: "";
+      background: var(--accent);
+      transform-origin: left;
+    }
+
+    .callout.c1 { top: 70px; right: 9px; }
+    .callout.c1::before { transform: rotate(-20deg); }
+    .callout.c2 { bottom: 30px; left: 12px; }
+    .callout.c2::before { transform: rotate(16deg); }
+
+    .mode-details .measurement { opacity: .16; }
+    .mode-details .detail-note { opacity: 1; }
+    .mode-measurements .detail-note { opacity: .35; }
+
+    .control-deck {
+      display: grid;
+      gap: 14px;
+      padding: 16px;
+      border-bottom: 1px solid var(--ink);
+      background: var(--paper-deep);
+    }
+
+    .search-wrap { position: relative; }
+
+    .search-wrap label {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--line);
+      font-size: .7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .search-wrap input {
+      width: 100%;
+      height: 46px;
+      padding: 8px 42px 8px 12px;
+      border: 2px solid var(--ink);
+      border-radius: 0;
+      background: var(--white);
+      color: var(--ink-strong);
+    }
+
+    .search-wrap svg {
+      position: absolute;
+      right: 12px;
+      bottom: 12px;
+      width: 22px;
+      height: 22px;
+      pointer-events: none;
+    }
+
+    .filter-wrap > span,
+    .view-wrap > span {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--line);
+      font-size: .7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .filter-list,
+    .view-switch {
+      display: flex;
+      max-width: 100%;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: thin;
+      padding: 2px 2px 7px;
+    }
+
+    .filter-button,
+    .mode-button {
+      min-height: 38px;
+      flex: 0 0 auto;
+      padding: 7px 10px;
+      border: 1px solid var(--ink);
+      border-radius: 0;
+      background: transparent;
+      cursor: pointer;
+      font-size: .72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .filter-button[aria-pressed="true"],
+    .mode-button[aria-pressed="true"] {
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    .drawing-section { padding: 30px 16px; }
+
+    .section-heading {
+      display: grid;
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .section-heading h2 {
+      margin: 4px 0 0;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: clamp(1.7rem, 7vw, 3.4rem);
+      letter-spacing: -.04em;
+      line-height: 1;
+    }
+
+    .count-block {
+      padding-left: 12px;
+      border-left: 3px solid var(--accent);
+      color: var(--line);
+      font-size: .76rem;
+    }
+
+    .count-block strong {
+      display: block;
+      color: var(--ink-strong);
+      font-size: 1.2rem;
+    }
+
+    .listings-frame {
+      border: 2px solid var(--ink-strong);
+      background: rgba(255, 253, 245, .56);
+      box-shadow: 7px 7px 0 var(--line-mid);
+    }
+
+    .list-head { display: none; }
+
+    .listing {
+      display: grid;
+      min-width: 0;
+      border-bottom: 1px solid var(--line-mid);
+    }
+
+    .listing:last-child { border-bottom: 0; }
+    .listing[hidden] { display: none; }
+
+    .listing summary {
+      display: grid;
+      grid-template-columns: 32px minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: start;
+      padding: 16px 12px;
+      cursor: pointer;
+      list-style: none;
+    }
+
+    .listing summary::-webkit-details-marker { display: none; }
+
+    .listing summary:hover { background: rgba(16, 57, 82, .06); }
+
+    .row-index {
+      display: grid;
+      width: 30px;
+      height: 30px;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      color: var(--line);
+      font-size: .67rem;
+    }
+
+    .role { min-width: 0; }
+
+    .role strong {
+      display: block;
+      overflow-wrap: anywhere;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 1rem;
+      line-height: 1.25;
+    }
+
+    .company {
+      display: block;
+      margin-top: 4px;
+      color: var(--line);
+      font-size: .75rem;
+    }
+
+    .mobile-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px 10px;
+      margin-top: 9px;
+      color: var(--ink);
+      font-size: .69rem;
+    }
+
+    .discipline-tag {
+      padding: 1px 5px;
+      border: 1px solid var(--line-mid);
+      color: var(--ink);
+      text-transform: uppercase;
+    }
+
+    .expand-mark {
+      position: relative;
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--ink);
+    }
+
+    .expand-mark::before,
+    .expand-mark::after {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 12px;
+      height: 1px;
+      content: "";
+      background: var(--ink);
+      transform: translate(-50%, -50%);
+    }
+
+    .expand-mark::after { transform: translate(-50%, -50%) rotate(90deg); transition: transform .15s ease; }
+    details[open] .expand-mark::after { transform: translate(-50%, -50%) rotate(0); }
+
+    .desktop-cell { display: none; }
+
+    .listing-detail {
+      display: grid;
+      gap: 16px;
+      padding: 4px 12px 18px 54px;
+      border-top: 1px dashed var(--line-mid);
+      background: rgba(232, 224, 200, .38);
+    }
+
+    .listing-detail p { margin: 12px 0 0; font-family: Arial, Helvetica, sans-serif; }
+
+    .spec-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin: 0;
+    }
+
+    .spec-list div {
+      min-width: 0;
+      padding-top: 7px;
+      border-top: 1px solid var(--line-mid);
+    }
+
+    .spec-list dt {
+      color: var(--line);
+      font-size: .62rem;
+      text-transform: uppercase;
+    }
+
+    .spec-list dd {
+      margin: 2px 0 0;
+      overflow-wrap: anywhere;
+      font-size: .73rem;
+      font-weight: 800;
+    }
+
+    .apply-link {
+      display: inline-flex;
+      width: fit-content;
+      min-height: 40px;
+      margin-top: 2px;
+      padding: 8px 12px;
+      align-items: center;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .empty-state {
+      display: none;
+      padding: 34px 18px;
+      text-align: center;
+    }
+
+    .empty-state.show { display: block; }
+    .empty-state strong { display: block; font-family: Arial, Helvetica, sans-serif; font-size: 1.2rem; }
+
+    .micro-note {
+      margin: 16px 0 0;
+      color: var(--line);
+      font-size: .7rem;
+    }
+
+    .system-section {
+      display: grid;
+      gap: 34px;
+      padding: 34px 16px;
+      border-top: 2px solid var(--ink-strong);
+      border-bottom: 2px solid var(--ink-strong);
+      background: rgba(232, 224, 200, .7);
+    }
+
+    .system-copy h2 {
+      margin: 8px 0 14px;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: clamp(2rem, 8vw, 4.5rem);
+      letter-spacing: -.05em;
+      line-height: .95;
+    }
+
+    .system-copy > p { max-width: 620px; font-family: Arial, Helvetica, sans-serif; }
+
+    .exploded-view {
+      position: relative;
+      display: grid;
+      gap: 18px;
+      padding: 24px 20px;
+      border: 1px solid var(--ink);
+      background-image: radial-gradient(var(--line-mid) 1px, transparent 1px);
+      background-size: 16px 16px;
+    }
+
+    .part {
+      position: relative;
+      padding: 14px;
+      border: 2px solid var(--ink);
+      background: var(--paper);
+      box-shadow: 4px 4px 0 var(--line-mid);
+    }
+
+    .part::after {
+      position: absolute;
+      bottom: -20px;
+      left: 50%;
+      width: 1px;
+      height: 18px;
+      content: "";
+      background: var(--accent);
+    }
+
+    .part:last-of-type::after { display: none; }
+
+    .part small {
+      display: block;
+      color: var(--accent);
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .part strong {
+      display: block;
+      margin: 4px 0;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 1rem;
+    }
+
+    .part span { color: var(--line); font-size: .72rem; }
+
+    .bom {
+      margin-top: 24px;
+      border: 2px solid var(--ink-strong);
+      background: var(--paper);
+    }
+
+    .bom-title {
+      display: flex;
+      padding: 10px 12px;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid var(--ink-strong);
+      background: var(--ink-strong);
+      color: var(--paper);
+      font-size: .74rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .bom-grid { display: grid; }
+
+    .plan {
+      position: relative;
+      padding: 20px 16px;
+    }
+
+    .plan + .plan { border-top: 2px solid var(--ink-strong); }
+
+    .plan-kicker { color: var(--accent); font-size: .7rem; font-weight: 800; text-transform: uppercase; }
+
+    .price {
+      margin: 7px 0 4px;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: -.04em;
+    }
+
+    .price span { font-family: inherit; font-size: .8rem; font-weight: 600; letter-spacing: 0; }
+
+    .plan ul {
+      margin: 16px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .plan li {
+      position: relative;
+      padding: 7px 0 7px 22px;
+      border-top: 1px solid var(--line-mid);
+      font-size: .8rem;
+    }
+
+    .plan li::before {
+      position: absolute;
+      top: 8px;
+      left: 0;
+      color: var(--green);
+      content: "[x]";
+      font-weight: 800;
+    }
+
+    .plan.paid { background: var(--accent-soft); }
+
+    .section-cut {
+      padding: 34px 16px;
+      border-bottom: 1px solid var(--ink);
+    }
+
+    .cut-grid {
+      display: grid;
+      gap: 24px;
+      margin-top: 22px;
+    }
+
+    .cut-diagram {
+      position: relative;
+      min-height: 310px;
+      padding: 30px 14px 20px;
+      border: 1px solid var(--ink);
+      background: rgba(255, 253, 245, .5);
+      overflow: hidden;
+    }
+
+    .cut-line {
+      position: absolute;
+      top: 18px;
+      right: 12px;
+      left: 12px;
+      border-top: 2px dashed var(--accent);
+      color: var(--accent);
+      font-size: .64rem;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .monday-stack {
+      display: grid;
+      gap: 5px;
+      margin: 30px auto 0;
+      max-width: 330px;
+      transform: rotate(-1.5deg);
+    }
+
+    .match-sheet {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 9px;
+      padding: 8px 10px;
+      border: 1px solid var(--ink);
+      background: var(--paper);
+      box-shadow: 3px 3px 0 var(--line-mid);
+      font-size: .7rem;
+    }
+
+    .match-sheet:nth-child(2n) { transform: translateX(8px); }
+    .match-sheet b { color: var(--accent); }
+
+    .cut-copy h2 {
+      margin: 7px 0 14px;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: clamp(2rem, 8vw, 4rem);
+      letter-spacing: -.05em;
+      line-height: .98;
+    }
+
+    .cut-copy p { font-family: Arial, Helvetica, sans-serif; }
+
+    .flow-list {
+      margin: 22px 0 0;
+      padding: 0;
+      counter-reset: flow;
+      list-style: none;
+    }
+
+    .flow-list li {
+      position: relative;
+      min-height: 52px;
+      padding: 8px 0 12px 48px;
+      border-top: 1px solid var(--line-mid);
+      counter-increment: flow;
+    }
+
+    .flow-list li::before {
+      position: absolute;
+      top: 8px;
+      left: 0;
+      display: grid;
+      width: 30px;
+      height: 30px;
+      place-items: center;
+      border: 1px solid var(--ink);
+      border-radius: 50%;
+      content: counter(flow, decimal-leading-zero);
+      font-size: .67rem;
+      font-weight: 800;
+    }
+
+    .maker {
+      display: grid;
+      gap: 20px;
+      padding: 34px 16px;
+      background: var(--ink-strong);
+      color: var(--paper);
+    }
+
+    .maker h2 {
+      margin: 8px 0 12px;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: clamp(1.8rem, 7vw, 3.6rem);
+      letter-spacing: -.04em;
+      line-height: 1;
+    }
+
+    .maker p { max-width: 650px; color: #d8d5c7; font-family: Arial, Helvetica, sans-serif; }
+
+    .maker-stamp {
+      display: grid;
+      min-height: 180px;
+      padding: 20px;
+      place-items: center;
+      border: 1px solid var(--paper);
+      background-image: linear-gradient(rgba(244, 240, 223, .1) 1px, transparent 1px), linear-gradient(90deg, rgba(244, 240, 223, .1) 1px, transparent 1px);
+      background-size: 16px 16px;
+      text-align: center;
+    }
+
+    .maker-stamp strong {
+      display: block;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 1.7rem;
+      letter-spacing: -.04em;
+    }
+
+    .maker-stamp span {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 3px 8px;
+      border: 1px solid var(--accent-soft);
+      color: var(--accent-soft);
+    }
+
+    footer {
+      display: grid;
+      gap: 22px;
+      padding: 26px 16px;
+      border-top: 5px double var(--ink-strong);
+      background: var(--paper-deep);
+    }
+
+    .title-block {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      border: 2px solid var(--ink-strong);
+    }
+
+    .title-main { padding: 12px; }
+    .title-main strong { display: block; font-size: 1.2rem; letter-spacing: .08em; }
+    .title-main span { color: var(--line); font-size: .68rem; text-transform: uppercase; }
+
+    .revision {
+      display: grid;
+      min-width: 76px;
+      padding: 8px;
+      place-items: center;
+      border-left: 2px solid var(--ink-strong);
+      text-align: center;
+    }
+
+    .revision small { font-size: .6rem; text-transform: uppercase; }
+    .revision b { font-size: 1.2rem; }
+
+    .footer-copy { color: var(--line); font-size: .72rem; }
+    .footer-copy strong { color: var(--ink-strong); }
+
+    @media (min-width: 700px) {
+      .topbar { padding-inline: 28px; }
+      .nav-links { display: flex; gap: 18px; align-items: center; font-size: .74rem; font-weight: 800; text-transform: uppercase; }
+      .nav-links a { text-decoration: none; }
+      .nav-links a:hover { text-decoration: underline; }
+      .sheet-id { display: none; }
+      .hero { padding: 54px 28px 34px; }
+      .assembly { min-height: 430px; }
+      .control-deck { grid-template-columns: minmax(240px, 1.2fr) 2fr; padding: 18px 28px; }
+      .view-wrap { grid-column: 1 / -1; }
+      .drawing-section, .system-section, .section-cut, .maker { padding: 48px 28px; }
+      .section-heading { grid-template-columns: 1fr auto; align-items: end; }
+      .listing summary { padding-inline: 16px; }
+      .listing-detail { grid-template-columns: 1.2fr .8fr; padding-left: 58px; padding-right: 18px; }
+      .bom-grid { grid-template-columns: 1fr 1fr; }
+      .plan + .plan { border-top: 0; border-left: 2px solid var(--ink-strong); }
+      .cut-grid, .maker { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; }
+      footer { grid-template-columns: minmax(300px, 1fr) 1fr; align-items: center; padding-inline: 28px; }
+    }
+
+    @media (min-width: 980px) {
+      .hero { grid-template-columns: minmax(0, 1.12fr) minmax(380px, .88fr); align-items: center; min-height: 650px; padding: 64px 42px 44px; }
+      .assembly { min-height: 480px; }
+      .control-deck { grid-template-columns: minmax(270px, 1.2fr) 2fr auto; align-items: end; padding-inline: 42px; }
+      .view-wrap { grid-column: auto; }
+      .drawing-section, .system-section, .section-cut { padding: 60px 42px; }
+      .list-head {
+        display: grid;
+        grid-template-columns: 42px minmax(260px, 1.5fr) minmax(130px, .7fr) minmax(120px, .65fr) 38px;
+        gap: 10px;
+        padding: 9px 16px;
+        border-bottom: 2px solid var(--ink-strong);
+        color: var(--line);
+        font-size: .66rem;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+      .listing summary { grid-template-columns: 42px minmax(260px, 1.5fr) minmax(130px, .7fr) minmax(120px, .65fr) 38px; gap: 10px; align-items: center; }
+      .mobile-meta { display: none; }
+      .desktop-cell { display: block; min-width: 0; font-size: .75rem; }
+      .system-section { grid-template-columns: minmax(0, .85fr) minmax(400px, 1.15fr); align-items: start; }
+      .exploded-view { margin-top: 20px; }
+      .part:nth-child(2) { margin-inline: 34px; }
+      .part:nth-child(3) { margin-inline: 68px; }
+      .cut-grid { grid-template-columns: minmax(420px, 1fr) minmax(0, 1fr); gap: 60px; }
+      .maker { padding: 52px 42px; }
+      footer { padding-inline: 42px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .001ms !important; animation-duration: .001ms !important; animation-iteration-count: 1 !important; }
+    }
+  </style>
+</head>
+<body class="mode-measurements">
+  <a class="skip-link" href="#listings">Skip to internship list</a>
+  <div class="sheet">
+    <header class="topbar">
+      <a class="wordmark" href="#top" aria-label="UGMI home">
+        <span class="mark">UG</span>
+        <span><strong>UGMI</strong><small>Undergrad opportunity index</small></span>
+      </a>
+      <nav class="nav-links" aria-label="Primary navigation">
+        <a href="#listings">Open roles</a>
+        <a href="#system">How it works</a>
+        <a href="#bom">Free vs matched</a>
+        <a href="#maker">The builder</a>
+      </nav>
+      <div class="sheet-id"><strong>DWG 1427</strong><br>REV 03</div>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
+        <div>
+          <div class="eyebrow">Live field index / mostly Canada</div>
+          <h1 id="hero-title">Find the opening.<br><span class="outline">Build the start.</span></h1>
+          <p class="hero-copy">A searchable working drawing of <strong>1,427 open internships</strong>. No account, no email gate, no paywall. Just roles you can inspect and apply to.</p>
+          <div class="action-row">
+            <a class="button" href="#listings">Inspect open roles</a>
+            <a class="button secondary" href="#bom">See Monday matches</a>
+          </div>
+          <ul class="trust-line" aria-label="Service commitments">
+            <li><strong>1,427</strong>open roles</li>
+            <li><strong>$0 CAD</strong>to search</li>
+            <li><strong>0 forms</strong>before browsing</li>
+          </ul>
+        </div>
+
+        <div class="assembly" aria-label="Exploded diagram of the internship search process">
+          <div class="measurement dim-top"><span>1,427 active units</span></div>
+          <svg viewBox="0 0 520 470" role="img" aria-labelledby="assembly-title assembly-desc">
+            <title id="assembly-title">Internship finder assembly</title>
+            <desc id="assembly-desc">An exploded line drawing of listings moving through filtering and into an application.</desc>
+            <g fill="none" stroke="#103952" stroke-width="2">
+              <path d="M110 54h300v84H110z"/>
+              <path d="M132 76h160M132 94h236M132 112h196" stroke-width="1"/>
+              <circle cx="382" cy="96" r="17"/>
+              <path d="m394 108 17 17"/>
+              <path d="M260 139v40" stroke="#b63d29" stroke-dasharray="5 5"/>
+              <path d="M86 180h348l-36 86H122z"/>
+              <path d="M137 203h246M147 223h226M156 243h208" stroke-width="1"/>
+              <path d="M260 267v41" stroke="#b63d29" stroke-dasharray="5 5"/>
+              <path d="M151 310h218v96H151z"/>
+              <path d="m151 310 28 24h162l28-24M179 334v72M341 334v72"/>
+              <circle cx="260" cy="368" r="19" stroke="#b63d29"/>
+              <path d="m252 368 6 6 12-15" stroke="#b63d29"/>
+              <path d="M72 54v352M62 54h20M62 406h20" stroke="#b63d29" stroke-width="1"/>
+              <path d="M436 180h22M398 266h60M450 180v86" stroke="#b63d29" stroke-width="1"/>
+            </g>
+            <g fill="#103952" font-family="monospace" font-size="11">
+              <text x="112" y="45">A. SEARCH SURFACE</text>
+              <text x="88" y="170">B. DISCIPLINE FILTER PLATE</text>
+              <text x="152" y="426">C. DIRECT APPLICATION OUTPUT</text>
+            </g>
+            <g fill="#b63d29" font-family="monospace" font-size="10">
+              <text x="25" y="235" transform="rotate(-90 25 235)">NO LOGIN REQUIRED</text>
+              <text x="462" y="228" transform="rotate(90 462 228)">86 PX</text>
+            </g>
+          </svg>
+          <div class="callout c1 measurement">Search by role, company, or place</div>
+          <div class="callout c2 detail-note">Applications leave directly from each listing</div>
+        </div>
+      </section>
+
+      <section class="control-deck" aria-label="Listing controls">
+        <div class="search-wrap">
+          <label for="search">Find within sample listings</label>
+          <input id="search" type="search" placeholder="Try robotics, Toronto, data..." autocomplete="off">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+        </div>
+        <div class="filter-wrap">
+          <span id="filter-label">Discipline filter</span>
+          <div class="filter-list" role="group" aria-labelledby="filter-label">
+            <button class="filter-button" type="button" data-filter="all" aria-pressed="true">All fields</button>
+            <button class="filter-button" type="button" data-filter="software" aria-pressed="false">Software</button>
+            <button class="filter-button" type="button" data-filter="data" aria-pressed="false">Data</button>
+            <button class="filter-button" type="button" data-filter="hardware" aria-pressed="false">Hardware</button>
+            <button class="filter-button" type="button" data-filter="design" aria-pressed="false">Design</button>
+          </div>
+        </div>
+        <div class="view-wrap">
+          <span id="view-label">Drawing layer</span>
+          <div class="view-switch" role="group" aria-labelledby="view-label">
+            <button class="mode-button" type="button" data-mode="measurements" aria-pressed="true">Measurements</button>
+            <button class="mode-button" type="button" data-mode="details" aria-pressed="false">Details</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="drawing-section" id="listings" aria-labelledby="listings-title">
+        <div class="section-heading">
+          <div>
+            <div class="drawing-label">Schedule A / open positions</div>
+            <h2 id="listings-title">Current field samples</h2>
+          </div>
+          <div class="count-block" aria-live="polite"><strong id="visible-count">8 shown</strong>of 1,427 total listings</div>
+        </div>
+
+        <div class="listings-frame">
+          <div class="list-head" aria-hidden="true"><span>No.</span><span>Role / organization</span><span>Location</span><span>Discipline</span><span>Open</span></div>
+
+          <details class="listing" data-discipline="software" data-search="software developer intern northstar mobility waterloo ontario hybrid typescript react transit">
+            <summary>
+              <span class="row-index">01</span>
+              <span class="role"><strong>Software Developer Intern</strong><span class="company">Northstar Mobility</span><span class="mobile-meta"><span>Waterloo, ON</span><span class="discipline-tag">Software</span></span></span>
+              <span class="desktop-cell">Waterloo, ON<br>Hybrid</span><span class="desktop-cell discipline-tag">Software</span><span class="expand-mark" aria-hidden="true"></span>
+            </summary>
+            <div class="listing-detail"><p>Help ship live transit tools in TypeScript and React. You will pair with two product engineers and own a small feature from sketch to release.</p><div><dl class="spec-list"><div><dt>Term</dt><dd>Summer 2026</dd></div><div><dt>Length</dt><dd>4 months</dd></div><div><dt>Posted</dt><dd>2 days ago</dd></div><div><dt>Source</dt><dd>Company site</dd></div></dl><a class="apply-link" href="#apply-note">Apply at source</a></div></div>
+          </details>
+
+          <details class="listing" data-discipline="hardware" data-search="mechatronics co-op arc works robotics mississauga ontario on-site cad solidworks sensors">
+            <summary>
+              <span class="row-index">02</span>
+              <span class="role"><strong>Mechatronics Co-op</strong><span class="company">Arc Works Robotics</span><span class="mobile-meta"><span>Mississauga, ON</span><span class="discipline-tag">Hardware</span></span></span>
+              <span class="desktop-cell">Mississauga, ON<br>On-site</span><span class="desktop-cell discipline-tag">Hardware</span><span class="expand-mark" aria-hidden="true"></span>
+            </summary>
+            <div class="listing-detail"><p>Prototype end effectors, document bench tests, and revise CAD with the mechanical team. Familiarity with SolidWorks and sensors is useful.</p><div><dl class="spec-list"><div><dt>Term</dt><dd>Fall 2026</dd></div><div><dt>Length</dt><dd>4 months</dd></div><div><dt>Posted</dt><dd>Today</dd></div><div><dt>Source</dt><dd>Company site</dd></div></dl><a class="apply-link" href="#apply-note">Apply at source</a></div></div>
+          </details>
+
+          <details class="listing" data-discipline="data" data-search="data science intern boreal energy calgary alberta hybrid python sql forecasting climate">
+            <summary>
+              <span class="row-index">03</span>
+              <span class="role"><strong>Data Science Intern</strong><span class="company">Boreal Energy Lab</span><span class="mobile-meta"><span>Calgary, AB</span><span class="discipline-tag">Data</span></span></span>
+              <span class="desktop-cell">Calgary, AB<br>Hybrid</span><span class="desktop-cell discipline-tag">Data</span><span class="expand-mark" aria-hidden="true"></span>
+            </summary>
+            <div class="listing-detail"><p>Clean operational datasets and test forecasting models for energy demand. The team works in Python and SQL, with weekly model reviews.</p><div><dl class="spec-list"><div><dt>Term</dt><dd>Summer 2026</dd></div><div><dt>Length</dt><dd>4 months</dd></div><div><dt>Posted</dt><dd>1 day ago</dd></div><div><dt>Source</dt><dd>Job board</dd></div></dl><a class="apply-link" href="#apply-note">Apply at source</a></div></div>
+          </details>
+
+          <details class="listing" data-discipline="design" data-search="product design intern relay health toronto ontario remote figma research accessibility">
+            <summary>
+              <span class="row-index">04</span>
+              <span class="role"><strong>Product Design Intern</strong><span class="company">Relay Health Tools</span><span class="mobile-meta"><span>Toronto, ON</span><span class="discipline-tag">Design</span></span></span>
+              <span class="desktop-cell">Toronto, ON<br>Remote</span><span class="desktop-cell discipline-tag">Design</span><span class="expand-mark" aria-hidden="true"></span>
+            </summary>
+            <div class="listing-detail"><p>Turn research notes into accessible patient workflows. Expect hands-on Figma work, prototype testing, and direct critique with the product lead.</p><div><dl class="spec-list"><div><dt>Term</dt><dd>Summer 2026</dd></div><div><dt>Length</dt><dd>4 months</dd></div><div><dt>Posted</dt><dd>3 days ago</dd></div><div><dt>Source</dt><dd>Company site</dd></div></dl><a class="apply-link" href="#apply-note">Apply at source</a></div></div>
+          </details>
+
+          <details class="listing" data-discipline="software" data-search="cloud platform intern cedarstack montreal quebec hybrid go kubernetes developer tools">
+            <summary>
+              <span class="row-index">05</span>
+              <span class="role"><strong>Cloud Platform Intern</strong><span class="company">Cedarstack</span><span class="mobile-meta"><span>Montréal, QC</span><span class="discipline-tag">Software</span></span></span>
+              <span class="desktop-cell">Montréal, QC<br>Hybrid</span><span class="desktop-cell discipline-tag">Software</span><span class="expand-mark" aria-hidden="true"></span>
+            </summary>
+            <div class="listing-detail"><p>Improve internal developer tools and learn how a small platform team runs reliable services. Go experience is welcome, not required.</p><div><dl class="spec-list"><div><dt>Term</dt><dd>Fall 2026</dd></div><div><dt>Length</dt><dd>4 or 8 months</dd></div><div><dt>Posted</dt><dd>4 days ago</dd></div><div><dt>Source</dt><dd>Company site</dd></div></dl><a class="apply-link" href="#apply-note">Apply at source</a></div></div>
+          </details>
+
+          <details class="listing" data-discipline="hardware" data-search="electrical engineering intern tidal instruments halifax nova scotia on-site pcb testing embedded marine">
+            <summary>
+              <span class="row-index">06</span>
+              <span class="role"><strong>Electrical Engineering Intern</strong><span class="company">Tidal Instruments</span><span class="mobile-meta"><span>Halifax, NS</span><span class="discipline-tag">Hardware</span></span></span>
+              <span class="desktop-cell">Halifax, NS<br>On-site</span><span class="desktop-cell discipline-tag">Hardware</span><span class="expand-mark" aria-hidden="true"></span>
+            </summary>
+            <div class="listing-detail"><p>Support PCB bring-up and environmental testing for marine sensors. You will work beside the embedded and mechanical teams in the lab.</p><div><dl class="spec-list"><div><dt>Term</dt><dd>Summer 2026</dd></div><div><dt>Length</dt><dd>4 months</dd></div><div><dt>Posted</dt><dd>5 days ago</dd></div><div><dt>Source</dt><dd>Job board</dd></div></dl><a class="apply-link" href="#apply-note">Apply at source</a></div></div>
+          </details>
+
+          <details class="listing" data-discipline="data" data-search="analytics co-op fieldnote foods vancouver british columbia hybrid sql tableau operations">
+            <summary>
+              <span class="row-index">07</span>
+              <span class="role"><strong>Analytics Co-op</strong><span class="company">Fieldnote Foods</span><span class="mobile-meta"><span>Vancouver, BC</span><span class="discipline-tag">Data</span></span></span>
+              <span class="desktop-cell">Vancouver, BC<br>Hybrid</span><span class="desktop-cell discipline-tag">Data</span><span class="expand-mark" aria-hidden="true"></span>
+            </summary>
+            <div class="listing-detail"><p>Build clear operating reports for a growing food logistics network. You will use SQL, spreadsheets, and Tableau with support from an analyst.</p><div><dl class="spec-list"><div><dt>Term</dt><dd>Summer 2026</dd></div><div><dt>Length</dt><dd>4 months</dd></div><div><dt>Posted</dt><dd>1 week ago</dd></div><div><dt>Source</dt><dd>Company site</dd></div></dl><a class="apply-link" href="#apply-note">Apply at source</a></div></div>
+          </details>
+
+          <details class="listing" data-discipline="design" data-search="ux research intern commons learning ottawa ontario remote interviews education accessibility">
+            <summary>
+              <span class="row-index">08</span>
+              <span class="role"><strong>UX Research Intern</strong><span class="company">Commons Learning</span><span class="mobile-meta"><span>Ottawa, ON</span><span class="discipline-tag">Design</span></span></span>
+              <span class="desktop-cell">Ottawa, ON<br>Remote</span><span class="desktop-cell discipline-tag">Design</span><span class="expand-mark" aria-hidden="true"></span>
+            </summary>
+            <div class="listing-detail"><p>Plan student interviews, synthesize patterns, and help improve an accessible learning platform. Strong writing and curiosity matter most.</p><div><dl class="spec-list"><div><dt>Term</dt><dd>Fall 2026</dd></div><div><dt>Length</dt><dd>4 months</dd></div><div><dt>Posted</dt><dd>2 days ago</dd></div><div><dt>Source</dt><dd>Company site</dd></div></dl><a class="apply-link" href="#apply-note">Apply at source</a></div></div>
+          </details>
+
+          <div class="empty-state" id="empty-state"><strong>No sample matches that measurement.</strong>Try another discipline or a broader search term.</div>
+        </div>
+        <p class="micro-note" id="apply-note">Sample data shown for this design mockup. In the working product, each source link opens the employer application.</p>
+      </section>
+
+      <section class="system-section" id="system" aria-labelledby="system-title">
+        <div class="system-copy">
+          <div class="drawing-label">Exploded system view / three parts</div>
+          <h2 id="system-title">Less machinery between you and the work.</h2>
+          <p>UGMI keeps the useful parts of internship search and removes the gatekeeping parts. Browse first. Decide for yourself. Leave directly for the employer application.</p>
+          <div class="exploded-view" aria-label="Three-part exploded service diagram">
+            <div class="part"><small>Part 01</small><strong>Open index</strong><span>1,427 roles gathered into one searchable surface.</span></div>
+            <div class="part"><small>Part 02</small><strong>Useful filters</strong><span>Discipline and plain-language search, without a profile.</span></div>
+            <div class="part"><small>Part 03</small><strong>Source route</strong><span>Inspect the role, then continue to the original posting.</span></div>
+          </div>
+        </div>
+
+        <div class="bom" id="bom" aria-labelledby="bom-title">
+          <div class="bom-title" id="bom-title"><span>Bill of materials</span><span>BOM 02</span></div>
+          <div class="bom-grid">
+            <article class="plan">
+              <div class="plan-kicker">Standard assembly</div>
+              <div class="price">$0 <span>CAD / always</span></div>
+              <p>For students who want a better list and their own process.</p>
+              <ul>
+                <li>Search 1,427 open internships</li>
+                <li>Mostly Canadian opportunities</li>
+                <li>No account or email required</li>
+                <li>No paywall on the listings</li>
+                <li>Direct route to source postings</li>
+              </ul>
+            </article>
+            <article class="plan paid">
+              <div class="plan-kicker">Optional matched assembly</div>
+              <div class="price">$15 <span>CAD / month</span></div>
+              <p>For students who want a smaller, researched Monday shortlist.</p>
+              <ul>
+                <li>10 hand-picked matched internships</li>
+                <li>Delivered every Monday</li>
+                <li>A named contact with every role</li>
+                <li>Human selection, not a keyword dump</li>
+                <li>Secure billing through Stripe</li>
+              </ul>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-cut" aria-labelledby="monday-title">
+        <div class="drawing-label">Section cut B-B / optional service</div>
+        <div class="cut-grid">
+          <div class="cut-diagram" aria-label="A cutaway view of ten Monday internship matches">
+            <div class="cut-line">Cut line B-B / Monday 08:00</div>
+            <div class="monday-stack">
+              <div class="match-sheet"><b>01</b><span>Role matched to your field<br>Contact: Product lead</span></div>
+              <div class="match-sheet"><b>02</b><span>Role matched to your goals<br>Contact: Hiring manager</span></div>
+              <div class="match-sheet"><b>03</b><span>Role checked by a human<br>Contact: Team recruiter</span></div>
+              <div class="match-sheet"><b>04</b><span>Fresh application route<br>Contact: Engineering lead</span></div>
+              <div class="match-sheet"><b>05-10</b><span>Six more researched matches<br>Each includes a named contact</span></div>
+            </div>
+          </div>
+          <div class="cut-copy">
+            <h2 id="monday-title">Ten good leads. One clear Monday.</h2>
+            <p>The optional service is not a second job board. It is a compact field packet, researched for your interests and sent at the start of each week.</p>
+            <ol class="flow-list">
+              <li><strong>Set the target.</strong><br>Share the kind of internship you actually want.</li>
+              <li><strong>Eric researches.</strong><br>Ten relevant openings are checked and selected by hand.</li>
+              <li><strong>You get context.</strong><br>Every match includes a named person connected to the role.</li>
+              <li><strong>You choose the next move.</strong><br>Apply to the leads that deserve your time.</li>
+            </ol>
+            <a class="button" href="#maker">Meet the person behind it</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="maker" id="maker" aria-labelledby="maker-title">
+        <div>
+          <div class="drawing-label" style="color:#e8b4a2">Fabricator's note / signed</div>
+          <h2 id="maker-title">Built and run by one Waterloo student.</h2>
+          <p>UGMI is maintained by Eric, a University of Waterloo student who wanted internship search to feel more direct, less extractive, and a little more human. Questions, corrections, and good finds go straight to the person running the thing.</p>
+          <p><strong>Find the builder: @sleppyeric</strong></p>
+        </div>
+        <div class="maker-stamp" aria-label="UGMI maker approval stamp">
+          <div><small>Checked by a real person</small><strong>UGMI / WATERLOO</strong><span>ONE-STUDENT OPERATION</span></div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="title-block">
+        <div class="title-main"><strong>UGMI</strong><span>Internship field blueprint / Canada</span></div>
+        <div class="revision"><small>Revision</small><b>03</b></div>
+      </div>
+      <div class="footer-copy"><strong>Free list:</strong> no account, email, or paywall. <strong>Optional service:</strong> $15 CAD monthly, billed with Stripe. Seed listings on this page are illustrative design data.</div>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var body = document.body;
+      var search = document.getElementById("search");
+      var listings = Array.prototype.slice.call(document.querySelectorAll(".listing"));
+      var filterButtons = Array.prototype.slice.call(document.querySelectorAll(".filter-button"));
+      var modeButtons = Array.prototype.slice.call(document.querySelectorAll(".mode-button"));
+      var count = document.getElementById("visible-count");
+      var empty = document.getElementById("empty-state");
+      var activeFilter = "all";
+
+      function updateListings() {
+        var query = search.value.trim().toLowerCase();
+        var shown = 0;
+
+        listings.forEach(function (listing) {
+          var disciplineMatch = activeFilter === "all" || listing.dataset.discipline === activeFilter;
+          var searchMatch = !query || listing.dataset.search.indexOf(query) !== -1;
+          var visible = disciplineMatch && searchMatch;
+          listing.hidden = !visible;
+          if (visible) shown += 1;
+        });
+
+        count.textContent = shown + (shown === 1 ? " shown" : " shown");
+        empty.classList.toggle("show", shown === 0);
+      }
+
+      filterButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+          activeFilter = button.dataset.filter;
+          filterButtons.forEach(function (item) {
+            item.setAttribute("aria-pressed", String(item === button));
+          });
+          updateListings();
+        });
+      });
+
+      modeButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+          var mode = button.dataset.mode;
+          body.classList.remove("mode-measurements", "mode-details");
+          body.classList.add("mode-" + mode);
+          modeButtons.forEach(function (item) {
+            item.setAttribute("aria-pressed", String(item === button));
+          });
+        });
+      });
+
+      search.addEventListener("input", updateListings);
+    }());
+  </script>
+</body>
+</html>

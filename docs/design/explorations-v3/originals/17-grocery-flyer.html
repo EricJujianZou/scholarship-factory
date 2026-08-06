@@ -1,0 +1,862 @@
+<!-- INTERNAL DESIGN MOCKUP - sample listing data -->
+<!doctype html>
+<html lang="en-CA">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="UGMI helps students find open Canadian internships for free, with an optional hand-picked Monday shortlist.">
+  <title>UGMI | Fresh internships, stocked daily</title>
+  <style>
+    :root {
+      --ink: #101a12;
+      --paper: #fffdf0;
+      --cream: #f5f0d8;
+      --green: #075c36;
+      --lime: #d8ff2f;
+      --orange: #ff5a1f;
+      --pink: #ff4f9a;
+      --yellow: #ffe244;
+      --blue: #1367d1;
+      --white: #fffef8;
+      --rule: 3px solid var(--ink);
+      --shadow: 5px 5px 0 var(--ink);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        linear-gradient(90deg, rgba(7,92,54,.045) 1px, transparent 1px) 0 0 / 18px 18px,
+        var(--paper);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 16px;
+      line-height: 1.4;
+      overflow-x: hidden;
+    }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    a { color: inherit; }
+    :focus-visible { outline: 4px solid var(--blue); outline-offset: 3px; }
+    .skip-link {
+      position: fixed;
+      top: 8px;
+      left: 8px;
+      z-index: 100;
+      padding: 10px 14px;
+      background: var(--white);
+      border: var(--rule);
+      transform: translateY(-160%);
+    }
+    .skip-link:focus { transform: translateY(0); }
+
+    .top-strip {
+      padding: 8px 16px;
+      color: var(--white);
+      background: var(--green);
+      font-size: .74rem;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+    .site-header {
+      position: relative;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 74px;
+      padding: 12px 16px;
+      background: var(--yellow);
+      border-bottom: var(--rule);
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      text-decoration: none;
+    }
+    .brand-mark {
+      display: grid;
+      width: 43px;
+      height: 43px;
+      place-items: center;
+      color: var(--white);
+      background: var(--green);
+      border: 2px solid var(--ink);
+      border-radius: 50% 50% 45% 45%;
+      font-size: 1.35rem;
+      font-weight: 1000;
+      transform: rotate(-4deg);
+    }
+    .brand-word {
+      font-size: 1.55rem;
+      font-weight: 1000;
+      letter-spacing: -.06em;
+      line-height: .85;
+    }
+    .brand-word small {
+      display: block;
+      margin-top: 5px;
+      font-size: .57rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .header-actions { display: flex; align-items: center; gap: 8px; }
+    .saved-receipt {
+      position: relative;
+      min-width: 64px;
+      padding: 8px 10px 12px;
+      background: var(--white);
+      border: 2px solid var(--ink);
+      font-size: .66rem;
+      font-weight: 900;
+      text-align: center;
+      text-transform: uppercase;
+      clip-path: polygon(0 0,100% 0,100% 88%,92% 100%,82% 88%,72% 100%,62% 88%,52% 100%,42% 88%,32% 100%,22% 88%,12% 100%,0 88%);
+    }
+    .saved-receipt strong { display: block; font-size: 1.25rem; line-height: 1; }
+    .nav-link { display: none; font-weight: 900; text-decoration: none; }
+
+    main { overflow: hidden; }
+    .hero {
+      position: relative;
+      padding: 30px 16px 34px;
+      background: var(--lime);
+      border-bottom: var(--rule);
+    }
+    .hero::after {
+      content: "FRESH";
+      position: absolute;
+      right: -22px;
+      top: 18px;
+      padding: 6px 24px;
+      color: var(--white);
+      background: var(--orange);
+      border: 2px solid var(--ink);
+      font-size: .72rem;
+      font-weight: 1000;
+      letter-spacing: .16em;
+      transform: rotate(12deg);
+    }
+    .eyebrow {
+      display: inline-block;
+      margin: 0 0 15px;
+      padding: 5px 9px;
+      color: var(--white);
+      background: var(--green);
+      font-size: .7rem;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 {
+      max-width: 760px;
+      margin-bottom: 15px;
+      font-size: clamp(2.55rem, 12vw, 6.4rem);
+      font-weight: 1000;
+      letter-spacing: -.075em;
+      line-height: .88;
+      text-transform: uppercase;
+    }
+    .hero-copy {
+      max-width: 590px;
+      margin-bottom: 22px;
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+    .stock-count {
+      display: inline-grid;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      padding: 11px 13px;
+      background: var(--white);
+      border: var(--rule);
+      box-shadow: var(--shadow);
+      transform: rotate(-1deg);
+    }
+    .stock-count strong { font-size: 1.85rem; line-height: 1; }
+    .stock-count span { font-size: .72rem; font-weight: 900; line-height: 1.1; text-transform: uppercase; }
+    .trust-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 6px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    .trust-line li {
+      padding: 6px 9px;
+      background: rgba(255,255,255,.65);
+      border: 2px solid var(--ink);
+      font-size: .73rem;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .finder {
+      padding: 26px 16px 30px;
+      background: var(--paper);
+    }
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      max-width: 1180px;
+      margin: 0 auto 18px;
+    }
+    .section-kicker {
+      margin-bottom: 3px;
+      color: var(--green);
+      font-size: .72rem;
+      font-weight: 1000;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    h2 {
+      margin-bottom: 0;
+      font-size: clamp(1.8rem, 7vw, 3.4rem);
+      font-weight: 1000;
+      letter-spacing: -.045em;
+      line-height: .95;
+      text-transform: uppercase;
+    }
+    .result-tally {
+      flex: 0 0 auto;
+      padding: 7px 9px;
+      background: var(--yellow);
+      border: 2px solid var(--ink);
+      font-size: .72rem;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+    .finder-bar {
+      max-width: 1180px;
+      margin: 0 auto 19px;
+      padding: 12px;
+      background: var(--green);
+      border: var(--rule);
+      box-shadow: 4px 4px 0 var(--orange);
+    }
+    .search-wrap { position: relative; }
+    .search-wrap svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      width: 20px;
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+    .search {
+      width: 100%;
+      height: 48px;
+      padding: 0 12px 0 42px;
+      color: var(--ink);
+      background: var(--white);
+      border: 2px solid var(--ink);
+      border-radius: 0;
+      font-weight: 800;
+    }
+    .search::placeholder { color: #4f5e53; opacity: 1; }
+    .aisles-label {
+      margin: 14px 0 8px;
+      color: var(--white);
+      font-size: .67rem;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .aisles {
+      display: flex;
+      gap: 8px;
+      padding: 1px 1px 5px;
+      overflow-x: auto;
+      scrollbar-color: var(--yellow) var(--green);
+    }
+    .filter {
+      flex: 0 0 auto;
+      padding: 8px 11px;
+      background: var(--white);
+      border: 2px solid var(--ink);
+      border-radius: 0;
+      font-size: .75rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .filter:hover, .filter[aria-pressed="true"] { background: var(--yellow); }
+
+    .belt-wrap {
+      position: relative;
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+    .belt-label {
+      display: inline-block;
+      margin: 0 0 -2px 14px;
+      padding: 7px 12px;
+      color: var(--white);
+      background: var(--ink);
+      font-size: .66rem;
+      font-weight: 900;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+    .listing-belt {
+      display: grid;
+      gap: 14px;
+      padding: 14px;
+      background: repeating-linear-gradient(135deg, #263128 0 12px, #1b241d 12px 24px);
+      border: var(--rule);
+    }
+    .listing {
+      position: relative;
+      display: grid;
+      gap: 14px;
+      padding: 16px;
+      background: var(--white);
+      border: 2px solid var(--ink);
+    }
+    .listing:nth-child(2n) { background: #fffbea; }
+    .listing::before {
+      content: attr(data-aisle-label);
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      padding: 4px 7px;
+      color: var(--white);
+      background: var(--blue);
+      border: 2px solid var(--ink);
+      font-size: .6rem;
+      font-weight: 1000;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+    .listing-main { padding-top: 10px; }
+    .company {
+      margin-bottom: 4px;
+      color: var(--green);
+      font-size: .69rem;
+      font-weight: 1000;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .listing h3 {
+      margin-bottom: 8px;
+      padding-right: 32px;
+      font-size: 1.25rem;
+      font-weight: 1000;
+      letter-spacing: -.025em;
+      line-height: 1.05;
+    }
+    .details {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px 12px;
+      margin: 0;
+      color: #324037;
+      font-size: .78rem;
+      font-weight: 700;
+    }
+    .details span { display: inline-flex; align-items: center; gap: 4px; }
+    .price-zone {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: end;
+      gap: 12px;
+      border-top: 2px dashed var(--ink);
+      padding-top: 12px;
+    }
+    .price-tag {
+      display: inline-block;
+      width: fit-content;
+      padding: 7px 9px;
+      background: var(--yellow);
+      border: 2px solid var(--ink);
+      font-size: .68rem;
+      font-weight: 1000;
+      line-height: 1.05;
+      text-transform: uppercase;
+      transform: rotate(-1deg);
+    }
+    .price-tag strong { display: block; font-size: 1.15rem; letter-spacing: -.04em; }
+    .freshness {
+      margin-top: 7px;
+      font-size: .7rem;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+    .freshness mark { padding: 2px 4px; color: var(--ink); background: #b8ffb6; }
+    .save-btn {
+      min-width: 82px;
+      padding: 10px 9px;
+      background: var(--white);
+      border: 2px solid var(--ink);
+      box-shadow: 3px 3px 0 var(--ink);
+      font-size: .72rem;
+      font-weight: 1000;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .save-btn:hover { background: var(--pink); }
+    .save-btn[aria-pressed="true"] { color: var(--white); background: var(--green); box-shadow: none; transform: translate(3px,3px); }
+    .empty-state {
+      display: none;
+      padding: 30px 20px;
+      color: var(--ink);
+      background: var(--yellow);
+      border: 2px solid var(--ink);
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .promise {
+      padding: 26px 16px;
+      background: var(--orange);
+      border-block: var(--rule);
+    }
+    .promise-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      color: var(--white);
+      text-align: center;
+    }
+    .promise strong {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 1.5rem;
+      font-weight: 1000;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+    .promise p { margin: 0; font-weight: 800; }
+
+    .counter {
+      padding: 36px 16px 40px;
+      background: var(--cream);
+    }
+    .counter-grid {
+      display: grid;
+      gap: 22px;
+      max-width: 1050px;
+      margin: 0 auto;
+    }
+    .service-copy h2 { margin-bottom: 14px; }
+    .service-copy > p { max-width: 590px; font-weight: 700; }
+    .counter-list {
+      display: grid;
+      gap: 9px;
+      margin: 20px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    .counter-list li {
+      position: relative;
+      padding-left: 28px;
+      font-weight: 800;
+    }
+    .counter-list li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      top: -2px;
+      display: grid;
+      width: 21px;
+      height: 21px;
+      place-items: center;
+      color: var(--white);
+      background: var(--green);
+      border: 1px solid var(--ink);
+      font-size: .8rem;
+    }
+    .subscription {
+      position: relative;
+      max-width: 420px;
+      padding: 18px 18px 29px;
+      background: var(--white);
+      border: var(--rule);
+      box-shadow: 7px 7px 0 var(--green);
+    }
+    .subscription::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      bottom: 8px;
+      left: 0;
+      border-top: 2px dashed #8f9285;
+    }
+    .receipt-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      padding-bottom: 10px;
+      border-bottom: 2px dashed var(--ink);
+      font-size: .7rem;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+    .sub-price {
+      margin: 18px 0 6px;
+      font-size: 3.3rem;
+      font-weight: 1000;
+      letter-spacing: -.08em;
+      line-height: .9;
+    }
+    .sub-price sup { font-size: 1.2rem; vertical-align: top; letter-spacing: 0; }
+    .sub-price small { font-size: .72rem; letter-spacing: .02em; text-transform: uppercase; }
+    .subscription p { font-size: .85rem; font-weight: 700; }
+    .checkout-btn {
+      display: block;
+      width: 100%;
+      margin: 16px 0 11px;
+      padding: 13px;
+      color: var(--white);
+      background: var(--green);
+      border: 2px solid var(--ink);
+      box-shadow: 4px 4px 0 var(--ink);
+      font-weight: 1000;
+      text-align: center;
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+    .checkout-btn:hover { color: var(--ink); background: var(--lime); }
+    .fine-print { margin: 0 !important; color: #4a514b; font-size: .68rem !important; text-align: center; }
+
+    .founder {
+      padding: 28px 16px;
+      color: var(--white);
+      background: var(--blue);
+      border-bottom: var(--rule);
+    }
+    .founder-inner {
+      display: grid;
+      grid-template-columns: 62px 1fr;
+      gap: 15px;
+      max-width: 760px;
+      margin: 0 auto;
+      align-items: center;
+    }
+    .founder-stamp {
+      display: grid;
+      width: 62px;
+      height: 62px;
+      place-items: center;
+      color: var(--ink);
+      background: var(--yellow);
+      border: 3px solid var(--ink);
+      border-radius: 50%;
+      font-size: 1.5rem;
+      font-weight: 1000;
+      transform: rotate(-7deg);
+    }
+    .founder p { margin: 0; font-weight: 700; }
+    .founder a { font-weight: 1000; }
+
+    footer {
+      padding: 22px 16px 28px;
+      background: var(--yellow);
+      text-align: center;
+    }
+    footer strong { display: block; margin-bottom: 4px; font-size: 1.25rem; letter-spacing: -.04em; }
+    footer p { margin: 0; font-size: .75rem; font-weight: 800; }
+
+    .toast {
+      position: fixed;
+      right: 14px;
+      bottom: 14px;
+      z-index: 50;
+      max-width: calc(100vw - 28px);
+      padding: 10px 13px;
+      color: var(--white);
+      background: var(--ink);
+      border: 2px solid var(--white);
+      font-size: .78rem;
+      font-weight: 900;
+      transform: translateY(140%);
+      transition: transform .2s ease;
+    }
+    .toast.show { transform: translateY(0); }
+
+    @media (min-width: 680px) {
+      .site-header { padding-inline: 28px; }
+      .nav-link { display: inline; }
+      .hero, .finder, .counter { padding-inline: 28px; }
+      .hero { padding-top: 52px; padding-bottom: 54px; }
+      .hero-inner { max-width: 1180px; margin: 0 auto; }
+      .hero-copy { font-size: 1.2rem; }
+      .finder-bar { display: grid; grid-template-columns: minmax(240px, .8fr) 1.2fr; gap: 16px; align-items: end; }
+      .aisles-label { margin-top: 0; }
+      .listing { grid-template-columns: minmax(0,1fr) 230px; align-items: center; padding: 18px 20px; }
+      .price-zone { grid-template-columns: 1fr auto; border-top: 0; border-left: 2px dashed var(--ink); padding: 2px 0 2px 18px; }
+      .counter-grid { grid-template-columns: minmax(0,1fr) 390px; align-items: center; gap: 50px; }
+    }
+    @media (min-width: 980px) {
+      .listing-belt { gap: 16px; padding: 18px; }
+      .listing:nth-child(odd) { margin-right: 8%; }
+      .listing:nth-child(even) { margin-left: 8%; }
+      .listing h3 { font-size: 1.45rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#listings">Skip to internship listings</a>
+  <div class="top-strip">Open across Canada · Fresh roles checked often · Always free to search</div>
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="UGMI home">
+      <span class="brand-mark" aria-hidden="true">U</span>
+      <span class="brand-word">UGMI<small>Internship market</small></span>
+    </a>
+    <nav class="header-actions" aria-label="Primary navigation">
+      <a class="nav-link" href="#listings">Shop internships</a>
+      <a class="nav-link" href="#monday">Monday shortlist</a>
+      <div class="saved-receipt" aria-live="polite"><strong id="savedCount">0</strong>saved</div>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-inner">
+        <p class="eyebrow">This week's career specials</p>
+        <h1 id="hero-title">Good internships. Right this aisle.</h1>
+        <p class="hero-copy">Browse roles that are actually open, see the pay when it is posted, and save your useful finds. Mostly Canadian. No account required.</p>
+        <div class="stock-count" aria-label="1,427 free searchable open internships">
+          <strong>1,427</strong><span>open internships<br>in stock now</span>
+        </div>
+        <ul class="trust-line" aria-label="Free search benefits">
+          <li>No email</li>
+          <li>No account</li>
+          <li>No paywall</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="finder" id="listings" aria-labelledby="finder-title">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Aisles 01 to 06</p>
+          <h2 id="finder-title">Today's useful finds</h2>
+        </div>
+        <div class="result-tally" id="resultTally" aria-live="polite">6 shown</div>
+      </div>
+
+      <div class="finder-bar">
+        <div class="search-wrap">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="10" cy="10" r="6"></circle><path d="m15 15 6 6"></path></svg>
+          <label for="search" class="visually-hidden" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Search internships</label>
+          <input class="search" id="search" type="search" placeholder="Search role, company, or city" autocomplete="off">
+        </div>
+        <div>
+          <p class="aisles-label">Choose a department aisle</p>
+          <div class="aisles" role="group" aria-label="Filter by discipline">
+            <button class="filter" type="button" data-filter="all" aria-pressed="true">All aisles</button>
+            <button class="filter" type="button" data-filter="software" aria-pressed="false">Software</button>
+            <button class="filter" type="button" data-filter="data" aria-pressed="false">Data</button>
+            <button class="filter" type="button" data-filter="design" aria-pressed="false">Design</button>
+            <button class="filter" type="button" data-filter="business" aria-pressed="false">Business</button>
+            <button class="filter" type="button" data-filter="climate" aria-pressed="false">Climate</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="belt-wrap">
+        <div class="belt-label">Next on belt</div>
+        <div class="listing-belt" id="listingBelt">
+          <article class="listing" data-discipline="software" data-search="backend developer intern freshbooks toronto ontario remote software" data-aisle-label="Aisle 01 · Software">
+            <div class="listing-main">
+              <p class="company">FreshBooks</p>
+              <h3>Backend Developer Intern, Billing Systems</h3>
+              <p class="details"><span>Toronto, ON</span><span>Hybrid</span><span>May to Aug 2026</span></p>
+            </div>
+            <div class="price-zone">
+              <div><div class="price-tag">Posted pay<strong>$29 to $34/hr</strong></div><div class="freshness"><mark>Closes Mar 27</mark> · 8 days fresh</div></div>
+              <button class="save-btn" type="button" aria-pressed="false" aria-label="Save Backend Developer Intern at FreshBooks">+ Save</button>
+            </div>
+          </article>
+
+          <article class="listing" data-discipline="data" data-search="data science intern koho vancouver british columbia remote analytics machine learning" data-aisle-label="Aisle 02 · Data">
+            <div class="listing-main">
+              <p class="company">KOHO</p>
+              <h3>Data Science Intern, Member Insights</h3>
+              <p class="details"><span>Vancouver, BC</span><span>Remote in Canada</span><span>4 months</span></p>
+            </div>
+            <div class="price-zone">
+              <div><div class="price-tag">Posted pay<strong>$31/hr</strong></div><div class="freshness"><mark>Closes Apr 2</mark> · Plenty of time</div></div>
+              <button class="save-btn" type="button" aria-pressed="false" aria-label="Save Data Science Intern at KOHO">+ Save</button>
+            </div>
+          </article>
+
+          <article class="listing" data-discipline="design" data-search="product design intern clio burnaby british columbia ux ui research" data-aisle-label="Aisle 03 · Design">
+            <div class="listing-main">
+              <p class="company">Clio</p>
+              <h3>Product Design Intern, Legal Experiences</h3>
+              <p class="details"><span>Burnaby, BC</span><span>Hybrid</span><span>Summer 2026</span></p>
+            </div>
+            <div class="price-zone">
+              <div><div class="price-tag">Salary marker<strong>$5,200/mo</strong></div><div class="freshness"><mark>Closes Mar 24</mark> · Apply soon</div></div>
+              <button class="save-btn" type="button" aria-pressed="false" aria-label="Save Product Design Intern at Clio">+ Save</button>
+            </div>
+          </article>
+
+          <article class="listing" data-discipline="climate" data-search="sustainability operations intern northland power toronto ontario climate energy" data-aisle-label="Aisle 04 · Climate">
+            <div class="listing-main">
+              <p class="company">Northland Power</p>
+              <h3>Sustainability Operations Intern</h3>
+              <p class="details"><span>Toronto, ON</span><span>On-site</span><span>May to Aug 2026</span></p>
+            </div>
+            <div class="price-zone">
+              <div><div class="price-tag">Posted pay<strong>$25/hr</strong></div><div class="freshness"><mark>Closes Mar 30</mark> · 11 days fresh</div></div>
+              <button class="save-btn" type="button" aria-pressed="false" aria-label="Save Sustainability Operations Intern at Northland Power">+ Save</button>
+            </div>
+          </article>
+
+          <article class="listing" data-discipline="business" data-search="brand strategy intern lululemon vancouver british columbia marketing business" data-aisle-label="Aisle 05 · Business">
+            <div class="listing-main">
+              <p class="company">lululemon</p>
+              <h3>Brand Strategy Intern, Community</h3>
+              <p class="details"><span>Vancouver, BC</span><span>Hybrid</span><span>12 weeks</span></p>
+            </div>
+            <div class="price-zone">
+              <div><div class="price-tag">Posted range<strong>$23 to $27/hr</strong></div><div class="freshness"><mark>Closes Mar 25</mark> · Apply soon</div></div>
+              <button class="save-btn" type="button" aria-pressed="false" aria-label="Save Brand Strategy Intern at lululemon">+ Save</button>
+            </div>
+          </article>
+
+          <article class="listing" data-discipline="software" data-search="mobile engineering intern lightspeed montreal quebec software ios android" data-aisle-label="Aisle 06 · Software">
+            <div class="listing-main">
+              <p class="company">Lightspeed</p>
+              <h3>Mobile Engineering Intern, Retail</h3>
+              <p class="details"><span>Montréal, QC</span><span>Hybrid</span><span>4 months</span></p>
+            </div>
+            <div class="price-zone">
+              <div><div class="price-tag">Salary marker<strong>$30/hr</strong></div><div class="freshness"><mark>Closes Apr 4</mark> · Newly stocked</div></div>
+              <button class="save-btn" type="button" aria-pressed="false" aria-label="Save Mobile Engineering Intern at Lightspeed">+ Save</button>
+            </div>
+          </article>
+
+          <div class="empty-state" id="emptyState" role="status">Nothing in this aisle matches yet. Try a broader search.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="promise" aria-label="UGMI free search promise">
+      <div class="promise-inner">
+        <strong>Browsing stays free.</strong>
+        <p>All 1,427 open roles are searchable without an account, an email gate, or a paid plan.</p>
+      </div>
+    </section>
+
+    <section class="counter" id="monday" aria-labelledby="counter-title">
+      <div class="counter-grid">
+        <div class="service-copy">
+          <p class="section-kicker">At the service counter</p>
+          <h2 id="counter-title">Your Monday shortlist</h2>
+          <p>Want someone to check the shelves for you? Tell UGMI what fits. Every Monday, get 10 hand-picked open roles matched to your interests, each with a named person you can contact.</p>
+          <ul class="counter-list">
+            <li>10 matched roles, checked by a human</li>
+            <li>A named recruiter, manager, or team contact for every role</li>
+            <li>One useful email every Monday</li>
+            <li>Cancel anytime, with no effect on free search</li>
+          </ul>
+        </div>
+        <aside class="subscription" aria-label="Monday shortlist subscription price">
+          <div class="receipt-top"><span>UGMI Service Counter</span><span>Weekly</span></div>
+          <div class="sub-price"><sup>$</sup>15 <small>CAD / month</small></div>
+          <p>This is an optional recurring subscription. Free search stays exactly free. Your preferences are used to prepare the shortlist you asked for.</p>
+          <a class="checkout-btn" href="#subscribe-note" id="checkoutButton">Start my Monday shortlist</a>
+          <p class="fine-print" id="subscribe-note">Secure payment through Stripe. Cancel anytime before your next billing date.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="founder" aria-label="About the founder">
+      <div class="founder-inner">
+        <div class="founder-stamp" aria-hidden="true">1×</div>
+        <p><strong>One student, not a giant job board.</strong><br>UGMI is run by one Waterloo student who got tired of stale internship lists. Say hi at @sleppyeric.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <strong>UGMI · Internship market</strong>
+    <p>Mostly Canada. Always straightforward. Sample listings shown for this design mockup.</p>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">Saved to your receipt.</div>
+
+  <script>
+    (function () {
+      const filters = Array.from(document.querySelectorAll('.filter'));
+      const listings = Array.from(document.querySelectorAll('.listing'));
+      const search = document.getElementById('search');
+      const tally = document.getElementById('resultTally');
+      const empty = document.getElementById('emptyState');
+      const count = document.getElementById('savedCount');
+      const toast = document.getElementById('toast');
+      const checkout = document.getElementById('checkoutButton');
+      let activeFilter = 'all';
+      let savedCount = 0;
+      let toastTimer;
+
+      function updateListings() {
+        const query = search.value.trim().toLowerCase();
+        let visible = 0;
+        listings.forEach(function (listing) {
+          const disciplineMatch = activeFilter === 'all' || listing.dataset.discipline === activeFilter;
+          const searchMatch = !query || listing.dataset.search.includes(query) || listing.textContent.toLowerCase().includes(query);
+          const show = disciplineMatch && searchMatch;
+          listing.hidden = !show;
+          if (show) visible += 1;
+        });
+        tally.textContent = visible + (visible === 1 ? ' shown' : ' shown');
+        empty.style.display = visible === 0 ? 'block' : 'none';
+      }
+
+      filters.forEach(function (button) {
+        button.addEventListener('click', function () {
+          activeFilter = button.dataset.filter;
+          filters.forEach(function (item) {
+            item.setAttribute('aria-pressed', String(item === button));
+          });
+          updateListings();
+        });
+      });
+
+      search.addEventListener('input', updateListings);
+
+      document.querySelectorAll('.save-btn').forEach(function (button) {
+        button.addEventListener('click', function () {
+          const isSaved = button.getAttribute('aria-pressed') === 'true';
+          button.setAttribute('aria-pressed', String(!isSaved));
+          button.textContent = isSaved ? '+ Save' : 'Saved';
+          savedCount += isSaved ? -1 : 1;
+          count.textContent = savedCount;
+          toast.textContent = isSaved ? 'Removed from your receipt.' : 'Saved to your receipt.';
+          toast.classList.add('show');
+          window.clearTimeout(toastTimer);
+          toastTimer = window.setTimeout(function () { toast.classList.remove('show'); }, 1800);
+        });
+      });
+
+      checkout.addEventListener('click', function (event) {
+        event.preventDefault();
+        toast.textContent = 'Demo only. A real launch would continue to Stripe.';
+        toast.classList.add('show');
+        window.clearTimeout(toastTimer);
+        toastTimer = window.setTimeout(function () { toast.classList.remove('show'); }, 2600);
+        document.getElementById('subscribe-note').focus({ preventScroll: false });
+      });
+    }());
+  </script>
+</body>
+</html>

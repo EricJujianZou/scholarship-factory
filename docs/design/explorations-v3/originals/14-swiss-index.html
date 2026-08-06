@@ -1,0 +1,1051 @@
+<!-- INTERNAL DESIGN MOCKUP - sample listing data -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>UGMI / Internship Index</title>
+  <style>
+    :root {
+      --paper: #f4f1e8;
+      --ink: #11110f;
+      --muted: #67665f;
+      --red: #e12b1f;
+      --line: #171714;
+      --soft-line: #b7b3a8;
+      --max: 1440px;
+      --pad: 18px;
+      --ease: 180ms ease;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--paper);
+    }
+
+    body {
+      margin: 0;
+      min-width: 0;
+      overflow-x: hidden;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: Arial, Helvetica, ui-sans-serif, system-ui, sans-serif;
+      font-size: 16px;
+      line-height: 1.25;
+      text-rendering: optimizeLegibility;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button,
+    a,
+    input {
+      border-radius: 0;
+    }
+
+    button {
+      color: inherit;
+    }
+
+    a {
+      color: inherit;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
+    a:hover { text-decoration-thickness: 3px; }
+
+    :focus-visible {
+      outline: 3px solid var(--red);
+      outline-offset: 3px;
+    }
+
+    .skip-link {
+      position: fixed;
+      z-index: 100;
+      top: 8px;
+      left: 8px;
+      padding: 10px 12px;
+      color: #fff;
+      background: var(--ink);
+      transform: translateY(-160%);
+    }
+
+    .skip-link:focus { transform: translateY(0); }
+
+    .shell {
+      width: min(100%, var(--max));
+      margin-inline: auto;
+      padding-inline: var(--pad);
+    }
+
+    .micro,
+    .eyebrow,
+    .index-button,
+    .view-button,
+    .entry-meta,
+    .entry-no,
+    .tag,
+    .field-label,
+    .mast-meta,
+    .metric-label,
+    .service-code,
+    .foot-code {
+      font-size: .67rem;
+      line-height: 1.15;
+      font-weight: 700;
+      letter-spacing: .105em;
+      text-transform: uppercase;
+    }
+
+    .topbar {
+      border-top: 8px solid var(--red);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .topbar-inner {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      min-height: 60px;
+    }
+
+    .wordmark {
+      font-size: 1.35rem;
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: -.05em;
+      text-decoration: none;
+    }
+
+    .wordmark span { color: var(--red); }
+
+    .topnav {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .topnav a {
+      font-size: .72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .topnav a:first-child { display: none; }
+
+    .masthead {
+      padding-top: 19px;
+      border-bottom: 2px solid var(--line);
+    }
+
+    .mast-grid {
+      display: grid;
+      grid-template-columns: 1fr 84px;
+      gap: 12px;
+    }
+
+    .mast-meta {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding-bottom: 7px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hero-title {
+      margin: 12px 0 5px;
+      max-width: 9ch;
+      font-size: clamp(3.65rem, 19vw, 8.4rem);
+      line-height: .78;
+      font-weight: 900;
+      letter-spacing: -.085em;
+      text-transform: uppercase;
+    }
+
+    .hero-title .red { color: var(--red); }
+
+    .edition-block {
+      align-self: stretch;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      margin-top: 12px;
+      padding: 8px 0 10px 10px;
+      border-left: 1px solid var(--line);
+    }
+
+    .edition-no {
+      font-size: 3.7rem;
+      line-height: .82;
+      font-weight: 900;
+      letter-spacing: -.08em;
+    }
+
+    .hero-copy {
+      grid-column: 1 / -1;
+      margin: 8px 0 18px;
+      max-width: 37rem;
+      font-size: 1.02rem;
+      font-weight: 700;
+      letter-spacing: -.02em;
+    }
+
+    .hero-copy strong {
+      color: var(--red);
+      font-weight: 900;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .metric {
+      min-height: 100px;
+      padding: 12px 0 15px;
+      border-right: 1px solid var(--line);
+    }
+
+    .metric:nth-child(even) {
+      padding-left: 12px;
+      border-right: 0;
+    }
+
+    .metric:nth-child(n+3) { border-top: 1px solid var(--line); }
+
+    .metric-value {
+      display: block;
+      margin-bottom: 8px;
+      font-size: clamp(2rem, 11vw, 4.8rem);
+      line-height: .82;
+      font-weight: 900;
+      letter-spacing: -.065em;
+    }
+
+    .metric-value.small { font-size: clamp(1.55rem, 8vw, 3.5rem); }
+
+    .catalog {
+      padding-top: 34px;
+    }
+
+    .section-heading {
+      display: grid;
+      grid-template-columns: 44px 1fr;
+      gap: 12px;
+      align-items: end;
+      padding-bottom: 9px;
+      border-bottom: 4px solid var(--line);
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      font-size: clamp(2rem, 10vw, 5.2rem);
+      line-height: .84;
+      letter-spacing: -.06em;
+      text-transform: uppercase;
+    }
+
+    .section-number {
+      color: var(--red);
+      font-size: 1.45rem;
+      line-height: 1;
+      font-weight: 900;
+    }
+
+    .controls {
+      display: grid;
+      gap: 0;
+      border-bottom: 2px solid var(--line);
+    }
+
+    .search-field {
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      align-items: center;
+      gap: 10px;
+      min-height: 66px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .search-field input {
+      width: 100%;
+      min-width: 0;
+      padding: 13px 0;
+      border: 0;
+      border-bottom: 2px solid var(--line);
+      color: var(--ink);
+      background: transparent;
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .search-field input::placeholder { color: #75736b; }
+
+    .search-field input:focus {
+      outline: 0;
+      border-color: var(--red);
+    }
+
+    .index-group {
+      padding: 13px 0 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .index-group:last-child { border-bottom: 0; }
+
+    .index-label {
+      display: block;
+      margin-bottom: 10px;
+      color: var(--red);
+    }
+
+    .index-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 5px;
+    }
+
+    .index-button,
+    .view-button {
+      min-height: 34px;
+      padding: 8px 9px 7px;
+      border: 1px solid var(--line);
+      background: transparent;
+      cursor: pointer;
+      transition: color var(--ease), background var(--ease);
+    }
+
+    .index-button:hover,
+    .view-button:hover,
+    .index-button[aria-pressed="true"],
+    .view-button[aria-pressed="true"] {
+      color: var(--paper);
+      background: var(--ink);
+    }
+
+    .index-button .count {
+      margin-left: 5px;
+      color: var(--red);
+    }
+
+    .index-button[aria-pressed="true"] .count { color: #ff6b5f; }
+
+    .results-bar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      min-height: 64px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .result-count {
+      margin: 0;
+      font-size: .78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .result-count strong {
+      color: var(--red);
+      font-size: 1.35rem;
+      letter-spacing: -.04em;
+    }
+
+    .view-switch {
+      display: flex;
+      gap: 4px;
+    }
+
+    .view-button {
+      min-height: 30px;
+      padding: 6px 7px;
+      font-size: .6rem;
+    }
+
+    .listing-table { border-bottom: 4px solid var(--line); }
+
+    .entry {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .entry[hidden] { display: none; }
+
+    .entry-no {
+      padding: 13px 8px 12px 0;
+      color: var(--red);
+      border-right: 1px solid var(--line);
+    }
+
+    .entry-main {
+      min-width: 0;
+      padding: 12px 0 13px 12px;
+    }
+
+    .entry-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px 11px;
+      margin-bottom: 8px;
+      color: var(--muted);
+    }
+
+    .entry-meta span:first-child { color: var(--ink); }
+
+    .entry-title {
+      margin: 0;
+      max-width: 24ch;
+      font-size: clamp(1.35rem, 6vw, 2.35rem);
+      line-height: .95;
+      font-weight: 900;
+      letter-spacing: -.045em;
+    }
+
+    .entry-org {
+      margin: 7px 0 12px;
+      font-size: .88rem;
+      font-weight: 700;
+    }
+
+    .entry-summary {
+      margin: 0 0 12px;
+      max-width: 52rem;
+      color: #35342f;
+      font-size: .9rem;
+      line-height: 1.4;
+    }
+
+    .entry-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 13px;
+    }
+
+    .details-button {
+      padding: 0;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      background: transparent;
+      font-size: .68rem;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .details-button::before { content: "+ "; color: var(--red); }
+    .details-button[aria-expanded="true"]::before { content: "− "; }
+
+    .tag {
+      display: inline-block;
+      padding: 4px 6px 3px;
+      color: var(--paper);
+      background: var(--ink);
+      font-size: .58rem;
+    }
+
+    .entry-detail {
+      display: none;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 15px;
+      padding-top: 11px;
+      border-top: 1px solid var(--soft-line);
+    }
+
+    .entry-detail[data-open="true"] { display: grid; }
+
+    .detail-item {
+      min-width: 0;
+    }
+
+    .detail-item b {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--red);
+      font-size: .59rem;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+
+    .detail-item span {
+      font-size: .8rem;
+      font-weight: 700;
+    }
+
+    .listing-table[data-view="compact"] .entry-summary,
+    .listing-table[data-view="compact"] .entry-detail,
+    .listing-table[data-view="compact"] .tag {
+      display: none;
+    }
+
+    .listing-table[data-view="compact"] .entry-main { padding-block: 9px; }
+    .listing-table[data-view="compact"] .entry-no { padding-top: 10px; }
+    .listing-table[data-view="compact"] .entry-meta { margin-bottom: 5px; }
+    .listing-table[data-view="compact"] .entry-title { font-size: 1.08rem; max-width: none; }
+    .listing-table[data-view="compact"] .entry-org { margin: 4px 0 7px; font-size: .75rem; }
+
+    .empty-state {
+      display: none;
+      margin: 0;
+      padding: 30px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 1.2rem;
+      font-weight: 900;
+    }
+
+    .empty-state[data-visible="true"] { display: block; }
+
+    .service {
+      margin-top: 50px;
+      color: var(--paper);
+      background: var(--ink);
+      border-top: 8px solid var(--red);
+    }
+
+    .service-grid {
+      display: grid;
+      padding-top: 16px;
+      padding-bottom: 28px;
+    }
+
+    .service-code {
+      display: flex;
+      justify-content: space-between;
+      padding-bottom: 9px;
+      border-bottom: 1px solid #807e76;
+      color: #c4c1b8;
+    }
+
+    .price {
+      margin: 18px 0 0;
+      color: var(--red);
+      font-size: clamp(4.3rem, 22vw, 9rem);
+      line-height: .74;
+      font-weight: 900;
+      letter-spacing: -.09em;
+    }
+
+    .price sup {
+      vertical-align: top;
+      font-size: .26em;
+      letter-spacing: 0;
+    }
+
+    .service-copy h2 {
+      margin: 21px 0 11px;
+      max-width: 13ch;
+      font-size: clamp(1.9rem, 9vw, 4rem);
+      line-height: .92;
+      letter-spacing: -.055em;
+      text-transform: uppercase;
+    }
+
+    .service-copy p {
+      max-width: 35rem;
+      margin: 0 0 18px;
+      color: #d7d4cb;
+      line-height: 1.45;
+    }
+
+    .service-list {
+      margin: 0 0 24px;
+      padding: 0;
+      list-style: none;
+      border-top: 1px solid #807e76;
+    }
+
+    .service-list li {
+      display: grid;
+      grid-template-columns: 30px 1fr;
+      gap: 8px;
+      padding: 9px 0;
+      border-bottom: 1px solid #807e76;
+      font-size: .8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .055em;
+    }
+
+    .service-list b { color: var(--red); }
+
+    .service-cta {
+      display: inline-block;
+      padding: 13px 16px 11px;
+      border: 2px solid var(--paper);
+      color: var(--paper);
+      background: transparent;
+      font-size: .72rem;
+      font-weight: 900;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      text-decoration: none;
+    }
+
+    .service-cta:hover,
+    .service-cta:focus-visible {
+      color: var(--ink);
+      background: var(--paper);
+    }
+
+    .about {
+      display: grid;
+      gap: 22px;
+      padding-top: 35px;
+      padding-bottom: 35px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .about h2 {
+      margin: 0;
+      max-width: 12ch;
+      font-size: clamp(2rem, 10vw, 4.5rem);
+      line-height: .9;
+      letter-spacing: -.06em;
+      text-transform: uppercase;
+    }
+
+    .about-copy {
+      max-width: 38rem;
+    }
+
+    .about-copy p {
+      margin: 0 0 15px;
+      line-height: 1.45;
+    }
+
+    .about-copy strong { font-weight: 900; }
+
+    footer {
+      padding: 15px 0 24px;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 15px;
+      align-items: end;
+    }
+
+    .footer-mark {
+      font-size: 2.9rem;
+      line-height: .8;
+      font-weight: 900;
+      letter-spacing: -.07em;
+    }
+
+    .footer-mark span { color: var(--red); }
+
+    .foot-code {
+      text-align: right;
+      color: var(--muted);
+    }
+
+    @media (min-width: 700px) {
+      :root { --pad: 28px; }
+      .topnav a:first-child { display: inline; }
+      .mast-grid { grid-template-columns: minmax(0, 1fr) 140px; }
+      .hero-copy { font-size: 1.25rem; }
+      .metrics { grid-template-columns: repeat(4, 1fr); }
+      .metric,
+      .metric:nth-child(even) {
+        padding: 15px 14px 18px;
+        border-top: 0;
+        border-right: 1px solid var(--line);
+      }
+      .metric:first-child { padding-left: 0; }
+      .metric:last-child { border-right: 0; }
+      .controls { grid-template-columns: minmax(210px, .8fr) 1fr 1fr; }
+      .search-field,
+      .index-group {
+        min-height: 115px;
+        padding: 15px;
+        border-right: 1px solid var(--line);
+        border-bottom: 0;
+      }
+      .search-field { grid-template-columns: 1fr; align-content: center; padding-left: 0; }
+      .index-group:last-child { border-right: 0; }
+      .entry { grid-template-columns: 64px 1fr; }
+      .entry-no { padding-right: 14px; }
+      .entry-main { padding: 16px 0 17px 16px; }
+      .entry-detail { grid-template-columns: repeat(4, 1fr); }
+      .service-grid { grid-template-columns: .9fr 1.1fr; gap: 50px; align-items: end; }
+      .about { grid-template-columns: .85fr 1.15fr; }
+    }
+
+    @media (min-width: 1020px) {
+      :root { --pad: 42px; }
+      .masthead { position: relative; }
+      .mast-grid { grid-template-columns: 90px minmax(0, 1fr) 190px; gap: 24px; }
+      .mast-meta { grid-column: 1 / -1; }
+      .hero-title { grid-column: 2; }
+      .edition-block { grid-column: 3; }
+      .hero-copy { grid-column: 2; max-width: 44rem; margin-bottom: 27px; }
+      .margin-note {
+        grid-column: 1;
+        grid-row: 2 / span 2;
+        position: relative;
+      }
+      .margin-note span {
+        position: absolute;
+        left: 0;
+        top: 170px;
+        width: 210px;
+        transform: rotate(-90deg) translateX(-100%);
+        transform-origin: left top;
+        color: var(--muted);
+        font-size: .62rem;
+        font-weight: 700;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+      }
+      .section-heading { grid-template-columns: 65px 1fr; }
+      .entry { grid-template-columns: 64px minmax(0, 1fr); }
+      .entry-main {
+        display: grid;
+        grid-template-columns: minmax(270px, .78fr) minmax(250px, 1fr) auto;
+        gap: 24px;
+        align-items: start;
+      }
+      .entry-meta { grid-column: 1 / -1; margin-bottom: -5px; }
+      .entry-title-wrap { grid-column: 1; }
+      .entry-summary { grid-column: 2; margin: 0; }
+      .entry-actions { grid-column: 3; justify-content: flex-end; }
+      .entry-detail { grid-column: 1 / -1; }
+      .listing-table[data-view="compact"] .entry-main {
+        grid-template-columns: 2fr 1fr auto;
+        align-items: center;
+      }
+      .listing-table[data-view="compact"] .entry-meta { grid-column: 2; grid-row: 1; margin: 0; }
+      .listing-table[data-view="compact"] .entry-title-wrap { grid-column: 1; grid-row: 1; }
+      .listing-table[data-view="compact"] .entry-actions { grid-column: 3; grid-row: 1; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#catalog">Skip to internship index</a>
+
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a class="wordmark" href="#top" aria-label="UGMI home">UGMI<span>/</span></a>
+      <nav class="topnav" aria-label="Primary navigation">
+        <a href="#catalog">Index</a>
+        <a href="#service">Monday 10</a>
+        <a href="#about">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="masthead" aria-labelledby="hero-title">
+      <div class="shell mast-grid">
+        <div class="mast-meta">
+          <span>Internship register / CA</span>
+          <span>Open access / 2025</span>
+        </div>
+        <aside class="margin-note" aria-hidden="true"><span>Compiled independently in Waterloo, Ontario</span></aside>
+        <h1 class="hero-title" id="hero-title">Your next <span class="red">move</span> is indexed.</h1>
+        <div class="edition-block" aria-label="Edition 14">
+          <span class="micro">Edition</span>
+          <span class="edition-no">14</span>
+          <span class="micro">Updated weekly</span>
+        </div>
+        <p class="hero-copy"><strong>1,427 internships.</strong> Mostly Canada. Search the full list with no account, no email, and no paywall.</p>
+      </div>
+    </section>
+
+    <section class="shell metrics" aria-label="UGMI facts">
+      <div class="metric"><span class="metric-value">1,427</span><span class="metric-label">Open listings</span></div>
+      <div class="metric"><span class="metric-value">$0</span><span class="metric-label">To search</span></div>
+      <div class="metric"><span class="metric-value small">CA</span><span class="metric-label">Primary geography</span></div>
+      <div class="metric"><span class="metric-value small">01</span><span class="metric-label">Student operator</span></div>
+    </section>
+
+    <section class="shell catalog" id="catalog" aria-labelledby="catalog-title">
+      <div class="section-heading">
+        <span class="section-number">01</span>
+        <h2 id="catalog-title">Live index</h2>
+      </div>
+
+      <div class="controls" aria-label="Filter internships">
+        <label class="search-field">
+          <span class="field-label">Keyword</span>
+          <input id="search" type="search" placeholder="Role or organization" autocomplete="off">
+        </label>
+        <div class="index-group">
+          <span class="index-label field-label">Type index</span>
+          <div class="index-options" role="group" aria-label="Filter by work type">
+            <button class="index-button type-filter" type="button" data-filter="all" aria-pressed="true">All <span class="count">08</span></button>
+            <button class="index-button type-filter" type="button" data-filter="software" aria-pressed="false">Software <span class="count">03</span></button>
+            <button class="index-button type-filter" type="button" data-filter="data" aria-pressed="false">Data <span class="count">02</span></button>
+            <button class="index-button type-filter" type="button" data-filter="design" aria-pressed="false">Design <span class="count">01</span></button>
+            <button class="index-button type-filter" type="button" data-filter="business" aria-pressed="false">Business <span class="count">02</span></button>
+          </div>
+        </div>
+        <div class="index-group">
+          <span class="index-label field-label">Location index</span>
+          <div class="index-options" role="group" aria-label="Filter by location">
+            <button class="index-button location-filter" type="button" data-filter="all" aria-pressed="true">All <span class="count">08</span></button>
+            <button class="index-button location-filter" type="button" data-filter="toronto" aria-pressed="false">Toronto <span class="count">03</span></button>
+            <button class="index-button location-filter" type="button" data-filter="waterloo" aria-pressed="false">Waterloo <span class="count">02</span></button>
+            <button class="index-button location-filter" type="button" data-filter="vancouver" aria-pressed="false">Vancouver <span class="count">01</span></button>
+            <button class="index-button location-filter" type="button" data-filter="remote" aria-pressed="false">Remote <span class="count">02</span></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="results-bar">
+        <p class="result-count" id="result-count" aria-live="polite"><strong>08</strong> sample entries shown</p>
+        <div class="view-switch" role="group" aria-label="Listing density">
+          <button class="view-button" type="button" data-view="compact" aria-pressed="false">Compact</button>
+          <button class="view-button" type="button" data-view="expanded" aria-pressed="true">Expanded</button>
+        </div>
+      </div>
+
+      <div class="listing-table" id="listing-table" data-view="expanded">
+        <article class="entry" data-type="software" data-location="toronto" data-search="backend engineering intern northstar systems toronto api infrastructure python">
+          <div class="entry-no">001</div>
+          <div class="entry-main">
+            <div class="entry-meta"><span>Software</span><span>Toronto, ON</span><span>4 months</span></div>
+            <div class="entry-title-wrap"><h3 class="entry-title">Backend Engineering Intern</h3><p class="entry-org">Northstar Systems</p></div>
+            <p class="entry-summary">Build internal APIs and observability tools with a small infrastructure team. Python experience is useful, curiosity is required.</p>
+            <div class="entry-actions"><span class="tag">Hybrid</span><button class="details-button" type="button" aria-expanded="false" aria-controls="detail-001">Details</button></div>
+            <div class="entry-detail" id="detail-001" data-open="false"><div class="detail-item"><b>Opens</b><span>May 2025</span></div><div class="detail-item"><b>Term</b><span>16 weeks</span></div><div class="detail-item"><b>Level</b><span>2nd year+</span></div><div class="detail-item"><b>Ref</b><span>NS-441</span></div></div>
+          </div>
+        </article>
+
+        <article class="entry" data-type="data" data-location="waterloo" data-search="machine learning intern fieldnote ai waterloo models data python research">
+          <div class="entry-no">002</div>
+          <div class="entry-main">
+            <div class="entry-meta"><span>Data</span><span>Waterloo, ON</span><span>8 months</span></div>
+            <div class="entry-title-wrap"><h3 class="entry-title">Machine Learning Intern</h3><p class="entry-org">Fieldnote AI</p></div>
+            <p class="entry-summary">Prototype evaluation pipelines for applied language models. Work directly with two researchers and a product engineer.</p>
+            <div class="entry-actions"><span class="tag">On site</span><button class="details-button" type="button" aria-expanded="false" aria-controls="detail-002">Details</button></div>
+            <div class="entry-detail" id="detail-002" data-open="false"><div class="detail-item"><b>Opens</b><span>May 2025</span></div><div class="detail-item"><b>Term</b><span>32 weeks</span></div><div class="detail-item"><b>Level</b><span>3rd year+</span></div><div class="detail-item"><b>Ref</b><span>FA-208</span></div></div>
+          </div>
+        </article>
+
+        <article class="entry" data-type="design" data-location="vancouver" data-search="product design intern common room studio vancouver ux interface research figma">
+          <div class="entry-no">003</div>
+          <div class="entry-main">
+            <div class="entry-meta"><span>Design</span><span>Vancouver, BC</span><span>4 months</span></div>
+            <div class="entry-title-wrap"><h3 class="entry-title">Product Design Intern</h3><p class="entry-org">Common Room Studio</p></div>
+            <p class="entry-summary">Map user flows, test prototypes, and contribute to a practical component library for public service products.</p>
+            <div class="entry-actions"><span class="tag">Hybrid</span><button class="details-button" type="button" aria-expanded="false" aria-controls="detail-003">Details</button></div>
+            <div class="entry-detail" id="detail-003" data-open="false"><div class="detail-item"><b>Opens</b><span>September 2025</span></div><div class="detail-item"><b>Term</b><span>16 weeks</span></div><div class="detail-item"><b>Level</b><span>Any</span></div><div class="detail-item"><b>Ref</b><span>CR-019</span></div></div>
+          </div>
+        </article>
+
+        <article class="entry" data-type="business" data-location="toronto" data-search="growth operations intern relay commerce toronto strategy sales analytics operations">
+          <div class="entry-no">004</div>
+          <div class="entry-main">
+            <div class="entry-meta"><span>Business</span><span>Toronto, ON</span><span>4 months</span></div>
+            <div class="entry-title-wrap"><h3 class="entry-title">Growth Operations Intern</h3><p class="entry-org">Relay Commerce</p></div>
+            <p class="entry-summary">Analyze channel performance and turn findings into weekly experiments. Strong writing and spreadsheet fluency matter here.</p>
+            <div class="entry-actions"><span class="tag">Hybrid</span><button class="details-button" type="button" aria-expanded="false" aria-controls="detail-004">Details</button></div>
+            <div class="entry-detail" id="detail-004" data-open="false"><div class="detail-item"><b>Opens</b><span>May 2025</span></div><div class="detail-item"><b>Term</b><span>16 weeks</span></div><div class="detail-item"><b>Level</b><span>2nd year+</span></div><div class="detail-item"><b>Ref</b><span>RC-771</span></div></div>
+          </div>
+        </article>
+
+        <article class="entry" data-type="software" data-location="remote" data-search="frontend developer intern civic layer remote canada react javascript accessibility web">
+          <div class="entry-no">005</div>
+          <div class="entry-main">
+            <div class="entry-meta"><span>Software</span><span>Remote, Canada</span><span>4 months</span></div>
+            <div class="entry-title-wrap"><h3 class="entry-title">Frontend Developer Intern</h3><p class="entry-org">Civic Layer</p></div>
+            <p class="entry-summary">Ship accessible web interfaces for municipal teams. Pair with senior developers and join weekly user research reviews.</p>
+            <div class="entry-actions"><span class="tag">Remote</span><button class="details-button" type="button" aria-expanded="false" aria-controls="detail-005">Details</button></div>
+            <div class="entry-detail" id="detail-005" data-open="false"><div class="detail-item"><b>Opens</b><span>September 2025</span></div><div class="detail-item"><b>Term</b><span>16 weeks</span></div><div class="detail-item"><b>Level</b><span>Any</span></div><div class="detail-item"><b>Ref</b><span>CL-315</span></div></div>
+          </div>
+        </article>
+
+        <article class="entry" data-type="data" data-location="toronto" data-search="business intelligence intern harbour health toronto sql tableau analytics data">
+          <div class="entry-no">006</div>
+          <div class="entry-main">
+            <div class="entry-meta"><span>Data</span><span>Toronto, ON</span><span>8 months</span></div>
+            <div class="entry-title-wrap"><h3 class="entry-title">Business Intelligence Intern</h3><p class="entry-org">Harbour Health</p></div>
+            <p class="entry-summary">Maintain reporting models, validate source data, and make operational metrics easier for clinical teams to use.</p>
+            <div class="entry-actions"><span class="tag">On site</span><button class="details-button" type="button" aria-expanded="false" aria-controls="detail-006">Details</button></div>
+            <div class="entry-detail" id="detail-006" data-open="false"><div class="detail-item"><b>Opens</b><span>May 2025</span></div><div class="detail-item"><b>Term</b><span>32 weeks</span></div><div class="detail-item"><b>Level</b><span>3rd year+</span></div><div class="detail-item"><b>Ref</b><span>HH-090</span></div></div>
+          </div>
+        </article>
+
+        <article class="entry" data-type="business" data-location="waterloo" data-search="product operations co-op kinetic labs waterloo research customer product business">
+          <div class="entry-no">007</div>
+          <div class="entry-main">
+            <div class="entry-meta"><span>Business</span><span>Waterloo, ON</span><span>4 months</span></div>
+            <div class="entry-title-wrap"><h3 class="entry-title">Product Operations Co-op</h3><p class="entry-org">Kinetic Labs</p></div>
+            <p class="entry-summary">Synthesize customer feedback and keep product launches moving. You will own a clear weekly research digest.</p>
+            <div class="entry-actions"><span class="tag">On site</span><button class="details-button" type="button" aria-expanded="false" aria-controls="detail-007">Details</button></div>
+            <div class="entry-detail" id="detail-007" data-open="false"><div class="detail-item"><b>Opens</b><span>September 2025</span></div><div class="detail-item"><b>Term</b><span>16 weeks</span></div><div class="detail-item"><b>Level</b><span>2nd year+</span></div><div class="detail-item"><b>Ref</b><span>KL-614</span></div></div>
+          </div>
+        </article>
+
+        <article class="entry" data-type="software" data-location="remote" data-search="mobile engineering intern north coast tools remote canada android kotlin software">
+          <div class="entry-no">008</div>
+          <div class="entry-main">
+            <div class="entry-meta"><span>Software</span><span>Remote, Canada</span><span>4 months</span></div>
+            <div class="entry-title-wrap"><h3 class="entry-title">Mobile Engineering Intern</h3><p class="entry-org">North Coast Tools</p></div>
+            <p class="entry-summary">Improve an Android field app used by distributed maintenance teams. Kotlin familiarity and careful testing are valued.</p>
+            <div class="entry-actions"><span class="tag">Remote</span><button class="details-button" type="button" aria-expanded="false" aria-controls="detail-008">Details</button></div>
+            <div class="entry-detail" id="detail-008" data-open="false"><div class="detail-item"><b>Opens</b><span>May 2025</span></div><div class="detail-item"><b>Term</b><span>16 weeks</span></div><div class="detail-item"><b>Level</b><span>Any</span></div><div class="detail-item"><b>Ref</b><span>NC-507</span></div></div>
+          </div>
+        </article>
+      </div>
+      <p class="empty-state" id="empty-state" data-visible="false">No sample entries match this index combination. Try All or clear the keyword.</p>
+    </section>
+
+    <section class="service" id="service" aria-labelledby="service-title">
+      <div class="shell service-grid">
+        <div>
+          <div class="service-code"><span>Optional service</span><span>Every Monday</span></div>
+          <p class="price"><sup>$</sup>15</p>
+          <span class="micro">CAD / month</span>
+        </div>
+        <div class="service-copy">
+          <h2 id="service-title">Ten matches. Ten real contacts.</h2>
+          <p>Get 10 hand-picked internships every Monday. Each match includes a named contact so you know who to reach, not just where to click.</p>
+          <ol class="service-list">
+            <li><b>01</b><span>Matched to your interests</span></li>
+            <li><b>02</b><span>Named contact with every role</span></li>
+            <li><b>03</b><span>Delivered once a week</span></li>
+          </ol>
+          <a class="service-cta" href="mailto:hello@ugmi.ca?subject=UGMI%20Monday%2010">Request Monday 10</a>
+          <p class="micro" style="margin-top:14px;margin-bottom:0;color:#9e9b93;">Payments processed with Stripe</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="shell about" id="about" aria-labelledby="about-title">
+      <div>
+        <span class="eyebrow" style="color:var(--red);">02 / Field note</span>
+        <h2 id="about-title">One student keeps the list moving.</h2>
+      </div>
+      <div class="about-copy">
+        <p>UGMI is run by one University of Waterloo student who got tired of internship lists that ask for your identity before showing you the work.</p>
+        <p><strong>The index stays free.</strong> No account, no email gate, no paywall. The optional Monday service funds the sorting, checking, and contact research.</p>
+        <p class="micro">Questions and corrections: <a href="mailto:hello@ugmi.ca">@sleppyeric</a></p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell footer-grid">
+      <div class="footer-mark">UGMI<span>/</span></div>
+      <div class="foot-code">Internship index<br>Canada / Open access</div>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      'use strict';
+
+      var state = { type: 'all', location: 'all', query: '' };
+      var entries = Array.prototype.slice.call(document.querySelectorAll('.entry'));
+      var typeButtons = Array.prototype.slice.call(document.querySelectorAll('.type-filter'));
+      var locationButtons = Array.prototype.slice.call(document.querySelectorAll('.location-filter'));
+      var viewButtons = Array.prototype.slice.call(document.querySelectorAll('.view-button'));
+      var search = document.getElementById('search');
+      var count = document.getElementById('result-count');
+      var empty = document.getElementById('empty-state');
+      var table = document.getElementById('listing-table');
+
+      function setPressed(buttons, active) {
+        buttons.forEach(function (button) {
+          button.setAttribute('aria-pressed', String(button.dataset.filter === active));
+        });
+      }
+
+      function filterEntries() {
+        var visible = 0;
+        entries.forEach(function (entry) {
+          var typeMatch = state.type === 'all' || entry.dataset.type === state.type;
+          var locationMatch = state.location === 'all' || entry.dataset.location === state.location;
+          var queryMatch = !state.query || entry.dataset.search.indexOf(state.query) !== -1;
+          var show = typeMatch && locationMatch && queryMatch;
+          entry.hidden = !show;
+          if (show) visible += 1;
+        });
+        var formatted = String(visible).padStart(2, '0');
+        count.innerHTML = '<strong>' + formatted + '</strong> sample ' + (visible === 1 ? 'entry' : 'entries') + ' shown';
+        empty.dataset.visible = String(visible === 0);
+      }
+
+      typeButtons.forEach(function (button) {
+        button.addEventListener('click', function () {
+          state.type = button.dataset.filter;
+          setPressed(typeButtons, state.type);
+          filterEntries();
+        });
+      });
+
+      locationButtons.forEach(function (button) {
+        button.addEventListener('click', function () {
+          state.location = button.dataset.filter;
+          setPressed(locationButtons, state.location);
+          filterEntries();
+        });
+      });
+
+      search.addEventListener('input', function () {
+        state.query = search.value.trim().toLowerCase();
+        filterEntries();
+      });
+
+      viewButtons.forEach(function (button) {
+        button.addEventListener('click', function () {
+          var selected = button.dataset.view;
+          table.dataset.view = selected;
+          viewButtons.forEach(function (item) {
+            item.setAttribute('aria-pressed', String(item === button));
+          });
+          if (selected === 'compact') {
+            document.querySelectorAll('.details-button').forEach(function (detailButton) {
+              detailButton.setAttribute('aria-expanded', 'false');
+              document.getElementById(detailButton.getAttribute('aria-controls')).dataset.open = 'false';
+            });
+          }
+        });
+      });
+
+      document.querySelectorAll('.details-button').forEach(function (button) {
+        button.addEventListener('click', function () {
+          if (table.dataset.view === 'compact') {
+            table.dataset.view = 'expanded';
+            viewButtons.forEach(function (item) {
+              item.setAttribute('aria-pressed', String(item.dataset.view === 'expanded'));
+            });
+          }
+          var detail = document.getElementById(button.getAttribute('aria-controls'));
+          var isOpen = button.getAttribute('aria-expanded') === 'true';
+          button.setAttribute('aria-expanded', String(!isOpen));
+          detail.dataset.open = String(!isOpen);
+        });
+      });
+    }());
+  </script>
+</body>
+</html>

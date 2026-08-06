@@ -1,0 +1,841 @@
+<!-- INTERNAL DESIGN MOCKUP - sample listing data -->
+<!--
+  REDESIGN of originals/06-campus-poster.html per REDESIGN-SPEC.md.
+  Kept: corkboard + photocopied flyer, torn top edge, marker headings,
+  Courier rows, riso-red spot color (decorative only, never on deadlines
+  or near money), the "Free, take one" strip, one-person voice.
+  Fixed: tab-counter fake scarcity deleted (fringe is now pure decoration,
+  no counter, no torn stubs), deadline chips moved red to warm amber,
+  "updated daily" replaced by the fixed pulse-strip stamp, search box
+  replaced by the 3-tap eligibility filter, calm ink-only checkout added,
+  prose cut to budget, em dashes removed from visible strings.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UGMI · free internship list, take one</title>
+<style>
+/* ============================================================
+   UGMI - CAMPUS POSTER (redesign)
+   A photocopied flyer stapled to a corkboard.
+   Black & white xerox + ONE spot color (riso red), decoration only.
+   Zero external requests. System fonts only.
+   ============================================================ */
+
+:root{
+  --ink:#181613;
+  --ink-soft:#3b3833;
+  --ink-faded:#6b6659;
+  --paper:#f6f3ea;
+  --paper-shade:#e9e5d8;
+  --spot:#ff3d00;            /* the one spot color, decorative only */
+  --spot-dim:#c93202;
+  --hl:rgba(255,61,0,.30);   /* highlighter swipe */
+  --amber-bg:#f3e3b0;        /* warm amber for deadline ramps */
+  --amber-ink:#5c4a00;
+  --cork-a:#4d4a44;
+  --cork-b:#403d38;
+  --marker:Impact,'Arial Black','Franklin Gothic Medium','Haettenschweiler',sans-serif;
+  --hand:'Segoe Print','Bradley Hand','Chalkboard SE','Comic Sans MS',cursive;
+  --mono:'Courier New',Courier,monospace;
+  --body:Arial,Helvetica,sans-serif;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{overflow-x:hidden;}
+
+body{
+  font-family:var(--body);
+  color:var(--ink);
+  background-color:var(--cork-b);
+  background-image:
+    radial-gradient(circle at 18% 22%, rgba(255,255,255,.05) 0 2px, transparent 3px),
+    radial-gradient(circle at 62% 8%,  rgba(0,0,0,.28) 0 2px, transparent 3px),
+    radial-gradient(circle at 84% 44%, rgba(255,255,255,.045) 0 2px, transparent 3px),
+    radial-gradient(circle at 38% 66%, rgba(0,0,0,.24) 0 2px, transparent 3px),
+    radial-gradient(circle at 8% 84%,  rgba(255,255,255,.04) 0 1px, transparent 2px),
+    radial-gradient(circle at 74% 88%, rgba(0,0,0,.22) 0 1px, transparent 2px),
+    radial-gradient(circle at 50% 40%, rgba(255,255,255,.03) 0 1px, transparent 2px),
+    linear-gradient(180deg, var(--cork-a), var(--cork-b));
+  background-size:
+    137px 149px, 163px 151px, 149px 167px, 173px 143px,
+    127px 157px, 151px 139px, 111px 121px, 100% 100%;
+  line-height:1.45;
+}
+
+.board{
+  min-height:100vh;
+  padding:26px 12px 60px;
+  display:flex;
+  justify-content:center;
+  position:relative;
+}
+
+/* ---------- corkboard ambience (desktop only) ---------- */
+.scrap{display:none;position:absolute;background:var(--paper-shade);
+  box-shadow:0 4px 10px rgba(0,0,0,.45);z-index:0;}
+.scrap .pinhead{position:absolute;top:6px;left:50%;margin-left:-7px;}
+.scrap-1{top:36px;left:3%;width:150px;height:104px;transform:rotate(-8deg);
+  clip-path:polygon(0 8%,12% 0,88% 4%,100% 14%,96% 78%,74% 100%,8% 92%);}
+.scrap-1 p{font-family:var(--marker);font-size:19px;letter-spacing:.5px;
+  padding:24px 12px 0;color:var(--ink-soft);line-height:1.05;text-transform:uppercase;}
+.scrap-1 small{display:block;font-family:var(--mono);font-size:9px;padding:4px 12px;color:#6a675f;}
+.scrap-2{bottom:120px;right:2.5%;width:120px;height:150px;transform:rotate(6deg);
+  clip-path:polygon(6% 0,94% 3%,100% 90%,80% 100%,14% 96%,0 82%);}
+.scrap-2 p{font-family:var(--hand);font-size:13px;padding:26px 12px 0;color:var(--ink-soft);}
+.scrap-3{top:44%;left:1.5%;width:86px;height:60px;transform:rotate(4deg);
+  clip-path:polygon(0 12%,20% 0,100% 8%,92% 88%,60% 100%,4% 90%);}
+
+/* pushpin, where the spot color earns its keep */
+.pinhead{width:15px;height:15px;border-radius:50%;
+  background:radial-gradient(circle at 34% 30%, #ff8a63 0 3px, var(--spot) 4px 70%, var(--spot-dim) 71%);
+  box-shadow:0 3px 4px rgba(0,0,0,.5);}
+
+/* ============================================================
+   THE FLYER
+   ============================================================ */
+.flyer{
+  position:relative;
+  width:100%;
+  max-width:620px;
+  transform:rotate(.45deg);
+  z-index:1;
+  filter:drop-shadow(0 14px 22px rgba(0,0,0,.5));
+}
+
+/* photocopy grain */
+.sheet, .tab-inner{
+  background-color:var(--paper);
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.055'/></svg>"),
+    linear-gradient(104deg, transparent 0 62%, rgba(24,22,19,.045) 62% 74%, transparent 74%);
+}
+
+.sheet{
+  position:relative;
+  padding:30px 20px 24px;
+  /* torn top edge, ripped off the pad */
+  clip-path:polygon(0 19px,2% 7px,5% 15px,9% 5px,13% 16px,18% 8px,23% 14px,
+    28% 5px,33% 13px,38% 7px,43% 15px,48% 5px,53% 14px,58% 8px,63% 16px,
+    68% 6px,73% 13px,78% 4px,83% 14px,88% 7px,93% 15px,97% 8px,100% 17px,
+    100% 100%,0 100%);
+}
+
+/* ---------- tape + staple ---------- */
+.tape{
+  position:absolute;width:96px;height:30px;z-index:3;
+  background:linear-gradient(180deg, rgba(232,228,214,.68), rgba(214,209,192,.55));
+  box-shadow:0 1px 3px rgba(0,0,0,.28), inset 0 0 6px rgba(255,255,255,.35);
+  border-left:1px dashed rgba(120,115,100,.35);
+  border-right:1px dashed rgba(120,115,100,.35);
+}
+.tape-tl{top:-11px;left:-26px;transform:rotate(-42deg);}
+.tape-tr{top:-11px;right:-26px;transform:rotate(42deg);}
+.tape-l{top:46%;left:-34px;transform:rotate(86deg);width:80px;}
+.tape-r{top:62%;right:-34px;transform:rotate(-88deg);width:80px;}
+
+.staple{
+  position:absolute;top:8px;left:50%;width:26px;height:9px;margin-left:-13px;
+  border:2.5px solid #5c5952;border-bottom:none;border-radius:2px 2px 0 0;
+  transform:rotate(-3deg);z-index:4;
+  filter:drop-shadow(0 1px 1px rgba(0,0,0,.4));
+}
+.staple::before{content:"";position:absolute;left:-1px;top:9px;width:3px;height:3px;background:#454239;}
+.staple::after{content:"";position:absolute;right:-1px;top:9px;width:3px;height:3px;background:#454239;}
+
+/* ============================================================
+   FLYER CONTENT
+   ============================================================ */
+
+/* focus visibility, everywhere */
+:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
+
+/* "FREE - TAKE ONE" strip */
+.free-strip{
+  font-family:var(--marker);
+  text-transform:uppercase;
+  letter-spacing:2px;
+  font-size:14px;
+  text-align:center;
+  color:var(--paper);
+  background:var(--ink);
+  padding:7px 8px 6px;
+  transform:rotate(-.7deg);
+  margin:2px -6px 14px;
+  box-shadow:2px 2px 0 rgba(24,22,19,.18);
+}
+.free-strip b{color:var(--spot);font-weight:normal;}
+
+/* headline */
+.masthead{text-align:center;}
+h1{
+  font-family:var(--marker);
+  font-size:clamp(56px,18vw,96px);
+  line-height:.86;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  transform:rotate(-1.1deg);
+  text-shadow:3px 3px 0 rgba(24,22,19,.14); /* xerox double-strike */
+}
+.scribble{display:block;width:min(280px,72%);margin:2px auto 6px;}
+.site{
+  font-family:var(--mono);
+  font-weight:bold;
+  font-size:16px;
+  letter-spacing:3px;
+}
+.tagline{
+  font-family:var(--hand);
+  font-size:16px;
+  margin:10px auto 2px;
+  max-width:44ch;
+  transform:rotate(-.4deg);
+}
+.tagline .hl{
+  background:linear-gradient(100deg, transparent 4%, var(--hl) 8% 93%, transparent 96%);
+  padding:0 3px;
+  font-weight:bold;
+}
+.maple{display:inline-block;vertical-align:-2px;margin-left:1px;}
+
+/* the NO NO NO checklist */
+.no-list{
+  display:flex;justify-content:center;gap:4px 14px;flex-wrap:wrap;
+  margin:10px 0 4px;list-style:none;
+}
+.no-list li{
+  font-family:var(--marker);text-transform:uppercase;
+  font-size:14px;letter-spacing:1px;white-space:nowrap;
+}
+.no-list li::after{
+  content:"\2713";font-family:var(--hand);color:var(--spot);
+  font-size:17px;margin-left:4px;font-weight:bold;
+}
+.no-list li:nth-child(2){transform:rotate(1deg);}
+.no-list li:nth-child(3){transform:rotate(-1deg);}
+
+/* the pulse stamp: fixed build-time facts, inked on like a date stamp */
+.stamp{
+  font-family:var(--mono);
+  font-size:11.5px;
+  font-weight:bold;
+  letter-spacing:.4px;
+  line-height:1.6;
+  color:var(--ink-soft);
+  border:2.5px solid var(--ink-soft);
+  border-radius:4px 7px 5px 8px / 7px 4px 8px 5px;
+  padding:7px 10px 6px;
+  margin:12px auto 0;
+  max-width:52ch;
+  text-align:center;
+  transform:rotate(-.8deg);
+  box-shadow:inset 0 0 0 1px rgba(59,56,51,.25);
+}
+
+/* section rules, sharpie lines */
+.rule{border:none;border-top:3.5px solid var(--ink);margin:18px -4px;
+  transform:rotate(-.25deg);border-radius:2px;}
+.rule.thin{border-top-width:2px;opacity:.85;}
+
+/* ---------- eligibility pills ---------- */
+.listings-head{
+  display:flex;align-items:baseline;justify-content:space-between;
+  gap:8px;flex-wrap:wrap;margin-bottom:8px;
+}
+h2{
+  font-family:var(--marker);text-transform:uppercase;
+  font-size:25px;letter-spacing:1px;transform:rotate(-.8deg);
+  text-shadow:2px 2px 0 rgba(24,22,19,.12);
+}
+.count-note{font-family:var(--hand);font-size:13px;color:var(--ink-soft);}
+
+.elig{margin:2px 0 10px;}
+.elig-title{font-family:var(--hand);font-size:14px;margin-bottom:6px;transform:rotate(-.3deg);}
+.q-row{display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;}
+.q-label{
+  flex:0 0 70px;font-family:var(--hand);font-size:13px;
+  font-weight:bold;color:var(--ink-soft);
+}
+.pills{display:flex;flex-wrap:wrap;gap:6px;}
+.pill{
+  min-height:44px;padding:8px 13px;
+  font-family:var(--mono);font-size:13px;font-weight:bold;
+  color:var(--ink);background:transparent;cursor:pointer;
+  border:2.5px solid var(--ink);
+  border-radius:4px 8px 5px 9px / 8px 4px 9px 5px; /* hand-drawn box */
+}
+.pill[aria-pressed="true"]{
+  background:var(--ink);color:var(--paper);
+  box-shadow:2px 2px 0 rgba(24,22,19,.25);
+}
+.elig-status{min-height:24px;margin-top:4px;}
+.result-line{font-family:var(--mono);font-size:14px;font-weight:bold;}
+.zero-row{margin-top:2px;}
+.zero-line{font-family:var(--mono);font-size:13.5px;font-weight:bold;}
+.text-btn{
+  background:none;border:none;cursor:pointer;
+  font-family:var(--hand);font-size:14px;font-weight:bold;color:var(--ink);
+  text-decoration:underline;text-underline-offset:3px;
+  min-height:44px;padding:0 6px;
+}
+.saved-note{font-family:var(--hand);font-size:12px;color:var(--ink-faded);margin-top:2px;}
+
+/* ---------- listings ---------- */
+.rows{list-style:none;}
+.row{
+  padding:11px 2px 10px;
+  border-bottom:2px dashed rgba(24,22,19,.4);
+}
+.row:last-child{border-bottom:none;}
+.row-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;}
+.co{
+  font-family:var(--marker);font-size:19px;letter-spacing:.5px;
+  text-transform:uppercase;
+}
+.closes{
+  font-family:var(--mono);font-size:11.5px;font-weight:bold;
+  white-space:nowrap;color:var(--ink-soft);
+}
+.closes.soon{
+  color:var(--amber-ink);background:var(--amber-bg);
+  padding:2px 7px 1px;transform:rotate(-1.2deg);display:inline-block;
+  border-radius:2px;
+}
+.role{font-size:14.5px;font-weight:bold;margin-top:1px;}
+.meta{font-family:var(--mono);font-size:12px;color:var(--ink-soft);margin-top:2px;}
+.row.closed .co,.row.closed .role,.row.closed .meta{color:var(--ink-faded);}
+.row.closed .closes{
+  color:var(--paper);background:var(--ink-faded);
+  padding:2px 7px 1px;display:inline-block;border-radius:2px;
+}
+.more-note{
+  font-family:var(--hand);font-size:14px;margin-top:12px;
+  transform:rotate(-.5deg);
+}
+.more-note .hl{background:linear-gradient(100deg,transparent 3%,var(--hl) 7% 94%,transparent 97%);padding:0 3px;}
+
+/* ---------- who made this ---------- */
+.who{
+  margin:18px -2px 0;
+  padding:12px 14px 10px;
+  border:2.5px solid var(--ink);
+  border-radius:9px 5px 10px 6px / 5px 9px 6px 10px;
+  transform:rotate(.55deg);
+  position:relative;
+}
+.who h3{font-family:var(--hand);font-size:16px;margin-bottom:4px;}
+.who p{font-family:var(--hand);font-size:14.5px;color:var(--ink-soft);}
+.who .ig{
+  font-family:var(--mono);font-weight:bold;color:var(--ink);
+  border-bottom:2px solid var(--spot);text-decoration:none;
+}
+.who .arrow{position:absolute;top:-14px;right:14px;width:34px;height:26px;}
+
+/* ============================================================
+   THE PAID PITCH (ink only, no spot color from here down)
+   ============================================================ */
+.pitch{margin-top:22px;}
+.bridge{font-family:var(--mono);font-size:14px;font-weight:bold;}
+.bridge-sub{font-family:var(--hand);font-size:14px;color:var(--ink-soft);margin:2px 0 16px;}
+.pitch h2{font-size:clamp(26px,7.5vw,34px);transform:rotate(-1deg);}
+.pitch .lede{
+  font-family:var(--hand);font-size:15.5px;max-width:46ch;margin:8px 0 14px;
+}
+.example-label{
+  font-family:var(--mono);font-size:10.5px;font-weight:bold;
+  text-transform:uppercase;letter-spacing:1px;color:var(--ink-soft);
+  margin-bottom:5px;
+}
+.example-pick{
+  border:2.5px solid var(--ink);
+  border-radius:6px 10px 5px 9px / 10px 5px 9px 6px;
+  padding:12px 14px 11px;
+  margin:0 0 14px;
+  transform:rotate(-.5deg);
+  position:relative;
+  box-shadow:3px 4px 0 rgba(24,22,19,.12);
+}
+.example-pick .mini-tape{
+  position:absolute;top:-12px;left:50%;width:70px;height:22px;margin-left:-35px;
+  transform:rotate(-2deg);
+  background:linear-gradient(180deg, rgba(232,228,214,.7), rgba(214,209,192,.55));
+  box-shadow:0 1px 2px rgba(0,0,0,.2);
+}
+.pick-head{font-family:var(--marker);font-size:16px;letter-spacing:.4px;text-transform:uppercase;}
+.pick-meta{font-family:var(--mono);font-size:12px;color:var(--ink-soft);margin-top:3px;}
+.pick-why{font-family:var(--hand);font-size:13.5px;margin-top:7px;}
+.price-line{
+  font-family:var(--marker);font-size:19px;letter-spacing:.5px;
+  margin:2px 0 0;text-transform:uppercase;
+}
+
+/* ---------- calm checkout: the quietest block on the page ----------
+   No rotation, no spot color, no shadow play, no motion near it. */
+.checkout{
+  margin:22px 0 0;
+  padding:18px 16px 16px;
+  border:2px solid var(--ink);
+  border-radius:4px;
+}
+.checkout h2{
+  font-family:var(--mono);font-size:17px;letter-spacing:.5px;
+  text-transform:none;transform:none;text-shadow:none;margin-bottom:10px;
+}
+.fee-grid{list-style:none;margin-bottom:12px;}
+.fee-grid li{
+  display:flex;justify-content:space-between;gap:14px;
+  padding:7px 0;border-bottom:1px dashed rgba(24,22,19,.35);
+  font-family:var(--mono);font-size:12.5px;
+}
+.fee-grid li:last-child{border-bottom:none;}
+.fee-k{color:var(--ink-soft);white-space:nowrap;}
+.fee-v{font-weight:bold;text-align:right;max-width:62%;}
+.firewall{font-size:13.5px;margin-bottom:10px;}
+.handoff{font-family:var(--mono);font-size:12px;color:var(--ink-soft);margin-bottom:12px;}
+.cta{
+  display:block;width:100%;text-align:center;
+  font-family:var(--marker);text-transform:uppercase;letter-spacing:1px;
+  font-size:17px;color:var(--paper);text-decoration:none;
+  background:var(--ink);
+  padding:13px 20px 12px;
+  border-radius:4px;
+  min-height:44px;
+}
+.blemish{font-family:var(--hand);font-size:13.5px;color:var(--ink-soft);margin-top:12px;}
+
+/* footer + fine print */
+.foot{
+  font-family:var(--hand);font-size:14px;text-align:center;margin-top:18px;
+}
+.foot .ig{
+  font-family:var(--mono);font-weight:bold;color:var(--ink);
+  border-bottom:2px solid var(--spot);text-decoration:none;
+}
+.fine{
+  font-family:var(--mono);font-size:10px;color:#676357;
+  text-align:center;margin-top:10px;letter-spacing:.3px;
+}
+
+/* ---------- the fringe of pull tabs: pure decoration ---------- */
+.fringe{
+  display:flex;
+  align-items:flex-start;
+  margin-top:-1px; /* butt against sheet */
+}
+.tab{
+  flex:1 1 0;
+  min-width:0;
+  height:100px;
+  position:relative;
+}
+.tab-inner{
+  display:flex;align-items:center;justify-content:center;
+  width:100%;height:100%;
+  border-left:2px dashed rgba(24,22,19,.45);
+  /* hand-cut jagged bottoms */
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 7px),82% 100%,64% calc(100% - 5px),
+    46% calc(100% - 10px),28% calc(100% - 3px),12% calc(100% - 9px),0 calc(100% - 6px));
+}
+.tab:first-child .tab-inner{border-left:none;}
+.tab-inner span{
+  writing-mode:vertical-rl;
+  transform:rotate(180deg);
+  font-family:var(--mono);
+  font-weight:bold;
+  font-size:11px;
+  letter-spacing:.5px;
+  color:var(--ink);
+  white-space:nowrap;
+}
+/* each tab cut slightly differently */
+.tab:nth-child(2n) .tab-inner{height:97%;}
+.tab:nth-child(3n) .tab-inner{height:99%;
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 4px),78% calc(100% - 10px),
+    58% 100%,40% calc(100% - 6px),20% calc(100% - 11px),0 calc(100% - 5px));}
+.tab:nth-child(5n) .tab-inner{height:95%;}
+
+/* ============================================================
+   RESPONSIVE + MOTION
+   ============================================================ */
+@media (min-width:760px){
+  .board{padding:56px 24px 90px;}
+  .sheet{padding:38px 44px 28px;}
+  .scrap{display:block;}
+  h2{font-size:28px;}
+  .tab-inner span{font-size:12px;}
+}
+@media (max-width:420px){
+  .tab:nth-child(8),.tab:nth-child(9){display:none;} /* keep tabs readable at 390 */
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none !important;transition:none !important;}
+}
+</style>
+</head>
+<body>
+
+<div class="board">
+
+  <!-- corkboard ambience (desktop only, decorative) -->
+  <div class="scrap scrap-1" aria-hidden="true">
+    <span class="pinhead"></span>
+    <p>Roommate wanted</p>
+    <small>fall term &middot; text me</small>
+  </div>
+  <div class="scrap scrap-2" aria-hidden="true">
+    <span class="pinhead"></span>
+    <p>lost calculator?? MC 4th floor. it has stickers. you know who you are</p>
+  </div>
+  <div class="scrap scrap-3" aria-hidden="true">
+    <span class="pinhead"></span>
+  </div>
+
+  <!-- ======================= THE FLYER ======================= -->
+  <main class="flyer">
+
+    <span class="tape tape-tl" aria-hidden="true"></span>
+    <span class="tape tape-tr" aria-hidden="true"></span>
+    <span class="tape tape-l" aria-hidden="true"></span>
+    <span class="tape tape-r" aria-hidden="true"></span>
+    <span class="staple" aria-hidden="true"></span>
+
+    <div class="sheet">
+
+      <p class="free-strip">Free internship list &middot; <b>take one</b> &middot; seriously, it's free</p>
+
+      <header class="masthead">
+        <h1>UGMI</h1>
+        <!-- marker scribble underline -->
+        <svg class="scribble" viewBox="0 0 300 22" aria-hidden="true">
+          <path d="M4 9 C 60 3, 130 14, 296 7" fill="none" stroke="#ff3d00" stroke-width="5" stroke-linecap="round"/>
+          <path d="M10 16 C 90 11, 180 19, 288 13" fill="none" stroke="#ff3d00" stroke-width="3.5" stroke-linecap="round" opacity=".85"/>
+        </svg>
+        <p class="site">ugmi.ca</p>
+        <p class="tagline">
+          <span class="hl">1,427 open internships</span>, mostly Canadian
+          <svg class="maple" width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1l1.8 3.6 2.7-1.4-.7 3.7 3.7-.7-1.4 2.7L21.7 11l-3.2 1.9 1.6 2.4-3.6.3.6 3.5-3.9-1.5-.2 5.4h-2l-.2-5.4-3.9 1.5.6-3.5-3.6-.3 1.6-2.4L2.3 11l3.6-2.1-1.4-2.7 3.7.7-.7-3.7 2.7 1.4z" fill="#181613"/></svg>,
+          searchable. The whole list is right here, free.
+        </p>
+        <ul class="no-list">
+          <li>No account</li>
+          <li>No email</li>
+          <li>No paywall</li>
+        </ul>
+        <!-- pulse strip: fixed build-time facts, stamped on -->
+        <p class="stamp">Last checked Wed Aug 6, 7:04am ET &middot; 1,427 open &middot; 31 added this week &middot; 23 closed this week &middot; hand-checked, never invented</p>
+      </header>
+
+      <hr class="rule">
+
+      <!-- =================== LISTINGS =================== -->
+      <section aria-label="Sample of open internship listings">
+        <div class="listings-head">
+          <h2>Closing soonest</h2>
+          <p class="count-note">a scrap of the list &middot; the rest is on ugmi.ca</p>
+        </div>
+
+        <!-- 3-tap eligibility filter -->
+        <div class="elig">
+          <p class="elig-title">three taps show what you're eligible for:</p>
+          <div class="q-row">
+            <span class="q-label" id="q-auth">work in</span>
+            <div class="pills" role="group" aria-labelledby="q-auth" data-q="auth">
+              <button type="button" class="pill" data-v="ca" aria-pressed="false">Canada</button>
+              <button type="button" class="pill" data-v="us" aria-pressed="false">US</button>
+              <button type="button" class="pill" data-v="both" aria-pressed="false">both</button>
+            </div>
+          </div>
+          <div class="q-row">
+            <span class="q-label" id="q-term">term</span>
+            <div class="pills" role="group" aria-labelledby="q-term" data-q="term">
+              <button type="button" class="pill" data-v="s27" aria-pressed="false">Summer 2027</button>
+              <button type="button" class="pill" data-v="f26" aria-pressed="false">Fall 2026</button>
+              <button type="button" class="pill" data-v="w27" aria-pressed="false">Winter 2027</button>
+              <button type="button" class="pill" data-v="any" aria-pressed="false">any</button>
+            </div>
+          </div>
+          <div class="q-row">
+            <span class="q-label" id="q-loc">location</span>
+            <div class="pills" role="group" aria-labelledby="q-loc" data-q="loc">
+              <button type="button" class="pill" data-v="remote" aria-pressed="false">remote ok</button>
+              <button type="button" class="pill" data-v="toronto" aria-pressed="false">Toronto/GTA</button>
+              <button type="button" class="pill" data-v="vancouver" aria-pressed="false">Vancouver</button>
+              <button type="button" class="pill" data-v="anywhere" aria-pressed="false">anywhere</button>
+            </div>
+          </div>
+          <div class="elig-status" aria-live="polite">
+            <p class="result-line" id="resultLine" hidden></p>
+            <div class="zero-row" id="zeroRow" hidden>
+              <p class="zero-line">0 of 1,427 match all your filters. Loosen one?</p>
+              <button type="button" class="text-btn" id="undoBtn">undo last answer</button>
+            </div>
+            <p class="saved-note" id="savedNote" hidden>showing your filters, saved in this browser only</p>
+          </div>
+        </div>
+
+        <ul class="rows" id="rows">
+          <li class="row" data-country="ca" data-term="s27" data-loc="remote">
+            <div class="row-top"><span class="co">Shopify</span><span class="closes soon">closes in 3 days</span></div>
+            <p class="role">Software Engineering Intern</p>
+            <p class="meta">Remote, Canada &middot; Summer 2027 &middot; $34/hr CAD &middot; added 2d ago</p>
+          </li>
+          <li class="row" data-country="ca" data-term="s27" data-loc="vancouver">
+            <div class="row-top"><span class="co">Amazon</span><span class="closes soon">closes in 5 days</span></div>
+            <p class="role">SDE Intern</p>
+            <p class="meta">Vancouver &middot; Summer 2027 &middot; $41/hr CAD &middot; added 2w ago</p>
+          </li>
+          <li class="row" data-country="ca" data-term="f26" data-loc="toronto">
+            <div class="row-top"><span class="co">RBC</span><span class="closes soon">closes in 6 days</span></div>
+            <p class="role">Amplify Developer Intern</p>
+            <p class="meta">Toronto &middot; Fall 2026 &middot; $31/hr CAD &middot; added today</p>
+          </li>
+          <li class="row closed" data-country="ca" data-term="s27" data-loc="toronto">
+            <div class="row-top"><span class="co">Pinterest</span><span class="closes">closed</span></div>
+            <p class="role">Software Engineer Intern</p>
+            <p class="meta">Toronto &middot; Summer 2027 &middot; added 3w ago</p>
+          </li>
+          <li class="row" data-country="us" data-term="s27" data-loc="remote">
+            <div class="row-top"><span class="co">Stripe</span><span class="closes">closes in 9 days</span></div>
+            <p class="role">Software Engineer Intern</p>
+            <p class="meta">Remote, US &middot; Summer 2027 &middot; pay not listed &middot; added 5d ago</p>
+          </li>
+          <li class="row" data-country="ca" data-term="s27" data-loc="toronto remote">
+            <div class="row-top"><span class="co">Wealthsimple</span><span class="closes">closes in 11 days</span></div>
+            <p class="role">Data Science Intern</p>
+            <p class="meta">Toronto, remote ok &middot; Summer 2027 &middot; pay not listed &middot; added 4d ago</p>
+          </li>
+          <li class="row" data-country="ca" data-term="f26" data-loc="other">
+            <div class="row-top"><span class="co">OpenText</span><span class="closes">closes in 13 days</span></div>
+            <p class="role">Software Developer Co-op</p>
+            <p class="meta">Waterloo &middot; Fall 2026 &middot; $30/hr CAD &middot; added 1w ago</p>
+          </li>
+          <li class="row" data-country="ca" data-term="s27" data-loc="toronto">
+            <div class="row-top"><span class="co">ecobee</span><span class="closes">closes Aug 31</span></div>
+            <p class="role">Embedded Systems Intern</p>
+            <p class="meta">Toronto &middot; Summer 2027 &middot; $29/hr CAD &middot; added 1d ago</p>
+          </li>
+          <li class="row closed" data-country="ca" data-term="f26" data-loc="toronto">
+            <div class="row-top"><span class="co">Sun Life</span><span class="closes">closed</span></div>
+            <p class="role">Data Analyst Intern</p>
+            <p class="meta">Toronto &middot; Fall 2026 &middot; $27/hr CAD &middot; added 2w ago</p>
+          </li>
+          <li class="row" data-country="ca" data-term="w27" data-loc="vancouver">
+            <div class="row-top"><span class="co">TELUS</span><span class="closes">closes Sep 2</span></div>
+            <p class="role">Network Engineering Co-op</p>
+            <p class="meta">Vancouver &middot; Winter 2027 &middot; $28/hr CAD &middot; added 6d ago</p>
+          </li>
+          <li class="row" data-country="ca" data-term="w27" data-loc="vancouver">
+            <div class="row-top"><span class="co">Sanctuary AI</span><span class="closes">closes Sep 8</span></div>
+            <p class="role">Robotics Software Intern</p>
+            <p class="meta">Vancouver &middot; Winter 2027 &middot; pay not listed &middot; added 6d ago</p>
+          </li>
+          <li class="row" data-country="ca" data-term="w27" data-loc="vancouver">
+            <div class="row-top"><span class="co">BC Hydro</span><span class="closes">closes Sep 12</span></div>
+            <p class="role">Engineering Co-op</p>
+            <p class="meta">Vancouver &middot; Winter 2027 &middot; $27/hr CAD &middot; added 3d ago</p>
+          </li>
+          <li class="row" data-country="ca" data-term="s27" data-loc="other">
+            <div class="row-top"><span class="co">Google</span><span class="closes">closes Sep 19</span></div>
+            <p class="role">STEP Intern</p>
+            <p class="meta">Waterloo &middot; Summer 2027 &middot; pay not listed &middot; added 2d ago</p>
+          </li>
+          <li class="row" data-country="ca" data-term="s27" data-loc="other">
+            <div class="row-top"><span class="co">Ubisoft</span><span class="closes">no close date</span></div>
+            <p class="role">Gameplay Programmer Intern</p>
+            <p class="meta">Montreal &middot; Summer 2027 &middot; $30/hr CAD &middot; added 1w ago</p>
+          </li>
+        </ul>
+
+        <p class="more-note">the rest of the <span class="hl">1,427</span> is on the site. no sign-up wall.</p>
+      </section>
+
+      <!-- =================== WHO MADE THIS =================== -->
+      <aside class="who">
+        <svg class="arrow" viewBox="0 0 34 26" aria-hidden="true">
+          <path d="M30 2 C 22 14, 14 18, 6 20" fill="none" stroke="#ff3d00" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M12 15 L 5.5 20.5 L 13 22" fill="none" stroke="#ff3d00" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h3>who put this up?</h3>
+        <p>One Waterloo student, between assignments, keeping the list clean.
+        Tips and bugs: <a class="ig" href="#" aria-label="Instagram, at sleppyeric">@sleppyeric</a> on Instagram.</p>
+      </aside>
+
+      <hr class="rule thin">
+
+      <!-- =================== THE PAID PITCH =================== -->
+      <section class="pitch" aria-label="The UGMI 10, paid Monday list">
+        <p class="bridge">23 internships closed in the last 7 days.</p>
+        <p class="bridge-sub">the Monday list exists so you hear about things before they join that number</p>
+
+        <h2>The UGMI 10</h2>
+        <p class="lede">10 per week, each with a named contact. I read the 1,427 so you read 10.</p>
+
+        <div class="example-pick">
+          <span class="mini-tape" aria-hidden="true"></span>
+          <p class="example-label">Example pick, from a real week</p>
+          <p class="pick-head">3. PitchBook, Software Engineering Intern</p>
+          <p class="pick-meta">Toronto &middot; $38/hr CAD &middot; closes Fri &middot; contact: Sarah Chen, campus recruiting</p>
+          <p class="pick-why"><strong>Why this one:</strong> they take first-years, posted 2 days ago, and the recruiter replied to a student DM last month.</p>
+        </div>
+
+        <p class="price-line">$15/mo CAD. Cancel anytime.</p>
+
+        <!-- calm checkout: quietest block on the page, no motion near it -->
+        <div class="checkout" id="checkout">
+          <h2>What $15 buys</h2>
+          <ul class="fee-grid">
+            <li><span class="fee-k">You get</span><span class="fee-v">4 Monday lists, 10 picks each, a named contact per pick</span></li>
+            <li><span class="fee-k">Monthly</span><span class="fee-v">$15 CAD, that's everything</span></li>
+            <li><span class="fee-k">Sign-up fee</span><span class="fee-v">$0</span></li>
+            <li><span class="fee-k">Cancellation</span><span class="fee-v">anytime, from your Stripe receipt email</span></li>
+            <li><span class="fee-k">Your card</span><span class="fee-v">handled by Stripe. I never see it.</span></li>
+          </ul>
+          <p class="firewall">The full list stays free either way.</p>
+          <p class="handoff">You'll be taken to Stripe to pay.</p>
+          <!-- production: Stripe payment link goes here -->
+          <a class="cta" href="#">Get my first list</a>
+          <p class="blemish">I'm one Waterloo student, not a company.</p>
+        </div>
+      </section>
+
+      <footer class="foot">
+        Dead link? Wrong deadline? DM <a class="ig" href="#" aria-label="Instagram, at sleppyeric">@sleppyeric</a>, fixed within a day.
+      </footer>
+
+      <p class="fine">
+        internal design mockup &middot; sample listing data &middot; ugmi.ca &middot;
+        payment via stripe &middot; the free list stays free
+      </p>
+    </div><!-- /sheet -->
+
+    <!-- pull-tab fringe: pure decoration, nothing counts them -->
+    <div class="fringe" aria-hidden="true">
+      <div class="tab"><span class="tab-inner"><span>ugmi.ca/monday</span></span></div>
+      <div class="tab"><span class="tab-inner"><span>10 picks &middot; every Monday</span></span></div>
+      <div class="tab"><span class="tab-inner"><span>ugmi.ca/monday</span></span></div>
+      <div class="tab"><span class="tab-inner"><span>named contact on each</span></span></div>
+      <div class="tab"><span class="tab-inner"><span>ugmi.ca/monday</span></span></div>
+      <div class="tab"><span class="tab-inner"><span>cancel anytime &middot; Stripe</span></span></div>
+      <div class="tab"><span class="tab-inner"><span>ugmi.ca/monday</span></span></div>
+      <div class="tab"><span class="tab-inner"><span>$15/mo &middot; Stripe</span></span></div>
+      <div class="tab"><span class="tab-inner"><span>ugmi.ca/monday</span></span></div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- 3-tap eligibility filter ---------- */
+  var KEY = "ugmi-elig-poster";
+  var TOTAL = 1427;
+  var state = { auth: null, term: null, loc: null };
+  var history = [];
+  var restored = false;
+
+  var rows = Array.prototype.slice.call(document.querySelectorAll("#rows .row"));
+  var openTotal = rows.filter(function(r){ return !r.classList.contains("closed"); }).length;
+  var resultLine = document.getElementById("resultLine");
+  var zeroRow = document.getElementById("zeroRow");
+  var savedNote = document.getElementById("savedNote");
+  var undoBtn = document.getElementById("undoBtn");
+
+  function fmt(n){ return n.toLocaleString("en-CA"); }
+
+  function load(){
+    try{
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return;
+      var saved = JSON.parse(raw);
+      ["auth","term","loc"].forEach(function(q){
+        if (saved && saved[q]) { state[q] = saved[q]; history.push(q); }
+      });
+      restored = history.length > 0;
+    }catch(e){ /* file:// or private mode: filters just don't persist */ }
+  }
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+  function anyAnswered(){ return !!(state.auth || state.term || state.loc); }
+
+  function rowMatches(row){
+    var c = row.getAttribute("data-country");
+    var t = row.getAttribute("data-term");
+    var l = row.getAttribute("data-loc");
+    if (state.auth && state.auth !== "both" && c !== state.auth) return false;
+    if (state.term && state.term !== "any" && t !== state.term) return false;
+    if (state.loc && state.loc !== "anywhere") {
+      if (state.loc === "remote") {
+        if (l.indexOf("remote") === -1) return false;
+      } else if (l.indexOf(state.loc) === -1 && l.indexOf("remote") === -1) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function render(){
+    var active = anyAnswered();
+    var visibleOpen = 0;
+
+    rows.forEach(function(row){
+      var show = !active || rowMatches(row);
+      row.hidden = !show;
+      if (show && active && !row.classList.contains("closed")) visibleOpen++;
+    });
+
+    document.querySelectorAll(".pills").forEach(function(group){
+      var q = group.getAttribute("data-q");
+      group.querySelectorAll(".pill").forEach(function(pill){
+        pill.setAttribute("aria-pressed", state[q] === pill.getAttribute("data-v") ? "true" : "false");
+      });
+    });
+
+    /* Mockup only: scales the sample-row proportion to the full list.
+       Production computes the real count from the dataset. */
+    var est = active ? Math.max(1, Math.round(TOTAL * visibleOpen / openTotal)) : TOTAL;
+
+    resultLine.hidden = !(active && visibleOpen > 0);
+    zeroRow.hidden = !(active && visibleOpen === 0);
+    if (active && visibleOpen > 0) {
+      resultLine.textContent = "Showing " + fmt(est) + " of " + fmt(TOTAL) + " you're actually eligible for.";
+    }
+    savedNote.hidden = !(restored && active);
+  }
+
+  document.querySelectorAll(".pills").forEach(function(group){
+    var q = group.getAttribute("data-q");
+    group.addEventListener("click", function(e){
+      var pill = e.target.closest(".pill");
+      if (!pill) return;
+      restored = false;
+      var v = pill.getAttribute("data-v");
+      var i = history.indexOf(q);
+      if (i !== -1) history.splice(i, 1);
+      if (state[q] === v) {
+        state[q] = null;
+      } else {
+        state[q] = v;
+        history.push(q);
+      }
+      save();
+      render();
+    });
+  });
+
+  undoBtn.addEventListener("click", function(){
+    var q = history.pop();
+    if (q) state[q] = null;
+    restored = false;
+    save();
+    render();
+  });
+
+  load();
+  render();
+})();
+</script>
+</body>
+</html>
