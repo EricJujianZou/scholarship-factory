@@ -15,6 +15,7 @@ Facts are never touched here. This layer reads stored opportunities and writes
 only an ordering plus a written reason -- it cannot invent a deadline.
 """
 import sqlite3
+from collections.abc import Callable
 from datetime import datetime, timezone
 
 from pydantic import BaseModel, Field
@@ -133,8 +134,14 @@ def score(
     client=None,
     model: str | None = None,
     provider: str | None = None,
+    on_batch: Callable[[list[ScoredOpportunity]], None] | None = None,
 ) -> list[ScoredOpportunity]:
-    """Order opportunities by fit. One LLM call per `SCORE_BATCH_SIZE` batch."""
+    """Order opportunities by fit. One LLM call per `SCORE_BATCH_SIZE` batch.
+
+    `on_batch` is called with each batch's results as it lands, so a caller can
+    persist incrementally -- a quota/outage death mid-run then keeps every batch
+    already judged instead of losing the whole pass.
+    """
     if not opportunities:
         return []
 
@@ -148,15 +155,16 @@ def score(
 
     scored: list[ScoredOpportunity] = []
     for start in range(0, len(opportunities), SCORE_BATCH_SIZE):
-        scored.extend(
-            _score_batch(
-                opportunities[start : start + SCORE_BATCH_SIZE],
-                context_sections,
-                client=client,
-                model=model,
-                provider=provider,
-            )
+        batch_scored = _score_batch(
+            opportunities[start : start + SCORE_BATCH_SIZE],
+            context_sections,
+            client=client,
+            model=model,
+            provider=provider,
         )
+        if on_batch is not None:
+            on_batch(batch_scored)
+        scored.extend(batch_scored)
     scored.sort(key=lambda s: (_FIT_ORDER.get(s.fit, 1), s.opportunity.title))
     return scored
 

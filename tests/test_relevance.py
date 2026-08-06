@@ -150,3 +150,24 @@ def test_bulk_scoring_batches_instead_of_one_giant_call():
     assert len(client.calls) == 3
     assert len(result) == len(opps)  # every opportunity judged exactly once
     assert {s.opportunity.title for s in result} == {o.title for o in opps}
+
+
+def test_on_batch_persists_batches_as_they_land():
+    """A quota death mid-run must keep the batches already judged."""
+    from scholarship_factory.relevance import SCORE_BATCH_SIZE
+
+    opps = [_opp(f"Opp {i:04d}") for i in range(SCORE_BATCH_SIZE + 3)]
+
+    class DiesOnSecondCall(BatchingStubClient):
+        def create(self, **kwargs):
+            if len(self.calls) >= 1:
+                raise RuntimeError("429 quota exhausted")
+            return super().create(**kwargs)
+
+    persisted = []
+    try:
+        score(opps, ApplicantProfile(), client=DiesOnSecondCall(), on_batch=persisted.extend)
+    except RuntimeError:
+        pass
+
+    assert len(persisted) == SCORE_BATCH_SIZE  # first batch survived the crash

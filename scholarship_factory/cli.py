@@ -133,8 +133,10 @@ def _profile_for(db_path: str) -> ApplicantProfile:
     return profiles[0] if profiles else ApplicantProfile()
 
 
-def _score_undecided(store: OpportunityStore) -> list:
-    """Re-score everything the owner has not already ruled on."""
+def _score_undecided(store: OpportunityStore, rescore_all: bool = False) -> list:
+    """Score what the owner has not ruled on, skipping already-scored rows unless
+    `rescore_all`. Each batch persists as it lands, so a quota/outage death
+    mid-run keeps every batch already judged."""
     db_path = store.db_path
     opportunities = store.list()
     decisions = DecisionStore(db_path)
@@ -147,14 +149,21 @@ def _score_undecided(store: OpportunityStore) -> list:
     if refreshed:
         print(f"preference summary refreshed:\n  {refreshed}\n")
 
+    relevance_store = RelevanceStore(db_path)
     decided = {d.opportunity_id for d in decisions.list()}
+    already_scored = set() if rescore_all else set(relevance_store.all())
+    undecided = [o for o in opportunities if o.id not in decided]
+    to_score = [o for o in undecided if o.id not in already_scored]
+    skipped = len(undecided) - len(to_score)
+    if skipped:
+        print(f"skipping {skipped} already-scored (use `sf rank --all` to re-judge)")
     scored = score(
-        [o for o in opportunities if o.id not in decided],
+        to_score,
         profile,
         decisions=decisions.list(),
         preference_summary=preferences.get(),
+        on_batch=relevance_store.replace,
     )
-    RelevanceStore(db_path).replace(scored)
     return scored
 
 
@@ -194,13 +203,13 @@ def _cmd_poll(
     return _cmd_digest(store, None, mark=True)
 
 
-def _cmd_rank(store: OpportunityStore) -> int:
+def _cmd_rank(store: OpportunityStore, rescore_all: bool = False) -> int:
     """Score stored opportunities against the profile, decisions and summary."""
     if not store.list():
         print("nothing stored yet - run `sf source` first")
         return 0
 
-    scored = _score_undecided(store)
+    scored = _score_undecided(store, rescore_all=rescore_all)
     for item in scored:
         print(f"{item.fit:<6} {item.opportunity.title[:58]}")
         print(f"       {item.reason}")
@@ -336,7 +345,11 @@ def main(argv: list[str] | None = None) -> int:
         "--min-interval", type=float, default=DEFAULT_MIN_INTERVAL,
         help=f"min seconds between requests to one host (default: {DEFAULT_MIN_INTERVAL})",
     )
-    sub.add_parser("rank", parents=[common], help="score stored opportunities by fit")
+    p_rank = sub.add_parser("rank", parents=[common], help="score stored opportunities by fit")
+    p_rank.add_argument(
+        "--all", action="store_true", dest="rescore_all",
+        help="re-judge already-scored rows too (e.g. after the profile changes)",
+    )
     p_poll = sub.add_parser(
         "poll", parents=[common],
         help="unattended pass: source, score, then print the digest",
@@ -390,7 +403,7 @@ def main(argv: list[str] | None = None) -> int:
             store, args.seeds, args.page_cap, args.min_interval, args.max_pages
         )
     if args.command == "rank":
-        return _cmd_rank(store)
+        return _cmd_rank(store, rescore_all=args.rescore_all)
     if args.command == "poll":
         return _cmd_poll(
             store, args.seeds, args.page_cap, args.min_interval, args.max_pages
