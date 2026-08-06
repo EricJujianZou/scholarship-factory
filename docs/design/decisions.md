@@ -23,9 +23,10 @@ New offer block:
 - Hook: "We can save you 10 hours of mass-applying to jobs with 0
   interviews. How much is your time worth?"
 - "What's included:" 1) Personalized contacts per job, get out of the ATS.
-  2) Proven referral outreach template. 3) Resume review from a coach who
-  spoke to recruiters from Apple & Nvidia.
-- CTA label: "Invest in your Next Internship" (was "Get your list ($15/mo)").
+  2) Step-by-step outreach template + playbook + coffee chat + follow-up
+  guide. 3) Resume review from a coach who spoke to recruiters from
+  Apple & Nvidia.
+- CTA label: "Invest in Your next internship" (was "Get your list ($15/mo)").
 
 Removed in the same pass: the Stripe handoff line, the "Not sure what to
 say?" DM message box, the footer builder credit line, the "saved on this
