@@ -10,7 +10,7 @@ never writes anything.
 Optional `site.toml` at the repo root configures the storefront pieces:
 
     stripe_url = "https://buy.stripe.com/..."   # the paid CTA becomes a link
-    instagram = "sleppyeric"                     # DM fallback CTA + footer
+    instagram = "sleppyeric"                     # DM path + footer credit
     price = "$15/mo"
     email_form_action = "https://..."            # email capture form POST target
 
@@ -21,11 +21,14 @@ Untrusted input note: titles, descriptions and URLs come from scraped pages.
 Everything dynamic is rendered via `textContent`, the JSON embed escapes
 `</`, and apply URLs are dropped server-side unless they are http(s).
 
+Copy note: the headline is generated from the corpus, never hardcoded. Only
+types the database actually carries in volume get named, so the page cannot
+promise a category it does not have.
+
 Design note: two voices carry the page. Anything the owner says is system
 sans; anything the scraper produced (org names, types, dates, counts, source
 hosts) is uppercase monospace. Exactly two hues do work: --marker highlights
-two phrases plus the freshness signals, --ink-blue is only ever interactive
-text.
+two phrases plus the saved marker, --ink-blue is only ever interactive text.
 """
 import json
 import re
@@ -55,8 +58,22 @@ KNOWN_TYPES = frozenset(
     }
 )
 
+# a type has to carry this many rows before the headline is allowed to name it
+HEADLINE_MIN = 20
+
 _MONTH_DAY_YEAR = re.compile(
     r"^([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})",
+)
+
+# adapters write "<category> internship. Term: A, B. Location: C, D"; terms
+# never contain a period and Location is always last
+_TERM_RE = re.compile(r"Term:\s*([^.]*)")
+_LOC_RE = re.compile(r"Location:\s*(.+)\Z", re.S)
+
+_DM_MESSAGE = (
+    "hey, I want the weekly list. I'm a [year] [program] student, I'm "
+    "looking for [Summer 2027], I can work in [Canada], and I'll send my "
+    "resume."
 )
 
 
@@ -104,6 +121,21 @@ def _parse_date(text: str | None) -> date | None:
     return None
 
 
+def _terms(desc: str | None) -> list[str]:
+    """The terms an internship listing states, e.g. ["Summer 2027"]."""
+    m = _TERM_RE.search(desc or "")
+    if not m:
+        return []
+    return [t.strip() for t in m.group(1).split(",") if t.strip()]
+
+
+def _location(desc: str | None) -> str:
+    """The location string a listing states, verbatim and unsplit: the parts
+    of "San Jose, CA" are not two places."""
+    m = _LOC_RE.search(desc or "")
+    return m.group(1).strip() if m else ""
+
+
 def _row(opp) -> dict | None:
     if not opp.apply_url.lower().startswith(("http://", "https://")):
         return None
@@ -116,6 +148,9 @@ def _row(opp) -> dict | None:
         "deadline": opp.deadline,
         "url": opp.apply_url,
         "src": _source_name(opp.source_url),
+        # facets, parsed out of the description the adapter assembled
+        "term": _terms(opp.description),
+        "loc": _location(opp.description),
         # "added": when this row first showed up, which is what the card says
         "seen": (opp.first_seen or opp.last_seen or "")[:10],
     }
@@ -132,14 +167,10 @@ def build_site(
     generated = today.isoformat()
 
     for r in rows:
-        added = _parse_date(r["seen"])
-        r["fresh"] = bool(added and 0 <= (today - added).days <= 7)
         due = _parse_date(r["deadline"])
         r["soon"] = bool(due and 0 <= (due - today).days <= 14)
-    if all(r["fresh"] for r in rows):
-        # a marker every row wears marks nothing; young database, no signal yet
-        for r in rows:
-            r["fresh"] = False
+        # sort key: only deadlines that are real, parseable and not already past
+        r["due"] = due.isoformat() if due and due >= today else None
 
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
@@ -150,6 +181,51 @@ def build_site(
     return index
 
 
+def _plural(word: str, n: int) -> str:
+    return word if n == 1 else word + "s"
+
+
+def _join(items: list[str]) -> str:
+    if len(items) <= 1:
+        return "".join(items)
+    return ", ".join(items[:-1]) + " and " + items[-1]
+
+
+def _type_counts(rows: list[dict]) -> list[tuple[str, int]]:
+    """Named types only. "other" is a bucket, not a category, so it never
+    appears in prose."""
+    return [
+        (t, n)
+        for t, n in Counter(r["type"] for r in rows).most_common()
+        if t != "other"
+    ]
+
+
+def _headline(rows: list[dict]) -> str:
+    """Only types the corpus carries in volume. The page cannot promise
+    hackathons it does not have."""
+    major = [t for t, n in _type_counts(rows) if n >= HEADLINE_MIN]
+    if not major:
+        return "Everything we can find, in one searchable list."
+    return f"Every {_join(major)} we can find, in one searchable list."
+
+
+def _also_line(rows: list[dict]) -> str:
+    """The smaller types, folded in with their real counts."""
+    minor = [(t, n) for t, n in _type_counts(rows) if n < HEADLINE_MIN]
+    if not minor:
+        return ""
+    return (
+        "Also in here: "
+        + _join([f"{n:,} {_plural(t, n)}" for t, n in minor])
+        + "."
+    )
+
+
+def _newest(rows: list[dict]) -> str:
+    return max((r["seen"] for r in rows if r["seen"]), default="")
+
+
 def _paid_cta(config: dict) -> str:
     price = config.get("price", "$15/mo")
     stripe = config.get("stripe_url")
@@ -158,7 +234,7 @@ def _paid_cta(config: dict) -> str:
         button = f'<a class="btn" href="{stripe}">Get your list ({price})</a>'
     elif instagram:
         button = (
-            f'<a class="btn" href="https://instagram.com/{instagram}">'
+            f'<a class="btn" href="https://ig.me/m/{instagram}">'
             f"DM @{instagram} to start ({price})</a>"
         )
     else:
@@ -166,15 +242,42 @@ def _paid_cta(config: dict) -> str:
     return button
 
 
+def _dm_block(config: dict) -> str:
+    """The other way in. ig.me/m/ opens a message thread; the profile URL
+    just opens a profile and the person has to find the button themselves."""
+    instagram = config.get("instagram")
+    if not instagram:
+        return ""
+    lead = ""
+    if config.get("stripe_url"):
+        # without stripe the CTA button is already the DM, so no second line
+        lead = (
+            f'<p class="dm">or <a href="https://ig.me/m/{instagram}">'
+            f"DM @{instagram}</a> first if you have questions</p>"
+        )
+    return (
+        f"{lead}"
+        '<div class="msg">'
+        '<p class="msg-h">Not sure what to say? Copy this.</p>'
+        f'<p class="msg-t" id="msg-text">{escape(_DM_MESSAGE)}</p>'
+        '<button class="copy" id="copy-msg" type="button">'
+        "Copy the message</button>"
+        "</div>"
+    )
+
+
 def _email_form(config: dict) -> str:
     action = config.get("email_form_action")
     if not action:
         return ""
     return (
+        '<p class="sub">I send five new ones every Sunday. Not matched to '
+        "you, just the five best that opened that week. Free, and no other "
+        "emails.</p>"
         f'<form class="email" method="post" action="{action}">'
-        '<label class="sr-only" for="email">Your school email</label>'
+        '<label class="sr-only" for="email">Your email</label>'
         '<input id="email" type="email" name="email" required '
-        'placeholder="you@school.edu">'
+        'placeholder="your email">'
         '<button class="btn">Get the weekly top 5</button></form>'
     )
 
@@ -194,9 +297,21 @@ def _facts(rows: list[dict], generated: str) -> str:
     parts.append('<p class="f-h">where it comes from</p>')
     for s, n in Counter(r["src"] for r in rows).most_common():
         parts.append(_fact(s, f"{n:,}"))
-    parts.append('<p class="f-h">last updated</p>')
-    parts.append(_fact("utc", generated))
+    parts.append('<p class="f-h">freshness</p>')
+    # two different claims: when the page was made, and how new the data is
+    parts.append(_fact("built", generated))
+    parts.append(_fact("newest listing", _newest(rows) or "none yet"))
     return "\n  ".join(parts)
+
+
+def _facts_summary(rows: list[dict], sources: list[str]) -> str:
+    """Two lines, which is all the panel shows on a phone."""
+    newest = _newest(rows) or "none yet"
+    return (
+        f'<span>{len(rows):,} listings from {len(sources)} '
+        f"{_plural('source', len(sources))}</span>"
+        f"<span>newest listing {escape(newest)}</span>"
+    )
 
 
 def _source_tags(sources: list[str]) -> str:
@@ -222,6 +337,23 @@ Thanks either way,
 {you}"""
 
 
+def _nudge(config: dict) -> str:
+    """Shown only after the visitor has revealed intent (searched a few times
+    or saved a couple of listings)."""
+    instagram = config.get("instagram")
+    dm = (
+        f' or <a href="https://ig.me/m/{instagram}">DM @{instagram}</a>'
+        if instagram
+        else ""
+    )
+    return (
+        '<div id="nudge" class="nudge" hidden>'
+        "<p>You are digging. I do this filtering by hand for people every "
+        f'week. <a href="#offer">See what that is</a>{dm}.</p>'
+        "</div>"
+    )
+
+
 def _render(rows: list[dict], sources: list[str], generated: str, config: dict) -> str:
     data = json.dumps(rows, ensure_ascii=False).replace("</", "<\\/")
     instagram = config.get("instagram")
@@ -231,13 +363,29 @@ def _render(rows: list[dict], sources: list[str], generated: str, config: dict) 
         else "the owner"
     )
     price = config.get("price", "$15/mo")
+    headline = _headline(rows)
+    also = _also_line(rows)
+    meta_desc = " ".join(
+        p
+        for p in (
+            headline,
+            also,
+            "Free to browse, no account and no email.",
+        )
+        if p
+    )
+    lede = (
+        (also + " " if also else "")
+        + "Free to browse. No account, no email, no paywall on the list. "
+        + "There is a paid thing further down. The list is not it."
+    )
     return f"""<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>UGMI: every internship and scholarship we can find, free</title>
-<meta name="description" content="A live database of internships, scholarships, hackathons and grants for students. Free to browse.">
+<title>UGMI: {escape(headline)}</title>
+<meta name="description" content="{escape(meta_desc)}">
 <style>
 :root {{
   --background: oklch(1 0 0);
@@ -374,14 +522,26 @@ h1 {{
   color: var(--foreground);
   font-variant-numeric: tabular-nums;
 }}
+/* on a phone the whole panel folds down to its two-line summary */
+.facts-d > summary {{
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 44px;
+  padding: var(--sp-2) 0;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  list-style: none;
+}}
+.facts-d > summary::-webkit-details-marker {{ display: none; }}
 
 /* paid offer: the one high-contrast object on the page */
 .offer {{
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 340px);
   gap: var(--sp-6) var(--sp-8);
-  align-items: end;
-  margin: 0;
+  align-items: start;
+  margin: var(--sp-16) 0 var(--sp-6);
   padding: var(--sp-5);
   background: var(--primary);
   color: var(--primary-foreground);
@@ -401,7 +561,9 @@ h1 {{
   font-weight: 800;
 }}
 .offer p.sub {{ margin: 0; max-width: 62ch; font-size: 0.9375rem; color: var(--ink-muted-foreground); }}
+.offer p.sub + p.sub {{ margin-top: var(--sp-3); }}
 .buy {{ display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-3); }}
+.buy > * {{ max-width: 100%; }}
 /* the wash sits on white here because the card behind it is near-black:
    near-black text stays AA on both halves of the slip */
 .price {{
@@ -413,6 +575,23 @@ h1 {{
   font-size: 2rem;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}}
+.dm {{ margin: 0; font-size: 0.9375rem; color: var(--ink-muted-foreground); }}
+.dm a {{ color: var(--primary-foreground); }}
+.msg {{
+  width: 100%;
+  padding: var(--sp-3);
+  border: 1px solid var(--ink-muted-foreground);
+  border-radius: var(--radius-sm);
+}}
+.msg-h {{ margin: 0 0 var(--sp-2); font-size: 0.9375rem; font-weight: 600; }}
+.msg-t {{
+  margin: 0 0 var(--sp-3);
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--ink-muted-foreground);
+  overflow-wrap: anywhere;
 }}
 
 /* buttons and inputs */
@@ -450,6 +629,25 @@ h1 {{
 }}
 .offer .btn.muted {{ background: var(--ink-muted-foreground); border-color: var(--ink-muted-foreground); }}
 .offer :focus-visible {{ outline-color: var(--background); }}
+.copy {{
+  min-height: 44px;
+  padding: 0 var(--sp-4);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--background);
+  color: var(--foreground);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.12s ease, border-color 0.12s ease;
+}}
+.copy:hover {{ background: var(--muted); border-color: var(--foreground); }}
+.offer .copy {{
+  background: transparent;
+  border-color: var(--ink-muted-foreground);
+  color: var(--primary-foreground);
+}}
+.offer .copy:hover {{ background: transparent; border-color: var(--background); }}
 input, select {{
   min-height: 44px;
   padding: 0 var(--sp-3);
@@ -464,7 +662,7 @@ input, select {{
 .email input {{ flex: 1 1 200px; }}
 .email .btn {{ padding: 0 var(--sp-4); }}
 
-/* free template, kept for the closing block so listings clear the fold */
+/* free template, sitting with the offer under the database */
 .tpl-card {{
   margin: 0 0 var(--sp-6);
   border: 1px solid var(--border);
@@ -504,12 +702,16 @@ pre.tpl {{
   margin: 0;
   padding: var(--sp-5);
   background: var(--muted);
-  border-radius: 0 0 var(--radius) var(--radius);
   white-space: pre-wrap;
   overflow-x: auto;
   font-family: var(--mono);
   font-size: 0.8125rem;
   line-height: 1.6;
+}}
+.tpl-foot {{
+  padding: var(--sp-3) var(--sp-5);
+  background: var(--muted);
+  border-radius: 0 0 var(--radius) var(--radius);
 }}
 
 /* the rule the whole database runs on, stated right before the data */
@@ -521,6 +723,7 @@ pre.tpl {{
   line-height: 1.6;
   color: var(--muted-foreground);
 }}
+.method.note {{ margin: 0 0 var(--sp-3); }}
 
 /* sticky search bar */
 .bar {{
@@ -547,7 +750,7 @@ pre.tpl {{
   padding: 0 var(--sp-4);
   font-size: 1.0625rem;
 }}
-#type {{
+#sort {{
   flex: 0 0 auto;
   height: 52px;
   font-family: var(--mono);
@@ -562,6 +765,54 @@ pre.tpl {{
   font-variant-numeric: tabular-nums;
 }}
 #count #count-n {{ color: var(--foreground); }}
+/* one row of one-tap filters, scrolled sideways rather than wrapped so the
+   sticky bar never eats the fold */
+.chips {{
+  display: flex;
+  gap: var(--sp-2);
+  margin-top: var(--sp-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+  /* the fade is the only honest way to say "there are more of these" */
+  -webkit-mask-image: linear-gradient(to right, #000 92%, transparent);
+  mask-image: linear-gradient(to right, #000 92%, transparent);
+}}
+.chips::-webkit-scrollbar {{ display: none; }}
+.chip {{
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 0 var(--sp-4);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.12s ease, border-color 0.12s ease;
+}}
+/* on a phone the readout moves down here so the search box keeps its width */
+.chips #count {{ align-self: center; }}
+.chip:hover {{ border-color: var(--foreground); }}
+.chip[aria-pressed="true"] {{
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-foreground);
+}}
+
+/* the quiet offer bar, shown only once someone has revealed intent */
+.nudge {{
+  margin: 0 0 var(--sp-4);
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--muted-foreground);
+}}
+.nudge p {{ margin: 0; }}
+.nudge a {{ color: var(--ink-blue); }}
 
 /* listings */
 #list {{
@@ -628,13 +879,26 @@ pre.tpl {{
 .opp-foot {{
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   gap: var(--sp-1) var(--sp-3);
   margin-top: var(--sp-2);
   color: var(--card-muted-foreground);
 }}
 .opp .deadline {{ color: var(--card-foreground); font-weight: 600; }}
-.opp .deadline.soon, .opp .new {{ color: var(--foreground); }}
+.opp .deadline.soon {{ color: var(--foreground); }}
+.opp .save {{
+  margin-left: auto;
+  min-height: 44px;
+  padding: 0 var(--sp-2);
+  border: 0;
+  background: none;
+  color: var(--card-muted-foreground);
+  cursor: pointer;
+}}
+.opp .save[aria-pressed="true"] {{ color: var(--foreground); }}
+.opp .save[aria-pressed="true"] .save-t {{
+  background-image: linear-gradient(180deg, transparent 55%, var(--marker) 55%);
+}}
 #more, #clear {{
   display: block;
   min-height: 44px;
@@ -661,17 +925,6 @@ footer {{
   border-top: 1px solid var(--foreground);
 }}
 footer a {{ color: var(--ink-blue); }}
-footer a.btn {{ color: var(--primary-foreground); }}
-footer .f-cta {{
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--sp-4);
-  margin: 0 0 var(--sp-6);
-  max-width: 60ch;
-  font-size: 1.0625rem;
-  font-weight: 600;
-}}
 footer .credit {{ margin: 0 0 var(--sp-6); max-width: 60ch; color: var(--muted-foreground); }}
 footer .f-h {{ margin: 0 0 var(--sp-2); color: var(--muted-foreground); }}
 footer .tags {{
@@ -691,18 +944,20 @@ footer .tags li {{
 
 @media (max-width: 860px) {{
   .hero {{ grid-template-columns: minmax(0, 1fr); }}
-  .offer {{ grid-template-columns: minmax(0, 1fr); align-items: start; }}
+  .offer {{ grid-template-columns: minmax(0, 1fr); }}
 }}
 @media (max-width: 640px) {{
   .hero {{ padding: var(--sp-6) 0 var(--sp-4); }}
   h1 {{ max-width: none; }}
+  .facts-d > summary {{ display: flex; }}
   .offer {{ padding: var(--sp-5); }}
   .tpl-card summary {{ padding: var(--sp-3) var(--sp-4); }}
   .tpl-card summary .hint {{ display: none; }}
   pre.tpl {{ padding: var(--sp-4); }}
-  #q, #type {{ height: 44px; }}
+  .tpl-foot {{ padding: var(--sp-3) var(--sp-4); }}
+  #q, #sort {{ height: 44px; }}
   #q {{ padding: 0 var(--sp-3); font-size: 1rem; }}
-  #type {{ padding: 0 var(--sp-1); max-width: 108px; }}
+  #sort {{ padding: 0 var(--sp-1); max-width: 108px; }}
   /* the readout keeps a unit when the full "of N listings" will not fit */
   .count-tail {{ display: none; }}
   #count::after {{ content: " shown"; }}
@@ -719,26 +974,18 @@ footer .tags li {{
     <p class="brand">UGMI</p>
     <p class="mono mark tag">u gon make it</p>
     <p class="bignum"><span class="n">{len(rows):,}</span><span class="mono unit">listings live</span></p>
-    <h1>Every internship, scholarship, hackathon and grant we can find.</h1>
-    <p class="lede">All of it is free to browse. No account, no email, no paywall on the list.</p>
+    <h1>{escape(headline)}</h1>
+    <p class="lede">{escape(lede)}</p>
   </div>
   <aside class="facts mono">
+    <details class="facts-d" id="facts-d" open>
+      <summary>{_facts_summary(rows, sources)}</summary>
+      <div class="facts-body">
   {_facts(rows, generated)}
+      </div>
+    </details>
   </aside>
 </header>
-
-<section class="offer">
-  <div>
-    <p class="eyebrow">You send a resume once and get a shortlist every week.</p>
-    <h2>Get your matched shortlist every week.</h2>
-    <p class="sub">The list below is everything, and you are eligible for a fraction of it. Send your resume and 3 lines about yourself. Every week you get your matched shortlist, plus the actual person to contact at each company and a working outreach template.</p>
-  </div>
-  <div class="buy">
-    <p class="price">{price}</p>
-    {_paid_cta(config)}
-    {_email_form(config)}
-  </div>
-</section>
 
 <p class="method">Facts are extracted from the listed pages, never invented; anything a page didn't state is simply blank.</p>
 
@@ -746,25 +993,51 @@ footer .tags li {{
   <div class="controls">
     <label class="sr-only" for="q">Search listings</label>
     <input id="q" type="search" placeholder="search: company, role, term, city…">
-    <label class="sr-only" for="type">Filter by type</label>
-    <select id="type"><option value="">all types</option></select>
+    <label class="sr-only" for="sort">Sort listings</label>
+    <select id="sort">
+      <option value="deadline">soonest deadline</option>
+      <option value="new">newest</option>
+      <option value="az">A to Z</option>
+    </select>
     <p id="count" class="mono"><span id="count-n"></span><span id="count-tail" class="count-tail"></span></p>
   </div>
+  <div id="chips" class="chips" role="group" aria-label="Filter listings"></div>
 </div>
+<p id="since-note" class="method note" hidden></p>
+<p id="save-note" class="method note" hidden>Saved on this device only. Clearing your browser clears this.</p>
+{_nudge(config)}
 <div id="list"></div>
 <div id="empty" hidden>
-  <p>Nothing matched that. The database is big but it is not magic. Try a shorter word.</p>
+  <p>Nothing matched all of those words. Try dropping one.</p>
   <button id="clear" type="button">Clear the search</button>
 </div>
 <button id="more" type="button" hidden>Show more</button>
 <p id="done" hidden></p>
 
+<section class="offer" id="offer">
+  <div>
+    <p class="eyebrow">You send a resume once and get a shortlist every week.</p>
+    <h2>Get your matched shortlist every week.</h2>
+    <p class="sub">The list above is everything, and you are eligible for a fraction of it. Send your resume and 3 lines about yourself. Every week you get your matched shortlist, plus the actual person to contact at each company and a working outreach template.</p>
+    <p class="sub">I read these myself. It is one person, so give me up to 48 hours.</p>
+  </div>
+  <div class="buy">
+    <p class="price">{price}</p>
+    {_paid_cta(config)}
+    {_dm_block(config)}
+    {_email_form(config)}
+  </div>
+</section>
+
+<details class="tpl-card">
+  <summary><span class="s-title">Free: the cold outreach template</span><span class="hint">works for referrals and coffee chats</span></summary>
+  <pre class="tpl" id="tpl-text">{_TEMPLATE_TEXT}</pre>
+  <div class="tpl-foot">
+    <button class="copy" id="copy-tpl" type="button">Copy the template</button>
+  </div>
+</details>
+
 <footer>
-  <details class="tpl-card">
-    <summary><span class="s-title">Free: the cold outreach template</span><span class="hint">works for referrals and coffee chats</span></summary>
-    <pre class="tpl">{_TEMPLATE_TEXT}</pre>
-  </details>
-  <p class="f-cta">Want this filtered down to the ones you can actually win? {_paid_cta(config)}</p>
   <p class="credit">Built by one Waterloo student who got tired of 40 tabs. {contact}</p>
   <p class="mono f-h">sources</p>
   <ul class="tags">
@@ -776,9 +1049,23 @@ footer .tags li {{
 <script id="data" type="application/json">{data}</script>
 <script>
 const ROWS = JSON.parse(document.getElementById("data").textContent);
+const PAGE_FIRST = 24;
 const PAGE = 200;
+// typed shorthand, expanded per token before matching
+const SYN = new Map([
+  ["swe", "software engineer"],
+  ["sde", "software engineer"],
+  ["pm", "product manager"],
+  ["ds", "data science"],
+  ["ml", "machine learning"]
+]);
+const SAVED_KEY = "ugmi.saved";
+const VISIT_KEY = "ugmi.lastVisit";
+const TODAY = new Date().toISOString().slice(0, 10);
+
 const q = document.getElementById("q");
-const typeSel = document.getElementById("type");
+const sortSel = document.getElementById("sort");
+const chipRow = document.getElementById("chips");
 const list = document.getElementById("list");
 const countN = document.getElementById("count-n");
 const countTail = document.getElementById("count-tail");
@@ -787,13 +1074,31 @@ const done = document.getElementById("done");
 const empty = document.getElementById("empty");
 const clearBtn = document.getElementById("clear");
 const bar = document.querySelector(".bar");
-let filtered = ROWS, shown = 0;
+const sinceNote = document.getElementById("since-note");
+const saveNote = document.getElementById("save-note");
+const nudge = document.getElementById("nudge");
+const factsD = document.getElementById("facts-d");
 
-for (const t of [...new Set(ROWS.map(r => r.type))].sort()) {{
-  const o = document.createElement("option");
-  o.value = t; o.textContent = t;
-  typeSel.appendChild(o);
+// one lowercased haystack per row, built once
+let NEWEST = "";
+for (const r of ROWS) {{
+  r.blob = [r.title, r.org, r.desc, r.req, r.type, r.src]
+    .filter(Boolean).join(" ").toLowerCase();
+  r.locLower = (r.loc || "").toLowerCase();
+  if (r.seen && r.seen > NEWEST) NEWEST = r.seen;
 }}
+
+function lsGet(k) {{ try {{ return localStorage.getItem(k); }} catch (e) {{ return null; }} }}
+function lsSet(k, v) {{ try {{ localStorage.setItem(k, v); }} catch (e) {{}} }}
+
+let saved = new Set();
+try {{
+  const raw = JSON.parse(lsGet(SAVED_KEY) || "[]");
+  if (Array.isArray(raw)) saved = new Set(raw.filter(x => typeof x === "string"));
+}} catch (e) {{}}
+
+let filtered = ROWS, shown = 0, searches = 0, lastCounted = "";
+const chips = [];
 
 function el(tag, cls, text) {{
   const n = document.createElement(tag);
@@ -802,9 +1107,109 @@ function el(tag, cls, text) {{
   return n;
 }}
 
-function matches(r, needle) {{
-  return [r.title, r.org, r.desc, r.req, r.type, r.src]
-    .some(v => v && v.toLowerCase().includes(needle));
+function addChip(label, group, test) {{
+  const b = el("button", "chip mono", label);
+  b.type = "button";
+  b.setAttribute("aria-pressed", "false");
+  b.dataset.group = group || "";
+  b.test = test;
+  b.addEventListener("click", () => {{
+    const on = b.getAttribute("aria-pressed") === "true";
+    if (!on && b.dataset.group) {{
+      for (const c of chips) {{
+        if (c !== b && c.dataset.group === b.dataset.group) {{
+          c.setAttribute("aria-pressed", "false");
+        }}
+      }}
+    }}
+    b.setAttribute("aria-pressed", on ? "false" : "true");
+    apply();
+  }});
+  chips.push(b);
+  chipRow.appendChild(b);
+  return b;
+}}
+
+// saved first: it is the only chip about you
+const savedChip = addChip("saved (0)", "", r => saved.has(r.url));
+
+function refreshSaved() {{
+  savedChip.textContent = "saved (" + saved.size.toLocaleString() + ")";
+  savedChip.hidden = saved.size === 0;
+  if (saved.size === 0) savedChip.setAttribute("aria-pressed", "false");
+  saveNote.hidden = saved.size === 0;
+}}
+
+// "added since your last visit", with a guard: a bulk import is not news
+const prevVisit = lsGet(VISIT_KEY);
+lsSet(VISIT_KEY, TODAY);
+if (prevVisit) {{
+  const fresh = ROWS.filter(r => r.seen && r.seen > prevVisit);
+  if (fresh.length > 0 && fresh.length < 400) {{
+    addChip(fresh.length.toLocaleString() + " added since " + prevVisit, "",
+      r => r.seen && r.seen > prevVisit);
+  }} else if (fresh.length >= 400) {{
+    sinceNote.textContent = "the list was rebuilt on " + NEWEST;
+    sinceNote.hidden = false;
+  }}
+}}
+
+// facets, counted off the rows that actually loaded
+const termCount = new Map();
+let noTerm = 0;
+for (const r of ROWS) {{
+  const ts = r.term || [];
+  if (!ts.length) noTerm++;
+  for (const t of ts) termCount.set(t, (termCount.get(t) || 0) + 1);
+}}
+for (const [t, n] of [...termCount.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4)) {{
+  addChip(t + " (" + n.toLocaleString() + ")", "term",
+    r => (r.term || []).indexOf(t) !== -1);
+}}
+if (noTerm) {{
+  // never let unparsed rows vanish behind a facet nobody offered
+  addChip("term not stated (" + noTerm.toLocaleString() + ")", "term",
+    r => !(r.term || []).length);
+}}
+for (const [label, hit] of [["remote", "remote"], ["canada", "canada"]]) {{
+  const n = ROWS.filter(r => r.locLower.indexOf(hit) !== -1).length;
+  if (n) addChip(label + " (" + n.toLocaleString() + ")", "",
+    r => r.locLower.indexOf(hit) !== -1);
+}}
+const typeCount = new Map();
+for (const r of ROWS) {{
+  if (r.type && r.type !== "internship") typeCount.set(r.type, (typeCount.get(r.type) || 0) + 1);
+}}
+for (const [t, n] of [...typeCount.entries()].sort((a, b) => b[1] - a[1])) {{
+  if (n >= 10) addChip(t + " (" + n.toLocaleString() + ")", "type", r => r.type === t);
+}}
+
+function escRe(s) {{
+  return s.replace(/[^a-z0-9]/gi, m => "\\\\" + m);
+}}
+
+function tokenTest(t) {{
+  if (t.length <= 2) {{
+    // two letters match too much as a substring, so demand a whole word
+    const re = new RegExp("\\\\b" + escRe(t) + "\\\\b");
+    return b => re.test(b);
+  }}
+  return b => b.indexOf(t) !== -1;
+}}
+
+function sortRows(rs) {{
+  const mode = sortSel.value;
+  const byTitle = (a, b) => a.title.localeCompare(b.title);
+  const byNew = (a, b) => (b.seen || "").localeCompare(a.seen || "") || byTitle(a, b);
+  if (mode === "az") return rs.slice().sort(byTitle);
+  if (mode === "new") return rs.slice().sort(byNew);
+  return rs.slice().sort((a, b) => {{
+    const ad = a.due || "", bd = b.due || "";
+    if (ad && bd) return ad === bd ? byNew(a, b) : (ad < bd ? -1 : 1);
+    if (ad) return -1;
+    if (bd) return 1;
+    return byNew(a, b);
+  }});
 }}
 
 function card(r) {{
@@ -825,13 +1230,33 @@ function card(r) {{
       "deadline " + r.deadline));
   }}
   if (r.seen) foot.appendChild(el("span", "mono added", "added " + r.seen));
-  if (r.fresh) foot.appendChild(el("span", "mono new mark", "new"));
-  if (foot.childNodes.length) d.appendChild(foot);
+  const sv = el("button", "save mono");
+  sv.type = "button";
+  const svText = el("span", "save-t", "save");
+  sv.appendChild(svText);
+  function paintSave() {{
+    const on = saved.has(r.url);
+    sv.setAttribute("aria-pressed", on ? "true" : "false");
+    sv.setAttribute("aria-label", (on ? "Remove from saved: " : "Save: ") + r.title);
+    svText.textContent = on ? "saved" : "save";
+  }}
+  paintSave();
+  sv.addEventListener("click", () => {{
+    if (saved.has(r.url)) saved.delete(r.url); else saved.add(r.url);
+    lsSet(SAVED_KEY, JSON.stringify([...saved]));
+    paintSave();
+    refreshSaved();
+    maybeNudge();
+    if (savedChip.getAttribute("aria-pressed") === "true") apply();
+  }});
+  foot.appendChild(sv);
+  d.appendChild(foot);
   return d;
 }}
 
 function renderMore() {{
-  const next = filtered.slice(shown, shown + PAGE);
+  const size = shown === 0 ? PAGE_FIRST : PAGE;
+  const next = filtered.slice(shown, shown + size);
   for (const r of next) list.appendChild(card(r));
   shown += next.length;
   const left = filtered.length - shown;
@@ -841,10 +1266,19 @@ function renderMore() {{
   done.hidden = !(filtered.length > 0 && left <= 0);
 }}
 
+function maybeNudge() {{
+  if (nudge && (searches >= 3 || saved.size >= 2)) nudge.hidden = false;
+}}
+
 function apply() {{
-  const needle = q.value.trim().toLowerCase();
-  const t = typeSel.value;
-  filtered = ROWS.filter(r => (!t || r.type === t) && (!needle || matches(r, needle)));
+  // every word has to land somewhere in the row, not the whole phrase in one place
+  const tests = q.value.trim().toLowerCase().split(/\\s+/).filter(Boolean)
+    .map(t => SYN.has(t) ? SYN.get(t) : t)
+    .map(tokenTest);
+  const on = chips.filter(c => c.getAttribute("aria-pressed") === "true");
+  filtered = sortRows(ROWS.filter(
+    r => tests.every(fn => fn(r.blob)) && on.every(c => c.test(r))
+  ));
   list.textContent = "";
   shown = 0;
   countN.textContent = filtered.length.toLocaleString();
@@ -853,15 +1287,62 @@ function apply() {{
   renderMore();
 }}
 
-q.addEventListener("input", apply);
-typeSel.addEventListener("change", apply);
+function wireCopy(btnId, srcId) {{
+  const b = document.getElementById(btnId), s = document.getElementById(srcId);
+  if (!b || !s) return;
+  b.addEventListener("click", () => {{
+    const label = b.dataset.label || b.textContent;
+    b.dataset.label = label;
+    try {{
+      navigator.clipboard.writeText(s.textContent).then(() => {{
+        b.textContent = "Copied";
+        setTimeout(() => {{ b.textContent = label; }}, 1600);
+      }}, () => {{ b.textContent = "Copy failed, select it instead"; }});
+    }} catch (e) {{ b.textContent = "Copy failed, select it instead"; }}
+  }});
+}}
+wireCopy("copy-msg", "msg-text");
+wireCopy("copy-tpl", "tpl-text");
+
+let searchTimer;
+q.addEventListener("input", () => {{
+  apply();
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {{
+    const v = q.value.trim().toLowerCase();
+    if (v.length >= 2 && v !== lastCounted) {{
+      lastCounted = v;
+      searches++;
+      maybeNudge();
+    }}
+  }}, 700);
+}});
+sortSel.addEventListener("change", apply);
 more.addEventListener("click", renderMore);
 clearBtn.addEventListener("click", () => {{
-  q.value = ""; typeSel.value = ""; apply(); q.focus();
+  q.value = "";
+  for (const c of chips) c.setAttribute("aria-pressed", "false");
+  apply();
+  q.focus();
 }});
 addEventListener("scroll", () => {{
   bar.classList.toggle("stuck", bar.getBoundingClientRect().top <= 0);
 }}, {{ passive: true }});
+
+// a phone gets the facts panel folded to its two-line summary, and the count
+// readout moved off the input row so the search box stays typeable
+const narrow = matchMedia("(max-width: 640px)");
+const countP = document.getElementById("count");
+const controls = document.querySelector(".controls");
+function syncNarrow() {{
+  if (factsD) factsD.open = !narrow.matches;
+  if (narrow.matches) chipRow.prepend(countP);
+  else controls.appendChild(countP);
+}}
+narrow.addEventListener("change", syncNarrow);
+syncNarrow();
+
+refreshSaved();
 apply();
 </script>
 </body>

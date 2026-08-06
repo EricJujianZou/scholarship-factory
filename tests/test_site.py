@@ -1,6 +1,17 @@
 from scholarship_factory.models import Opportunity
-from scholarship_factory.site import build_site, load_site_config
+from scholarship_factory.site import KNOWN_TYPES, build_site, load_site_config
 from scholarship_factory.store import OpportunityStore
+
+
+def _rows_of(html):
+    import json
+
+    data = html.split('<script id="data" type="application/json">')[1]
+    return json.loads(data.split("</script>")[0])
+
+
+def _h1(html):
+    return html.split("<h1>")[1].split("</h1>")[0]
 
 
 def _store_with(tmp_path, *opps):
@@ -117,3 +128,103 @@ def test_unknown_types_collapse_to_other(tmp_path):
 
 def test_missing_config_file_is_empty(tmp_path):
     assert load_site_config(tmp_path / "nope.toml") == {}
+
+
+def test_headline_never_names_a_type_the_rows_do_not_have(tmp_path):
+    store = _store_with(
+        tmp_path,
+        *[
+            _opp(f"S{i}", apply_url=f"https://uw.ca/s{i}", type="scholarship")
+            for i in range(25)
+        ],
+        *[
+            _opp(f"I{i}", apply_url=f"https://ex.com/i{i}", type="internship")
+            for i in range(3)
+        ],
+    )
+
+    html = build_site(store, tmp_path / "site").read_text(encoding="utf-8")
+
+    h1 = _h1(html)
+    present = {r["type"] for r in _rows_of(html)}
+    for t in KNOWN_TYPES:
+        if t in h1:
+            assert t in present, f"h1 names {t!r} but no row has it"
+    # only the type that cleared the volume floor gets named
+    assert "scholarship" in h1
+    assert "internship" not in h1
+    assert "hackathon" not in h1
+    # the small ones are still accounted for, with real counts
+    assert "3 internships" in html
+
+
+def test_headline_names_nothing_when_no_type_has_volume(tmp_path):
+    store = _store_with(tmp_path, _opp("A", type="internship"))
+
+    html = build_site(store, tmp_path / "site").read_text(encoding="utf-8")
+
+    h1 = _h1(html)
+    assert h1 == "Everything we can find, in one searchable list."
+    for t in KNOWN_TYPES:
+        assert t not in h1
+
+
+def test_term_and_location_parsed_out_of_the_description(tmp_path):
+    store = _store_with(
+        tmp_path,
+        _opp(
+            "SWE Intern",
+            type="internship",
+            description=(
+                "Software Engineering internship. "
+                "Term: Summer 2027, Fall 2027. Location: Toronto, ON, Canada"
+            ),
+        ),
+        _opp(
+            "Term only",
+            apply_url="https://example.com/b",
+            description="Hardware internship. Term: Winter 2026",
+        ),
+        _opp(
+            "Prose",
+            apply_url="https://example.com/c",
+            description="A grant for journalists reporting on anything.",
+        ),
+    )
+
+    rows = {r["title"]: r for r in _rows_of(
+        build_site(store, tmp_path / "site").read_text(encoding="utf-8")
+    )}
+
+    assert rows["SWE Intern"]["term"] == ["Summer 2027", "Fall 2027"]
+    # "Toronto, ON, Canada" is one place, not three
+    assert rows["SWE Intern"]["loc"] == "Toronto, ON, Canada"
+    assert rows["Term only"]["term"] == ["Winter 2026"]
+    assert rows["Term only"]["loc"] == ""
+    assert rows["Prose"]["term"] == []
+    assert rows["Prose"]["loc"] == ""
+
+
+def test_facts_separate_build_date_from_newest_listing(tmp_path):
+    store = _store_with(tmp_path, _opp("A"))
+
+    html = build_site(store, tmp_path / "site").read_text(encoding="utf-8")
+
+    assert "built" in html
+    assert "newest listing" in html
+    newest = max(r["seen"] for r in _rows_of(html))
+    assert newest in html
+
+
+def test_dm_path_uses_the_message_deep_link(tmp_path):
+    store = _store_with(tmp_path, _opp("A"))
+
+    html = build_site(
+        store,
+        tmp_path / "site",
+        config={"stripe_url": "https://buy.stripe.com/x", "instagram": "sleppyeric"},
+    ).read_text(encoding="utf-8")
+
+    assert "https://ig.me/m/sleppyeric" in html
+    # the suggested opener ships with the link, not as an exercise for the reader
+    assert "I want the weekly list" in html
