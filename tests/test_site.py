@@ -97,5 +97,23 @@ def test_simplify_source_is_credited(tmp_path):
     assert "Simplify (github.com/SimplifyJobs)" in html
 
 
+def test_unknown_types_collapse_to_other(tmp_path):
+    import json
+
+    store = _store_with(
+        tmp_path,
+        _opp("A", type="Master's Scholarship and Internship Programme"),
+        _opp("B", apply_url="https://example.com/b", type="Fellowship"),
+        _opp("C", apply_url="https://example.com/c", type=None),
+    )
+
+    html = build_site(store, tmp_path / "site").read_text(encoding="utf-8")
+
+    data = html.split('<script id="data" type="application/json">')[1]
+    data = data.split("</script>")[0]
+    types = sorted(r["type"] for r in json.loads(data))
+    assert types == ["fellowship", "other", "other"]
+
+
 def test_missing_config_file_is_empty(tmp_path):
     assert load_site_config(tmp_path / "nope.toml") == {}
