@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UGMI — mark &amp; favicon gallery (20 concepts)</title>
+<style>
+:root {
+  --ink: #17181C;
+  --paper: #fff;
+  --marker: #FFE24B;
+  --blue: #1F4FFF;
+  --muted: #6b6b6b;
+  --border: #e4e4e4;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+main { max-width: 1200px; margin: 0 auto; padding: 32px 20px 96px; }
+.mono {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.mark-wash { background-image: linear-gradient(180deg, transparent 55%, var(--marker) 55%); }
+header h1 {
+  margin: 0 0 8px;
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+header p { max-width: 68ch; color: var(--muted); margin: 0 0 6px; }
+.chips { display: flex; gap: 8px; margin: 14px 0 0; align-items: center; flex-wrap: wrap; }
+.chip { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); }
+.chip .sw { width: 14px; height: 14px; border-radius: 4px; border: 1px solid var(--border); display: inline-block; }
+
+h2.group {
+  margin: 56px 0 4px;
+  font-size: 1.125rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+p.group-note { margin: 0 0 20px; color: var(--muted); max-width: 70ch; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  gap: 16px;
+}
+.card {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.card-head .name { font-weight: 800; font-size: 0.9375rem; }
+.card-head .num { color: var(--muted); }
+.dial { display: flex; gap: 3px; align-items: center; }
+.dial i { width: 7px; height: 7px; border-radius: 50%; background: var(--border); }
+.dial i.on { background: var(--ink); }
+.caption { margin: 0; font-size: 0.875rem; color: var(--muted); min-height: 3.9em; }
+.renders { display: flex; align-items: flex-end; gap: 18px; }
+.render { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.render .stage {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  background:
+    conic-gradient(#f3f3f3 0 25%, transparent 0 50%, #f3f3f3 0 75%, transparent 0) 0 0/16px 16px;
+}
+.stage.big { width: 120px; height: 120px; }
+.stage.mid { width: 56px; height: 56px; }
+.stage.tiny { width: 36px; height: 36px; }
+.render .lbl { color: var(--muted); }
+
+.tabs { display: flex; flex-direction: column; gap: 6px; }
+.tabstrip {
+  border-radius: 8px 8px 0 0;
+  padding: 6px 8px 0;
+  display: flex;
+}
+.tabstrip.light { background: #DEE1E6; }
+.tabstrip.dark { background: #202124; }
+.tab {
+  display: flex; align-items: center; gap: 7px;
+  border-radius: 8px 8px 0 0;
+  padding: 5px 12px 6px 10px;
+  max-width: 230px;
+  min-width: 0;
+}
+.tabstrip.light .tab { background: #fff; }
+.tabstrip.dark .tab { background: #35363A; }
+.tab svg { flex: 0 0 auto; }
+.tab .t {
+  font-size: 11px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.tabstrip.light .tab .t { color: #3c4043; }
+.tabstrip.dark .tab .t { color: #E8EAED; }
+
+.lockup {
+  display: flex; align-items: center; gap: 9px;
+  border-top: 1px dashed var(--border);
+  padding-top: 12px;
+}
+.lockup .wm { font-weight: 800; font-size: 1.0625rem; letter-spacing: 0.02em; }
+
+.verdict {
+  margin-top: 72px;
+  border: 2px solid var(--ink);
+  border-radius: 14px;
+  padding: 24px;
+}
+.verdict h2 { margin: 0 0 12px; font-size: 1.25rem; font-weight: 800; }
+.verdict p { max-width: 75ch; margin: 0 0 10px; }
+.verdict ul { margin: 0 0 10px; padding-left: 20px; max-width: 75ch; }
+.verdict li { margin-bottom: 6px; }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+
+<!-- 01 ink-u -->
+<symbol id="m01" viewBox="0 0 64 64">
+  <path d="M19 8 V34 a13 13 0 0 0 26 0 V8" fill="none" stroke="#17181C" stroke-width="14"/>
+</symbol>
+
+<!-- 02 u-marked -->
+<symbol id="m02" viewBox="0 0 64 64">
+  <rect x="-2" y="28" width="68" height="20" fill="#FFE24B" transform="rotate(-7 32 38)"/>
+  <path d="M19 8 V34 a13 13 0 0 0 26 0 V8" fill="none" stroke="#17181C" stroke-width="14"/>
+</symbol>
+
+<!-- 03 yellow-tile -->
+<symbol id="m03" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#FFE24B"/>
+  <path d="M21 13 V34 a11 11 0 0 0 22 0 V13" fill="none" stroke="#17181C" stroke-width="12"/>
+</symbol>
+
+<!-- 04 ugmi-stack -->
+<symbol id="m04" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#17181C"/>
+  <text x="32" y="30" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="800" font-size="24" letter-spacing="1" fill="#fff">UG</text>
+  <text x="32" y="54" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="800" font-size="24" letter-spacing="1" fill="#fff">MI</text>
+</symbol>
+
+<!-- 05 blue-u -->
+<symbol id="m05" viewBox="0 0 64 64">
+  <path d="M19 6 V30 a13 13 0 0 0 26 0 V6" fill="none" stroke="#1F4FFF" stroke-width="14"/>
+  <rect x="14" y="53" width="36" height="8" rx="4" fill="#FFE24B"/>
+</symbol>
+
+<!-- 06 check -->
+<symbol id="m06" viewBox="0 0 64 64">
+  <rect x="7" y="7" width="50" height="50" rx="12" fill="#FFE24B"/>
+  <path d="M20 33 l9 10 l16 -20" fill="none" stroke="#17181C" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+</symbol>
+
+<!-- 07 one-tab -->
+<symbol id="m07" viewBox="0 0 64 64">
+  <path d="M8 56 V26 q0 -12 12 -12 h24 q12 0 12 12 v30 z" fill="#FFE24B" stroke="#17181C" stroke-width="5" stroke-linejoin="round"/>
+  <circle cx="22" cy="28" r="4.5" fill="#17181C"/>
+  <rect x="31" y="24.5" width="16" height="7" rx="3.5" fill="#17181C"/>
+</symbol>
+
+<!-- 08 list-pick -->
+<symbol id="m08" viewBox="0 0 64 64">
+  <rect x="9" y="12" width="46" height="8" rx="4" fill="#17181C"/>
+  <rect x="4" y="24" width="56" height="16" rx="4" fill="#FFE24B"/>
+  <rect x="9" y="28" width="46" height="8" rx="4" fill="#17181C"/>
+  <rect x="9" y="44" width="34" height="8" rx="4" fill="#17181C"/>
+</symbol>
+
+<!-- 09 u-cursor -->
+<symbol id="m09" viewBox="0 0 64 64">
+  <text x="7" y="50" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="700" font-size="48" fill="#17181C">u</text>
+  <rect x="38" y="14" width="13" height="38" fill="#FFE24B"/>
+</symbol>
+
+<!-- 10 up-u -->
+<symbol id="m10" viewBox="0 0 64 64">
+  <path d="M17 15 V35 a13 13 0 0 0 26 0 V15" fill="none" stroke="#17181C" stroke-width="13"/>
+  <path d="M31 17 L43 3 L55 17 Z" fill="#17181C"/>
+</symbol>
+
+<!-- 11 deadline-dot -->
+<symbol id="m11" viewBox="0 0 64 64">
+  <rect x="9" y="13" width="46" height="42" rx="8" fill="#fff" stroke="#17181C" stroke-width="5"/>
+  <path d="M9 26 h46" stroke="#17181C" stroke-width="5"/>
+  <rect x="18" y="6" width="6" height="12" rx="3" fill="#17181C"/>
+  <rect x="40" y="6" width="6" height="12" rx="3" fill="#17181C"/>
+  <circle cx="40" cy="42" r="8" fill="#FFE24B" stroke="#17181C" stroke-width="3"/>
+</symbol>
+
+<!-- 12 dm-u -->
+<symbol id="m12" viewBox="0 0 64 64">
+  <rect x="8" y="8" width="48" height="38" rx="13" fill="#17181C"/>
+  <path d="M17 44 v14 l14 -12 z" fill="#17181C"/>
+  <text x="32" y="37" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="800" font-size="27" fill="#FFE24B">u</text>
+</symbol>
+
+<!-- 13 ten-badge -->
+<symbol id="m13" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#FFE24B"/>
+  <text x="32" y="44" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="800" font-size="34" fill="#17181C">10</text>
+</symbol>
+
+<!-- 14 swipe -->
+<symbol id="m14" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#17181C"/>
+  <path d="M15 46 L49 18" stroke="#FFE24B" stroke-width="17" stroke-linecap="square"/>
+</symbol>
+
+<!-- 15 smile-u -->
+<symbol id="m15" viewBox="0 0 64 64">
+  <circle cx="32" cy="32" r="28" fill="#FFE24B"/>
+  <path d="M17 30 v4 a15 15 0 0 0 30 0 v-4" fill="none" stroke="#17181C" stroke-width="9"/>
+  <circle cx="21.5" cy="19" r="4.5" fill="#17181C"/>
+  <circle cx="42.5" cy="19" r="4.5" fill="#17181C"/>
+</symbol>
+
+<!-- 16 marker-blob -->
+<symbol id="m16" viewBox="0 0 64 64">
+  <path d="M10 22 C7 10 16 6 26 8 C36 5 46 6 54 10 C60 14 58 24 56 32 C59 42 58 52 48 55 C38 60 24 59 15 54 C6 50 6 40 9 32 C6 28 8 26 10 22 Z" fill="#FFE24B"/>
+  <path d="M21 15 V34 a11 11 0 0 0 22 0 V15" fill="none" stroke="#17181C" stroke-width="12"/>
+</symbol>
+
+<!-- 17 u-leaf -->
+<symbol id="m17" viewBox="0 0 64 64">
+  <path d="M19 17 V38 a13 13 0 0 0 26 0 V17" fill="none" stroke="#17181C" stroke-width="14"/>
+  <g transform="translate(49 8)" fill="#E0332C">
+    <path d="M0 -8 L1.8 -4.2 L6 -6 L4.6 -1.4 L9 1.4 L4.6 2.8 L5.6 7 L1.4 4.6 L0 6.5 L-1.4 4.6 L-5.6 7 L-4.6 2.8 L-9 1.4 L-4.6 -1.4 L-6 -6 L-1.8 -4.2 Z"/>
+    <path d="M-1 5.5 L1 5.5 L0.8 11 L-0.8 11 Z"/>
+  </g>
+</symbol>
+
+<!-- 18 plane -->
+<symbol id="m18" viewBox="0 0 64 64">
+  <path d="M4 52 l16 -8" stroke="#FFE24B" stroke-width="8" stroke-linecap="round"/>
+  <path d="M6 36 L58 10 L36 54 L28 38 Z" fill="#fff" stroke="#17181C" stroke-width="4.5" stroke-linejoin="round"/>
+  <path d="M28 38 L58 10" stroke="#17181C" stroke-width="4.5"/>
+</symbol>
+
+<!-- 19 progress -->
+<symbol id="m19" viewBox="0 0 64 64">
+  <rect x="5" y="23" width="54" height="18" rx="9" fill="none" stroke="#17181C" stroke-width="5"/>
+  <rect x="10" y="28" width="37" height="8" rx="4" fill="#FFE24B"/>
+</symbol>
+
+<!-- 20 pixel-u -->
+<symbol id="m20" viewBox="0 0 64 64">
+  <rect x="8" y="8" width="11" height="11" rx="2.5" fill="#17181C"/>
+  <rect x="8" y="22" width="11" height="11" rx="2.5" fill="#17181C"/>
+  <rect x="8" y="36" width="11" height="11" rx="2.5" fill="#17181C"/>
+  <rect x="8" y="50" width="11" height="11" rx="2.5" fill="#17181C"/>
+  <rect x="22" y="50" width="11" height="11" rx="2.5" fill="#17181C"/>
+  <rect x="36" y="50" width="11" height="11" rx="2.5" fill="#17181C"/>
+  <rect x="50" y="50" width="11" height="11" rx="2.5" fill="#17181C"/>
+  <rect x="50" y="36" width="11" height="11" rx="2.5" fill="#17181C"/>
+  <rect x="50" y="22" width="11" height="11" rx="2.5" fill="#17181C"/>
+  <rect x="50" y="8" width="11" height="11" rx="2.5" fill="#FFE24B"/>
+</symbol>
+
+</defs>
+</svg>
+
+<main>
+<header>
+  <p class="mono">brand-marks · 2026-08-06 · favicon + logo, 20 concepts</p>
+  <h1>UGMI — <span class="mark-wash">mark &amp; favicon</span> gallery</h1>
+  <p>One mark that works as both the site logo and the 16px favicon. Every concept is
+  shown at logo size, at 32px and at a true 16px, then dropped into a light and a dark
+  browser tab — the two places a favicon actually lives. Checkered stage = transparent
+  background, so you can see which marks vanish on a dark tab.</p>
+  <p>All concepts speak the existing site language: ink, the yellow highlighter wash,
+  bold-800 type, the mono scraper voice. Ordered safe → wild.</p>
+  <div class="chips mono">
+    <span class="chip"><i class="sw" style="background:#17181C"></i> ink</span>
+    <span class="chip"><i class="sw" style="background:#FFE24B"></i> marker</span>
+    <span class="chip"><i class="sw" style="background:#1F4FFF"></i> ink-blue</span>
+    <span class="chip"><i class="sw" style="background:#fff"></i> paper</span>
+  </div>
+</header>
+
+<h2 class="group">Safe — the letterform, played straight</h2>
+<p class="group-note">Low-variance monograms. Boring is a virtue at 16px; the question
+is only which surface treatment survives a dark tab.</p>
+<div class="grid" id="g-safe"></div>
+
+<h2 class="group">Medium — the product as the mark</h2>
+<p class="group-note">Concepts drawn from what UGMI actually does: the checklist, the
+one tab that replaces forty, the curated pick, the scraper, the deadline, the DM.</p>
+<div class="grid" id="g-mid"></div>
+
+<h2 class="group">Wild — the attitude as the mark</h2>
+<p class="group-note">Higher-variance swings on the "u gon make it" energy. Some break
+a rule on purpose (noted in the caption). These are logo-first; judge the 16px render
+skeptically.</p>
+<div class="grid" id="g-wild"></div>
+
+<section class="verdict">
+  <h2>Recommendation</h2>
+  <p><strong>Ship #03 (yellow-tile) as the favicon and #02 (u-marked) as the logo.</strong>
+  They are the same U geometry in two dressings, so they read as one identity: the tile
+  survives 16px and dark tabs because it carries its own background, and the swiped U is
+  literally the site's <span class="mark-wash">.mark</span> highlighter move promoted to a
+  logo — nothing new is invented.</p>
+  <ul>
+    <li><strong>Runner-up, more ownable:</strong> #14 (swipe) — the only abstract mark here;
+    distinctive in a tab strip full of letters, but it gives up the "U".</li>
+    <li><strong>Runner-up, more voice:</strong> #09 (u-cursor) — the scraper's mono voice;
+    strongest with the r/csMajors crowd, weakest with everyone else.</li>
+    <li><strong>Avoid:</strong> #04 and #13 at favicon size (text mush / reads as a
+    notification badge); #17 breaks the two-hue palette for the leaf.</li>
+  </ul>
+  <p class="mono" style="color:var(--muted)">shipping: inline SVG favicon (all evergreen
+  browsers) + 32px .ico fallback + 180px apple-touch-icon PNG on white. tile marks need
+  no background added; transparent marks must gain a paper tile before shipping.</p>
+</section>
+</main>
+
+<script>
+const MARKS = [
+  { id:'m01', n:'01', name:'ink-u', dial:2, group:'safe',
+    cap:'The control. Geometric slab U, ink on nothing. Honest baseline — and the checkered stage shows why transparent ink dies on a dark tab.' },
+  { id:'m02', n:'02', name:'u-marked', dial:3, group:'safe',
+    cap:'The site’s own highlighter wash swiped behind the U. The .mark CSS trick promoted to a logo. Recommended logo.' },
+  { id:'m03', n:'03', name:'yellow-tile', dial:3, group:'safe',
+    cap:'Ink U on a marker-yellow tile. Carries its own background, so it is the same mark on light and dark tabs. Recommended favicon.' },
+  { id:'m04', n:'04', name:'ugmi-stack', dial:4, group:'safe',
+    cap:'Full name, stacked 2×2 on an ink tile. Fine as an avatar at 64px+; turns to mush at 16px — the tab render proves it.' },
+  { id:'m05', n:'05', name:'blue-u', dial:4, group:'safe',
+    cap:'U in ink-blue over a yellow base bar — the two brand hues in their site roles (blue = link, yellow = highlight).' },
+  { id:'m06', n:'06', name:'check', dial:5, group:'mid',
+    cap:'The UGMI 10 checklist reduced to one checked box. Instantly legible at 16px, but generic — every todo app owns this shape.' },
+  { id:'m07', n:'07', name:'one-tab', dial:6, group:'mid',
+    cap:'“Built by one Waterloo student who got tired of 40 tabs.” The one tab that replaces them — a browser tab as the favicon inside a browser tab.' },
+  { id:'m08', n:'08', name:'list-pick', dial:5, group:'mid',
+    cap:'Three list rows, one highlighted: the searchable list plus the curated pick in a single glyph. The whole business model in 10 rectangles.' },
+  { id:'m09', n:'09', name:'u-cursor', dial:6, group:'mid',
+    cap:'Mono lowercase u + block cursor: the scraper’s voice. Speaks directly to the cs-major audience; cursor doubles as a yellow accent.' },
+  { id:'m10', n:'10', name:'up-u', dial:6, group:'mid',
+    cap:'The U’s right stem leaves through the top. “u gon make it” as pure geometry, no words needed.' },
+  { id:'m11', n:'11', name:'deadline-dot', dial:5, group:'mid',
+    cap:'Calendar with one marked day — “don’t let me miss a deadline,” the product’s built-in urgency. Busiest mark here; strained at 16px.' },
+  { id:'m12', n:'12', name:'dm-u', dial:6, group:'mid',
+    cap:'A DM bubble saying “u”. The funnel is literally reel → comment → DM, and “u” is how the audience types it.' },
+  { id:'m13', n:'13', name:'ten-badge', dial:7, group:'mid',
+    cap:'“10” on marker yellow — the UGMI 10, the paid product as the brand. Risk: at 16px it reads as an unread-count badge.' },
+  { id:'m14', n:'14', name:'swipe', dial:7, group:'mid',
+    cap:'No letter at all: one highlighter stroke on ink. The most ownable shape in the set — nobody else’s tab looks like this.' },
+  { id:'m15', n:'15', name:'smile-u', dial:8, group:'wild',
+    cap:'The U is the smile. WAGMI optimism made literal; friendly to the point of sticker-ability. Risk: reads “generic smiley” before “U”.' },
+  { id:'m16', n:'16', name:'marker-blob', dial:8, group:'wild',
+    cap:'Hand-scrubbed highlighter blob behind the U — #02’s energy but louder and rougher, like the marker lingered.' },
+  { id:'m17', n:'17', name:'u-leaf', dial:8, group:'wild',
+    cap:'U with a maple-leaf tittle: the Canadian sources are the moat, so say so. Rule break: adds a third hue (leaf red) to a two-hue palette.' },
+  { id:'m18', n:'18', name:'plane', dial:8, group:'wild',
+    cap:'Paper plane with a highlighter contrail — the application, sent. Warmer than a rocket, but any send-button owns this shape too.' },
+  { id:'m19', n:'19', name:'progress', dial:9, group:'wild',
+    cap:'A progress bar at ~85%. “Almost there / u gon make it” as UI furniture. Deadpan joke; near-abstract at 16px.' },
+  { id:'m20', n:'20', name:'pixel-u', dial:9, group:'wild',
+    cap:'U assembled from scraped cells, one cell still highlighted — the database angle. Ten rectangles, survives 16px unusually well for a wild one.' },
+];
+
+const TAB_TITLE = 'UGMI: Every internship we can find…';
+
+function svgUse(id, px) {
+  return `<svg width="${px}" height="${px}" viewBox="0 0 64 64" role="img" aria-label=""><use href="#${id}"/></svg>`;
+}
+function dial(v) {
+  let s = '';
+  for (let i = 1; i <= 10; i++) s += `<i class="${i <= v ? 'on' : ''}"></i>`;
+  return `<span class="dial" title="creativity ${v}/10">${s}</span>`;
+}
+function card(m) {
+  return `<article class="card">
+    <div class="card-head">
+      <span class="name">${m.name} <span class="num mono">#${m.n}</span></span>
+      ${dial(m.dial)}
+    </div>
+    <p class="caption">${m.cap}</p>
+    <div class="renders">
+      <div class="render"><div class="stage big">${svgUse(m.id, 96)}</div><span class="lbl mono">logo</span></div>
+      <div class="render"><div class="stage mid">${svgUse(m.id, 32)}</div><span class="lbl mono">32</span></div>
+      <div class="render"><div class="stage tiny">${svgUse(m.id, 16)}</div><span class="lbl mono">16</span></div>
+    </div>
+    <div class="tabs">
+      <div class="tabstrip light"><div class="tab">${svgUse(m.id, 16)}<span class="t">${TAB_TITLE}</span></div></div>
+      <div class="tabstrip dark"><div class="tab">${svgUse(m.id, 16)}<span class="t">${TAB_TITLE}</span></div></div>
+    </div>
+    <div class="lockup">${svgUse(m.id, 26)}<span class="wm">UGMI</span></div>
+  </article>`;
+}
+
+for (const m of MARKS) {
+  document.getElementById('g-' + m.group).insertAdjacentHTML('beforeend', card(m));
+}
+</script>
+</body>
+</html>
