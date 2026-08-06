@@ -69,14 +69,18 @@ calm-plus-precision is what it cannot pattern-match to a scam. Corollary
 - **Betting/prediction-app stake mechanics** — cut at inventory stage,
   confirmed cut here.
 
-## What this map asks of the owner (walkthrough decision points)
+## Walkthrough decisions (owner, 2026-08-06)
 
-1. **Daily rebuild commitment** — the freshness family is conditional on it
-   (standing rule 2). Without it, adopt week-granularity labels instead.
-2. **"The UGMI 10" naming** — the count-as-brand move. Approve/rename.
-3. **Visual direction shift** — Family 3 (W1) implies moving the site toward
-   bone-background institutional calm; current system is "Light Marketplace".
-   This is a taste call: adopt, blend, or keep.
-4. **The 3-tap eligibility collapse** — the one real build (client-side JS +
-   localStorage on the static page). Prioritize or defer.
-5. **IG broadcast channel** — operational commitment (2-3 posts mid-week).
+1. **Daily rebuild** — mechanism explained (labels are build-time truths that
+   go stale without a rebuild); owner asked why. PENDING: confirm scheduled
+   daily task vs. week-granularity labels.
+2. **"The UGMI 10" naming** — rationale explained (bounded curation,
+   falsifiable process promise, count-as-brand like NeetCode 150). PENDING
+   explicit approval.
+3. **Visual direction** — DECIDED: owner dislikes current Light Marketplace;
+   switching. Five themed mockups commissioned to `theme-explorations/`
+   (institutional-calm, data-brutal, editorial-zine, tactile-consumer,
+   terminal-dark) for the taste pick, to be weighed against the research.
+4. **Build priority** — DECIDED: ship everything; make the site
+   commercial-ready (UI, UX, trust). Implementation follows the theme pick.
+5. **IG broadcast channel** — not yet addressed by owner.

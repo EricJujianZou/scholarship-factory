@@ -1,0 +1,665 @@
+<!-- INTERNAL DESIGN MOCKUP - sample listing data -->
+<!--
+  THEME: data-brutal (Swiss Industrial Print)
+  Production type intent:
+    Display  -> Neue Haas Grotesk Display (Black) or Archivo Black; a true heavy
+                condensed (e.g. Roboto Condensed 900 / Founders Grotesk X-Cond)
+                would be first choice. Approximated here with the system stack
+                'Arial Narrow' / Helvetica / Arial at weight 900, tight tracking.
+    Mono     -> JetBrains Mono or IBM Plex Mono. Approximated with
+                Cascadia Mono / Consolas / Menlo.
+  Zero external requests. All numbers in the mockup are sample/build-time style.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UGMI · Every internship we can find</title>
+<style>
+  :root{
+    --paper:#F4F4F0;
+    --ink:#050505;
+    --red:#E61919;
+    --mono:"Cascadia Mono",Consolas,Menlo,"Liberation Mono",monospace;
+    --disp:"Arial Narrow","Helvetica Neue Condensed","Helvetica Neue",Arial,sans-serif;
+    --sans:"Helvetica Neue",Helvetica,Arial,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;border-radius:0}
+  html{background:var(--paper)}
+  body{
+    background:var(--paper);color:var(--ink);
+    font-family:var(--sans);font-size:15px;line-height:1.55;
+    -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:1120px;margin:0 auto;padding-left:16px;padding-right:16px}
+  a{color:var(--ink)}
+  button{font:inherit;color:var(--ink);background:none;border:none;cursor:pointer}
+  :focus-visible{outline:2px dashed var(--ink);outline-offset:3px}
+  .mono{font-family:var(--mono)}
+
+  /* ---------- site header ---------- */
+  .site-head{border-bottom:3px solid var(--ink)}
+  .site-head .wrap{
+    display:flex;justify-content:space-between;align-items:baseline;
+    padding-top:12px;padding-bottom:12px;
+    font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  }
+  .site-head .brand{font-weight:700}
+
+  /* ---------- hero ---------- */
+  .hero{padding-top:44px;padding-bottom:8px}
+  .eyebrow{
+    font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;margin-bottom:18px;
+  }
+  h1{
+    font-family:var(--disp);font-weight:900;
+    font-size:clamp(1.4rem,5.2vw,5rem);
+    line-height:.98;letter-spacing:-.02em;
+  }
+  .sub{margin-top:16px;font-size:16px;max-width:44ch}
+  .bignum-row{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-top:28px}
+  .bignum{
+    font-family:var(--disp);font-weight:900;
+    font-size:clamp(4.25rem,19vw,11rem);
+    line-height:.9;letter-spacing:-.03em;
+    font-variant-numeric:tabular-nums;
+  }
+  .bignum-cap{
+    font-family:var(--mono);font-size:11px;letter-spacing:.1em;
+    text-transform:uppercase;line-height:1.6;padding-bottom:6px;
+  }
+  .also{
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;
+    text-transform:uppercase;margin-top:22px;color:rgba(5,5,5,.72);
+  }
+
+  /* ---------- pulse strip ---------- */
+  .pulse{
+    border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);
+    margin-top:26px;
+  }
+  .pulse .wrap{
+    padding-top:9px;padding-bottom:9px;
+    font-family:var(--mono);font-size:11px;letter-spacing:.06em;
+    text-transform:uppercase;line-height:1.7;
+  }
+
+  /* ---------- eligibility collapse ---------- */
+  .elig{padding-top:34px}
+  .elig .q{margin-bottom:14px}
+  .q-label{
+    display:block;font-family:var(--mono);font-size:11px;
+    letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px;
+  }
+  .pills{display:flex;flex-wrap:wrap;gap:8px}
+  .pill{
+    font-family:var(--mono);font-size:12px;letter-spacing:.06em;
+    text-transform:uppercase;
+    border:1px solid var(--ink);background:var(--paper);
+    min-height:44px;padding:10px 16px;
+  }
+  .pill[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+  .elig-status{margin-top:18px}
+  .result{
+    font-family:var(--mono);font-weight:700;font-size:16px;
+    font-variant-numeric:tabular-nums;letter-spacing:.02em;
+  }
+  .saved-note{
+    font-family:var(--mono);font-size:11px;letter-spacing:.05em;
+    text-transform:uppercase;margin-top:6px;color:rgba(5,5,5,.72);
+  }
+  .textbtn{
+    font-family:var(--mono);font-size:11px;letter-spacing:.08em;
+    text-transform:uppercase;text-decoration:underline;
+    min-height:44px;padding:8px 4px;
+  }
+  [hidden]{display:none !important}
+
+  /* ---------- table ---------- */
+  .tablewrap{margin-top:18px;margin-bottom:0}
+  .tbl{
+    display:grid;gap:1px;background:var(--ink);
+    border:1px solid var(--ink);
+  }
+  .row{background:var(--paper)}
+  .row--head{display:none}
+  .lr.hide{display:none}
+
+  /* mobile: stacked mono cards */
+  .lr{display:block;padding:11px 12px}
+  .c{font-family:var(--mono)}
+  .c-company{
+    display:block;font-size:10.5px;font-weight:700;
+    letter-spacing:.08em;text-transform:uppercase;
+  }
+  .c-role{
+    display:block;font-size:13px;font-weight:700;letter-spacing:.02em;
+    margin:3px 0 7px;
+  }
+  .c-loc,.c-pay,.c-closes,.c-added{
+    display:inline;font-size:10.5px;letter-spacing:.05em;
+    text-transform:uppercase;line-height:1.9;
+    font-variant-numeric:tabular-nums;
+  }
+  .c-loc::after,.c-pay::after,.c-closes::after{content:" · "}
+  .c-closes:not(.nodate):not(.isclosed)::before{content:"closes "}
+  .c-added::before{content:"added "}
+  .c-pay.np::before{content:"pay "}
+  .c-apply{display:block;margin-top:6px}
+  .c-apply a{
+    font-family:var(--mono);font-size:11px;font-weight:700;
+    letter-spacing:.08em;text-transform:uppercase;
+    display:inline-block;padding:6px 0;
+  }
+  .chip-new{
+    display:inline-block;background:var(--red);color:#fff;
+    font-family:var(--mono);font-size:9.5px;font-weight:700;
+    letter-spacing:.1em;text-transform:uppercase;
+    padding:2px 5px;margin-left:7px;vertical-align:1px;
+  }
+  .warn{color:var(--red);font-weight:700}
+  .lr.closed .c,.lr.closed .c *{color:rgba(5,5,5,.45)}
+  .lr.closed .chip-new{display:none}
+  .zero-row{background:var(--paper);padding:20px 12px;font-family:var(--mono);font-size:13px}
+  .zero-row .textbtn{margin-top:4px}
+
+  /* ---------- closings bridge ---------- */
+  .closings{padding-top:44px;padding-bottom:44px}
+  .closings .big{
+    font-family:var(--disp);font-weight:900;letter-spacing:-.015em;
+    font-size:clamp(1.5rem,5vw,2.9rem);line-height:1.02;
+    font-variant-numeric:tabular-nums;max-width:24ch;
+  }
+  .closings .bridge{margin-top:14px;max-width:52ch}
+
+  /* ---------- paid pitch (inverted band) ---------- */
+  .pitch{background:var(--ink);color:var(--paper)}
+  .pitch a,.pitch .c,.pitch button{color:var(--paper)}
+  .pitch :focus-visible{outline-color:var(--paper)}
+  .pitch .wrap{padding-top:52px;padding-bottom:56px}
+  .pitch h2{
+    font-family:var(--disp);font-weight:900;letter-spacing:-.02em;
+    font-size:clamp(2rem,7vw,4.25rem);line-height:.95;text-transform:uppercase;
+  }
+  .pitch .lede{
+    margin-top:16px;font-size:17px;max-width:44ch;
+  }
+  .pitch .detail{margin-top:12px;max-width:52ch;color:rgba(244,244,240,.85)}
+  .pick{
+    border:1px solid var(--paper);margin-top:28px;max-width:640px;
+  }
+  .pick-label{
+    font-family:var(--mono);font-size:10px;letter-spacing:.12em;
+    text-transform:uppercase;
+    border-bottom:1px solid var(--paper);padding:7px 12px;
+  }
+  .pick-body{padding:14px 12px;font-family:var(--mono);font-size:12.5px;line-height:1.7}
+  .pick-body .why{margin-top:8px;color:rgba(244,244,240,.8)}
+  .pitch .price-line{
+    margin-top:26px;font-family:var(--mono);font-size:13px;letter-spacing:.03em;
+  }
+  .pitch .goto{
+    display:inline-block;margin-top:14px;
+    font-family:var(--mono);font-size:12px;font-weight:700;
+    letter-spacing:.08em;text-transform:uppercase;
+    padding:12px 0;text-decoration:underline;
+  }
+
+  /* ---------- calm checkout: the quietest block ---------- */
+  .checkout{padding-top:96px;padding-bottom:104px}
+  .checkout .inner{max-width:560px;margin:0 auto}
+  .checkout h2{
+    font-family:var(--disp);font-weight:900;letter-spacing:-.015em;
+    font-size:clamp(1.4rem,4.5vw,2.1rem);line-height:1.05;
+  }
+  .offer{margin-top:18px;font-family:var(--mono);font-size:13px;line-height:1.9;letter-spacing:.02em}
+  .fees{margin-top:28px;border-top:1px solid var(--ink)}
+  .fees div{
+    display:flex;justify-content:space-between;gap:16px;
+    border-bottom:1px solid var(--ink);
+    padding:12px 0;font-size:14px;
+  }
+  .fees dt{font-weight:400}
+  .fees dd{font-family:var(--mono);font-size:13px;text-align:right}
+  .firewall{margin-top:26px;font-size:15px;max-width:46ch}
+  .handoff{margin-top:30px;font-family:var(--mono);font-size:12px;letter-spacing:.04em}
+  .buy{
+    display:block;width:100%;margin-top:12px;
+    background:var(--ink);color:var(--paper);
+    font-family:var(--disp);font-weight:900;font-size:19px;letter-spacing:.01em;
+    padding:18px 16px;text-align:center;min-height:56px;
+  }
+  .blemish{margin-top:16px;font-size:13.5px;color:rgba(5,5,5,.78);max-width:50ch}
+
+  /* ---------- about + footer ---------- */
+  .about{border-top:3px solid var(--ink);padding-top:40px;padding-bottom:12px}
+  .about p{max-width:52ch}
+  footer{padding-top:28px;padding-bottom:48px}
+  footer .wrap{
+    font-family:var(--mono);font-size:11px;letter-spacing:.06em;
+    text-transform:uppercase;line-height:2.1;
+  }
+
+  /* ---------- desktop ---------- */
+  @media (min-width:760px){
+    .wrap{padding-left:32px;padding-right:32px}
+    .row--head{display:grid}
+    .row--head,.lr{
+      display:grid;gap:1px;background:var(--ink);
+      grid-template-columns:1.05fr 1.7fr 1fr .62fr .8fr .5fr .55fr;
+      padding:0;
+    }
+    .lr>.c,.row--head>span{background:var(--paper);padding:9px 10px;display:block}
+    .row--head>span{
+      background:var(--ink);color:var(--paper);
+      font-family:var(--mono);font-size:10.5px;font-weight:700;
+      letter-spacing:.1em;text-transform:uppercase;padding:8px 10px;
+    }
+    .c-company{font-size:11.5px;margin:0}
+    .c-role{font-size:12.5px;margin:0;text-transform:none;letter-spacing:0}
+    .c-loc,.c-pay,.c-closes,.c-added{
+      display:block;font-size:12px;text-transform:none;letter-spacing:.04em;line-height:1.5;
+    }
+    .c-loc::after,.c-pay::after,.c-closes::after{content:""}
+    .c-closes:not(.nodate):not(.isclosed)::before{content:""}
+    .c-added::before{content:""}
+    .c-pay.np::before{content:""}
+    .c-apply{display:block;margin:0}
+    .c-apply a{padding:0}
+    .zero-row{padding:22px 16px}
+    .checkout .inner{max-width:620px}
+  }
+</style>
+</head>
+<body>
+
+<header class="site-head">
+  <div class="wrap">
+    <span class="brand">UGMI.CA</span>
+    <span>Index · rev 2026-08-06 · IG @sleppyeric</span>
+  </div>
+</header>
+
+<main>
+  <!-- 1 · HERO -->
+  <section class="hero wrap">
+    <p class="eyebrow">Free internship index · Canada-first</p>
+    <h1>Every internship we can find, in one searchable list.</h1>
+    <p class="sub">Free. No account, no email. The whole list is below this line.</p>
+    <div class="bignum-row">
+      <div class="bignum">1,427</div>
+      <div class="bignum-cap">open internship<br>listings · checked<br>every morning</div>
+    </div>
+    <p class="also">Also in the index: 11 fellowships · 7 scholarships · 3 competitions · 3 grants · 1 award</p>
+  </section>
+
+  <!-- pulse strip -->
+  <div class="pulse">
+    <div class="wrap">
+      Last checked Wed Aug 6, 7:04am ET · 1,427 open · 31 added this week · 23 closed this week · hand-checked, never invented
+    </div>
+  </div>
+
+  <!-- 2 · ELIGIBILITY COLLAPSE -->
+  <section class="elig wrap" aria-label="Eligibility filters">
+    <div class="q">
+      <span class="q-label" id="q-work">I can work in:</span>
+      <div class="pills" role="group" aria-labelledby="q-work">
+        <button class="pill" data-k="work" data-v="ca" aria-pressed="false">Canada</button>
+        <button class="pill" data-k="work" data-v="us" aria-pressed="false">US</button>
+        <button class="pill" data-k="work" data-v="both" aria-pressed="false">Both</button>
+      </div>
+    </div>
+    <div class="q">
+      <span class="q-label" id="q-term">Term:</span>
+      <div class="pills" role="group" aria-labelledby="q-term">
+        <button class="pill" data-k="term" data-v="s2027" aria-pressed="false">Summer 2027</button>
+        <button class="pill" data-k="term" data-v="f2026" aria-pressed="false">Fall 2026</button>
+        <button class="pill" data-k="term" data-v="w2027" aria-pressed="false">Winter 2027</button>
+        <button class="pill" data-k="term" data-v="any" aria-pressed="false">Any</button>
+      </div>
+    </div>
+    <div class="q">
+      <span class="q-label" id="q-loc">Location:</span>
+      <div class="pills" role="group" aria-labelledby="q-loc">
+        <button class="pill" data-k="loc" data-v="remote" aria-pressed="false">Remote ok</button>
+        <button class="pill" data-k="loc" data-v="toronto" aria-pressed="false">Toronto/GTA</button>
+        <button class="pill" data-k="loc" data-v="vancouver" aria-pressed="false">Vancouver</button>
+        <button class="pill" data-k="loc" data-v="any" aria-pressed="false">Anywhere</button>
+      </div>
+    </div>
+    <div class="elig-status">
+      <p class="result" id="result" aria-live="polite">1,427 open. Three taps shows what you're actually eligible for.</p>
+      <p class="saved-note" id="saved-note" hidden></p>
+      <button class="textbtn" id="reset" hidden>Reset filters</button>
+    </div>
+  </section>
+
+  <!-- 3 · THE TABLE -->
+  <section class="tablewrap wrap" aria-label="Internship listings, sample">
+    <div class="tbl" id="tbl">
+      <div class="row row--head" aria-hidden="true">
+        <span>Company</span><span>Role</span><span>Location</span><span>Pay</span><span>Closes</span><span>Added</span><span>Link</span>
+      </div>
+
+      <div class="row lr" data-country="ca" data-term="s2027" data-loc="toronto">
+        <span class="c c-company">Wealthsimple</span>
+        <span class="c c-role">Data Engineering Intern</span>
+        <span class="c c-loc">Toronto ON</span>
+        <span class="c c-pay">$36/hr</span>
+        <span class="c c-closes warn">in 2d</span>
+        <span class="c c-added">6d</span>
+        <span class="c c-apply"><a href="#" title="sample link">apply</a></span>
+      </div>
+
+      <div class="row lr" data-country="ca" data-term="s2027" data-loc="toronto">
+        <span class="c c-company">RBC Borealis</span>
+        <span class="c c-role">Machine Learning Intern<span class="chip-new">New</span></span>
+        <span class="c c-loc">Toronto ON</span>
+        <span class="c c-pay">$38/hr</span>
+        <span class="c c-closes warn">in 3d</span>
+        <span class="c c-added">1d</span>
+        <span class="c c-apply"><a href="#" title="sample link">apply</a></span>
+      </div>
+
+      <div class="row lr" data-country="ca" data-term="s2027" data-loc="remote">
+        <span class="c c-company">Shopify</span>
+        <span class="c c-role">Backend Developer Intern<span class="chip-new">New</span></span>
+        <span class="c c-loc">Remote, Canada</span>
+        <span class="c c-pay">$34/hr</span>
+        <span class="c c-closes warn">in 6d</span>
+        <span class="c c-added">today</span>
+        <span class="c c-apply"><a href="#" title="sample link">apply</a></span>
+      </div>
+
+      <div class="row lr" data-country="ca" data-term="s2027" data-loc="other">
+        <span class="c c-company">Google</span>
+        <span class="c c-role">STEP Intern</span>
+        <span class="c c-loc">Waterloo ON</span>
+        <span class="c c-pay np">not listed</span>
+        <span class="c c-closes">in 9d</span>
+        <span class="c c-added">1w</span>
+        <span class="c c-apply"><a href="#" title="sample link">apply</a></span>
+      </div>
+
+      <div class="row lr" data-country="ca" data-term="f2026" data-loc="vancouver">
+        <span class="c c-company">Telus Digital</span>
+        <span class="c c-role">Software Development Co-op</span>
+        <span class="c c-loc">Vancouver BC</span>
+        <span class="c c-pay">$29/hr</span>
+        <span class="c c-closes">in 11d</span>
+        <span class="c c-added">4d</span>
+        <span class="c c-apply"><a href="#" title="sample link">apply</a></span>
+      </div>
+
+      <div class="row lr" data-country="ca" data-term="w2027" data-loc="toronto">
+        <span class="c c-company">Cohere</span>
+        <span class="c c-role">Member of Technical Staff, Intern<span class="chip-new">New</span></span>
+        <span class="c c-loc">Toronto ON</span>
+        <span class="c c-pay">$45/hr</span>
+        <span class="c c-closes">Sep 12</span>
+        <span class="c c-added">2d</span>
+        <span class="c c-apply"><a href="#" title="sample link">apply</a></span>
+      </div>
+
+      <div class="row lr" data-country="ca" data-term="s2027" data-loc="vancouver">
+        <span class="c c-company">Amazon</span>
+        <span class="c c-role">SDE Intern</span>
+        <span class="c c-loc">Vancouver BC</span>
+        <span class="c c-pay">$42/hr</span>
+        <span class="c c-closes">Sep 19</span>
+        <span class="c c-added">1w</span>
+        <span class="c c-apply"><a href="#" title="sample link">apply</a></span>
+      </div>
+
+      <div class="row lr" data-country="us" data-term="s2027" data-loc="remote">
+        <span class="c c-company">Stripe</span>
+        <span class="c c-role">Software Engineer Intern</span>
+        <span class="c c-loc">Remote, US</span>
+        <span class="c c-pay np">not listed</span>
+        <span class="c c-closes">Sep 26</span>
+        <span class="c c-added">4d</span>
+        <span class="c c-apply"><a href="#" title="sample link">apply</a></span>
+      </div>
+
+      <div class="row lr" data-country="ca" data-term="w2027" data-loc="toronto">
+        <span class="c c-company">AMD</span>
+        <span class="c c-role">Silicon Design Intern</span>
+        <span class="c c-loc">Markham ON</span>
+        <span class="c c-pay">$33/hr</span>
+        <span class="c c-closes">Sep 30</span>
+        <span class="c c-added">1w</span>
+        <span class="c c-apply"><a href="#" title="sample link">apply</a></span>
+      </div>
+
+      <div class="row lr" data-country="ca" data-term="w2027" data-loc="other">
+        <span class="c c-company">Ubisoft</span>
+        <span class="c c-role">Gameplay Programmer Intern</span>
+        <span class="c c-loc">Montreal QC</span>
+        <span class="c c-pay">$26/hr</span>
+        <span class="c c-closes">Oct 1</span>
+        <span class="c c-added">5d</span>
+        <span class="c c-apply"><a href="#" title="sample link">apply</a></span>
+      </div>
+
+      <div class="row lr" data-country="us" data-term="s2027" data-loc="other">
+        <span class="c c-company">Jane Street</span>
+        <span class="c c-role">Software Engineer Intern</span>
+        <span class="c c-loc">New York NY</span>
+        <span class="c c-pay np">not listed</span>
+        <span class="c c-closes">Oct 15</span>
+        <span class="c c-added">2w+</span>
+        <span class="c c-apply"><a href="#" title="sample link">apply</a></span>
+      </div>
+
+      <div class="row lr" data-country="ca" data-term="f2026" data-loc="other">
+        <span class="c c-company">OpenText</span>
+        <span class="c c-role">Cloud Operations Co-op</span>
+        <span class="c c-loc">Waterloo ON</span>
+        <span class="c c-pay">$28/hr</span>
+        <span class="c c-closes nodate">no deadline listed</span>
+        <span class="c c-added">2w+</span>
+        <span class="c c-apply"><a href="#" title="sample link">apply</a></span>
+      </div>
+
+      <div class="row lr closed" data-country="ca" data-term="s2027" data-loc="toronto" data-closed="1">
+        <span class="c c-company">Ecobee</span>
+        <span class="c c-role">Firmware Intern</span>
+        <span class="c c-loc">Toronto ON</span>
+        <span class="c c-pay">$30/hr</span>
+        <span class="c c-closes isclosed">was Jul 30</span>
+        <span class="c c-added">2w+</span>
+        <span class="c c-apply">Closed</span>
+      </div>
+
+      <div class="row lr closed" data-country="ca" data-term="f2026" data-loc="vancouver" data-closed="1">
+        <span class="c c-company">BC Hydro</span>
+        <span class="c c-role">Engineering Co-op</span>
+        <span class="c c-loc">Vancouver BC</span>
+        <span class="c c-pay">$31/hr</span>
+        <span class="c c-closes isclosed">was Aug 1</span>
+        <span class="c c-added">2w+</span>
+        <span class="c c-apply">Closed</span>
+      </div>
+
+      <div class="zero-row" id="zero-row" hidden>
+        <p>0 of 1,427 match all three. Loosen one?</p>
+        <button class="textbtn" id="undo">Undo last answer</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · CLOSINGS LINE, BRIDGE TO PAID -->
+  <section class="closings wrap">
+    <p class="big">23 internships closed in the last 7 days.</p>
+    <p class="bridge">Deadlines pass whether you saw the posting or not. The weekly list exists so you hear about things before they join that number.</p>
+  </section>
+
+  <!-- 5a · THE UGMI 10 -->
+  <section class="pitch">
+    <div class="wrap">
+      <h2>The UGMI 10</h2>
+      <p class="lede">10 per week, each with a named contact. I read the 1,427 so you read 10.</p>
+      <p class="detail">Every Monday: 10 picks matched to your filters, each with a named contact and one line on why it made the cut. Onboarding is your resume plus 3 lines, work auth, term, location. First list within 48 hours.</p>
+      <div class="pick">
+        <p class="pick-label">Example pick, from a real weekly list</p>
+        <div class="pick-body">
+          <p>3. PitchBook · Toronto ON · $38/hr · closes Fri · DM Sarah Chen</p>
+          <p class="why">Why this one: they take first-years, posted 2d ago, and the recruiter replied to a student DM last month.</p>
+        </div>
+      </div>
+      <p class="price-line">$15/mo CAD. The full database above stays free either way.</p>
+      <a class="goto" href="#checkout">Get my first list</a>
+    </div>
+  </section>
+
+  <!-- 5b · CALM CHECKOUT -->
+  <section class="checkout wrap" id="checkout">
+    <div class="inner">
+      <h2>What $15 buys</h2>
+      <p class="offer">$15/mo CAD = 4 Monday lists · ~10 matches each · your filters applied · a named contact per pick</p>
+      <dl class="fees">
+        <div><dt>Monthly price</dt><dd>$15/mo CAD, that's everything</dd></div>
+        <div><dt>Sign-up fee</dt><dd>$0</dd></div>
+        <div><dt>Cancellation</dt><dd>anytime, from the Stripe receipt email. No DM needed.</dd></div>
+        <div><dt>Your card</dt><dd>handled by Stripe. We never see it.</dd></div>
+      </dl>
+      <p class="firewall">The full database stays free either way. $15 is for me doing your reading.</p>
+      <p class="handoff">You'll be taken to Stripe to pay.</p>
+      <button class="buy" type="button">Get my first list</button>
+      <p class="blemish">I'm one Waterloo student, not a company. Checkout runs on Stripe; your card details go to Stripe, never to me.</p>
+    </div>
+  </section>
+
+  <!-- 6 · ABOUT -->
+  <section class="about wrap">
+    <p>UGMI is one Waterloo student who got tired of 40 tabs. The index is rebuilt every morning; every count on this page is computed from that build, none are typed in.</p>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    Dead link? Wrong deadline? DM @sleppyeric. Fixed within a day.<br>
+    UGMI.CA · IG @sleppyeric · Payments by Stripe
+  </div>
+</footer>
+
+<script>
+(function(){
+  var TOTAL = 1427;
+  var rows = Array.prototype.slice.call(document.querySelectorAll('#tbl .lr'));
+  var OPEN_SAMPLE = rows.filter(function(r){ return !r.dataset.closed; }).length;
+  var pills = Array.prototype.slice.call(document.querySelectorAll('.pill'));
+  var resultEl = document.getElementById('result');
+  var savedNote = document.getElementById('saved-note');
+  var resetBtn = document.getElementById('reset');
+  var zeroRow = document.getElementById('zero-row');
+  var undoBtn = document.getElementById('undo');
+  var KEY = 'ugmi-filters';
+  var NOTE_KEY = 'ugmi-note-seen';
+
+  var state = { work: null, term: null, loc: null };
+  var history = [];
+
+  function fmt(n){
+    return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+  function touched(){
+    return !!(state.work || state.term || state.loc);
+  }
+  function matches(r){
+    if (state.work && state.work !== 'both' && r.dataset.country !== state.work) return false;
+    if (state.term && state.term !== 'any' && r.dataset.term !== state.term) return false;
+    if (state.loc && state.loc !== 'any' && r.dataset.loc !== state.loc) return false;
+    return true;
+  }
+  function persist(){
+    try {
+      if (touched()) localStorage.setItem(KEY, JSON.stringify({ state: state, history: history }));
+      else localStorage.removeItem(KEY);
+    } catch(e){}
+  }
+  function syncPills(){
+    pills.forEach(function(b){
+      var on = state[b.dataset.k] === b.dataset.v;
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  }
+  function update(fromRestore){
+    var openVisible = 0;
+    rows.forEach(function(r){
+      var m = matches(r);
+      r.classList.toggle('hide', !m);
+      if (m && !r.dataset.closed) openVisible++;
+    });
+    var isZero = touched() && openVisible === 0;
+    zeroRow.hidden = !isZero;
+    if (!touched()){
+      resultEl.textContent = fmt(TOTAL) + ' open. Three taps shows what you\'re actually eligible for.';
+    } else if (isZero){
+      resultEl.textContent = '0 of ' + fmt(TOTAL) + ' match all three. Loosen one?';
+    } else {
+      var scaled = Math.max(1, Math.round(TOTAL * openVisible / OPEN_SAMPLE));
+      resultEl.textContent = 'Showing ' + fmt(scaled) + ' of ' + fmt(TOTAL) + ' you\'re actually eligible for.';
+    }
+    resetBtn.hidden = !touched();
+    if (!fromRestore) savedNote.hidden = true;
+    syncPills();
+    persist();
+  }
+
+  pills.forEach(function(b){
+    b.addEventListener('click', function(){
+      var k = b.dataset.k, v = b.dataset.v;
+      history = history.filter(function(x){ return x !== k; });
+      if (state[k] === v){
+        state[k] = null;
+      } else {
+        state[k] = v;
+        history.push(k);
+      }
+      update(false);
+    });
+  });
+
+  undoBtn.addEventListener('click', function(){
+    var k = history.pop();
+    if (k) state[k] = null;
+    update(false);
+  });
+
+  resetBtn.addEventListener('click', function(){
+    state = { work: null, term: null, loc: null };
+    history = [];
+    try { localStorage.removeItem(KEY); } catch(e){}
+    update(false);
+  });
+
+  // restore saved filters (returning visitor)
+  (function(){
+    var saved = null;
+    try { saved = JSON.parse(localStorage.getItem(KEY)); } catch(e){}
+    if (saved && saved.state){
+      state.work = saved.state.work || null;
+      state.term = saved.state.term || null;
+      state.loc  = saved.state.loc  || null;
+      history = Array.isArray(saved.history) ? saved.history : [];
+      if (touched()){
+        var seen = false;
+        try { seen = !!localStorage.getItem(NOTE_KEY); localStorage.setItem(NOTE_KEY, '1'); } catch(e){}
+        savedNote.textContent = seen
+          ? 'Showing your saved filters.'
+          : 'Showing your saved filters. Saved in this browser only.';
+        savedNote.hidden = false;
+        update(true);
+        return;
+      }
+    }
+    update(false);
+  })();
+})();
+</script>
+</body>
+</html>

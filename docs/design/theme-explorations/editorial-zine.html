@@ -1,0 +1,681 @@
+<!-- INTERNAL DESIGN MOCKUP - sample listing data -->
+<!--
+  Theme: editorial-zine. Ink-and-paper broadsheet with one clay accent.
+  Intended production fonts (this file uses system stacks only):
+    display + body serif : DM Serif Display (heads) / Gelasio (body)
+    mono (tabular data)  : JetBrains Mono
+  System approximations: Iowan Old Style / Palatino / Georgia, ui-monospace.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UGMI · Every internship we can find, in one searchable list</title>
+<style>
+  :root{
+    --paper:      #F6EFE2;  /* warm cream ground, #F3E9D8-adjacent */
+    --paper-deep: #F3E9D8;  /* checkout field, example card */
+    --ink:        #111111;
+    --ink-soft:   #5A5348;  /* warm grey, AA on paper */
+    --rule:       #D9CCB4;  /* hairlines */
+    --clay:       #C56A3C;  /* decorative accent only */
+    --clay-deep:  #A0491F;  /* accent for text/links/buttons, AA on paper */
+    --warm:       #8A5A12;  /* desaturated amber for closing deadlines */
+    --closed:     #8B8272;  /* greyed closed rows, ~50% contrast on purpose */
+    --serif: "Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    --mono: ui-monospace,"Cascadia Mono",Consolas,"SF Mono",Menlo,monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  [hidden]{display:none !important}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--serif);
+    font-size:16px;
+    line-height:24px; /* 8pt baseline */
+  }
+  .wrap{max-width:800px;margin:0 auto;padding:0 20px}
+  a{color:var(--clay-deep)}
+  button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+  :focus-visible{outline:2px solid var(--clay-deep);outline-offset:2px}
+  b,strong{font-weight:700}
+  .num{font-family:var(--mono);font-size:.92em;font-weight:600;letter-spacing:-.01em}
+
+  /* ---------- masthead / hero ---------- */
+  .masthead{
+    display:flex;justify-content:space-between;align-items:baseline;
+    padding:16px 0 8px;
+  }
+  .mark{
+    font-family:var(--serif);font-weight:700;font-size:22px;line-height:24px;
+    letter-spacing:.04em;
+  }
+  .mh-right{font-family:var(--mono);font-size:12px;line-height:16px;color:var(--ink-soft)}
+  .mastrule{border:none;border-top:4px double var(--ink);margin:0 0 24px}
+  h1{
+    font-family:var(--serif);
+    font-size:clamp(24px,6.2vw,54px);
+    line-height:1.2;
+    letter-spacing:-.01em;
+    font-weight:700;
+    text-wrap:balance;
+    max-width:15em;
+  }
+  .standfirst{
+    margin-top:12px;
+    font-size:17px;line-height:24px;
+    color:var(--ink-soft);
+    font-style:italic;
+  }
+  .dateline{
+    margin-top:24px;
+    border-top:1px solid var(--rule);
+    border-bottom:1px solid var(--rule);
+    padding:8px 0;
+    font-size:13px;line-height:20px;
+    color:var(--ink-soft);
+  }
+  .dateline .num{color:var(--ink)}
+
+  /* ---------- sections ---------- */
+  section{border-top:1px solid var(--rule);padding:40px 0}
+  header.hero{padding-bottom:32px}
+  h2{
+    font-family:var(--serif);font-weight:700;
+    font-size:24px;line-height:32px;
+    letter-spacing:-.01em;
+    margin-bottom:16px;
+  }
+  .eyebrow{
+    display:block;
+    font-family:var(--mono);font-size:11px;line-height:16px;
+    font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--clay-deep);
+    margin-bottom:8px;
+  }
+
+  /* ---------- eligibility pills ---------- */
+  .q{margin-bottom:16px}
+  .qlabel{
+    display:block;font-size:14px;line-height:24px;color:var(--ink-soft);
+    font-style:italic;margin-bottom:4px;
+  }
+  .pills{display:flex;flex-wrap:wrap;gap:8px}
+  .pill{
+    min-height:44px;
+    padding:8px 18px;
+    border:1px solid var(--ink);
+    border-radius:999px;
+    font-family:var(--serif);font-size:15px;line-height:24px;
+    background:transparent;color:var(--ink);
+  }
+  .pill[aria-pressed="true"]{
+    background:var(--clay-deep);
+    border-color:var(--clay-deep);
+    color:#FBF6EA;
+  }
+  .eligline{
+    margin-top:24px;
+    font-size:19px;line-height:28px;
+  }
+  .eligline .num{font-size:.95em;font-weight:700}
+  .eligtools{margin-top:8px;font-size:13px;line-height:20px;color:var(--ink-soft)}
+  .linkbtn{
+    color:var(--clay-deep);text-decoration:underline;
+    min-height:44px;display:inline-flex;align-items:center;padding:0 4px;
+  }
+  .savednote{font-style:italic}
+
+  /* ---------- the index (listings) ---------- */
+  .alsoline{
+    font-family:var(--mono);font-size:12px;line-height:20px;
+    color:var(--ink-soft);margin:-8px 0 16px;
+  }
+  .rows{list-style:none}
+  .row{
+    display:grid;
+    grid-template-columns:1fr auto;
+    column-gap:12px;row-gap:2px;
+    padding:12px 0;
+    border-top:1px solid var(--rule);
+    align-items:start;
+  }
+  .rows > li:last-of-type{border-bottom:1px solid var(--rule)}
+  .name{grid-column:1;font-size:16px;line-height:24px}
+  .name b{font-weight:700}
+  .chip{
+    display:inline-block;vertical-align:2px;
+    margin-left:6px;padding:1px 6px;
+    background:var(--clay-deep);color:#FBF6EA;
+    font-family:var(--mono);font-size:10px;line-height:14px;
+    font-weight:700;letter-spacing:.1em;
+    border-radius:2px;
+  }
+  .meta{grid-column:1;font-size:13px;line-height:20px;color:var(--ink-soft)}
+  .meta > span{white-space:nowrap}
+  .meta > span:not(:first-child)::before{content:"· ";white-space:normal;color:var(--rule)}
+  .loc{font-style:italic}
+  .pay,.closes,.added{font-family:var(--mono);font-size:12.5px;letter-spacing:-.01em}
+  .closes.soon{color:var(--warm);font-weight:700}
+  .added{color:var(--ink-soft)}
+  .act{grid-column:2;grid-row:1 / span 2;align-self:center}
+  .apply{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:44px;padding:0 10px;
+    font-size:14px;
+  }
+  .closedlabel{
+    font-family:var(--mono);font-size:12.5px;color:var(--closed);
+    display:inline-flex;align-items:center;min-height:44px;padding:0 10px;
+  }
+  li.closed .name,li.closed .meta,li.closed .loc,li.closed .pay,
+  li.closed .closes,li.closed .added{color:var(--closed)}
+  li.closed .closes.soon{color:var(--closed);font-weight:400}
+  .row[hidden]{display:none}
+  .head{display:none}
+  .zero{
+    border-top:1px solid var(--rule);
+    padding:24px 0;
+    font-size:16px;line-height:24px;
+  }
+  .zero .linkbtn{font-size:15px}
+
+  /* desktop: classified columns */
+  @media (min-width:720px){
+    .row{
+      grid-template-columns:minmax(0,2.2fr) minmax(0,1.4fr) 6em 7em 5em 4em;
+      align-items:baseline;
+    }
+    .meta{display:contents}
+    .meta > span{white-space:normal}
+    .meta > span::before,.meta > span:not(:first-child)::before{content:none}
+    .name{grid-column:1}
+    .loc{grid-column:2;font-size:13.5px}
+    .pay{grid-column:3;text-align:right}
+    .closes{grid-column:4;text-align:right}
+    .added{grid-column:5;text-align:right}
+    .act{grid-column:6;grid-row:auto;justify-self:end;align-self:baseline}
+    .head{
+      display:grid;border-top:none;padding:4px 0;
+      font-family:var(--mono);font-size:10.5px;line-height:16px;
+      letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);
+    }
+    .head span{font-family:var(--mono);font-style:normal;font-size:10.5px;color:var(--ink-soft)}
+  }
+
+  /* ---------- paid pitch ---------- */
+  .closingsline{font-size:21px;line-height:28px;margin-bottom:16px}
+  .pitch p{max-width:38em;margin-bottom:16px}
+  .example{
+    margin:24px 0;
+    border:1px solid var(--rule);
+    background:var(--paper-deep);
+    padding:20px 20px 16px;
+    max-width:34em;
+  }
+  .example .exlabel{
+    font-family:var(--mono);font-size:11px;line-height:16px;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);
+    margin-bottom:12px;
+  }
+  .example .pickrow{font-size:16px;line-height:24px}
+  .example .why{font-style:italic;font-size:14px;line-height:20px;color:var(--ink-soft);margin-top:8px}
+  .pitchcta{font-size:16px}
+
+  /* ---------- calm checkout ---------- */
+  .checkout{padding:56px 0 64px}
+  .subcard{
+    max-width:520px;margin:0 auto;
+    background:var(--paper-deep);
+    border:1px solid var(--rule);
+    padding:40px 24px 32px;
+  }
+  .subcard h2{margin-bottom:8px}
+  .decomposed{font-size:15px;line-height:24px;color:var(--ink-soft);margin-bottom:32px}
+  .feegrid{margin-bottom:32px}
+  .feerow{
+    display:flex;align-items:baseline;gap:8px;
+    padding:8px 0;
+    font-size:14px;line-height:20px;
+  }
+  .feerow .lbl{white-space:nowrap}
+  .feerow .lead{flex:1;border-bottom:1px dotted var(--rule);min-width:16px}
+  .feerow .val{font-family:var(--mono);font-size:12.5px;text-align:right}
+  .firewall{font-size:15px;line-height:24px;margin-bottom:24px}
+  .onboard{font-size:14px;line-height:20px;color:var(--ink-soft);margin-bottom:32px}
+  .handoff{font-size:14px;line-height:20px;margin-bottom:16px}
+  .cta{
+    display:block;width:100%;
+    min-height:52px;
+    background:var(--clay-deep);
+    color:#FBF6EA;
+    font-family:var(--serif);font-size:17px;
+    border-radius:2px;
+    padding:12px 24px;
+  }
+  .cta:hover{background:#8B3E1A}
+  .blemish{
+    margin-top:24px;
+    font-size:13px;line-height:20px;color:var(--ink-soft);
+  }
+
+  /* ---------- about / footer ---------- */
+  .about p{max-width:38em;margin-bottom:16px}
+  footer{
+    border-top:4px double var(--ink);
+    padding:24px 0 64px;
+    font-size:13px;line-height:20px;color:var(--ink-soft);
+  }
+  footer p{margin-bottom:8px}
+  footer .fmark{font-family:var(--serif);font-weight:700;color:var(--ink);letter-spacing:.04em}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="masthead">
+      <span class="mark">UGMI</span>
+      <span class="mh-right">Waterloo, Ont. · ugmi.ca</span>
+    </div>
+    <hr class="mastrule">
+    <h1>Every internship we can find, in one searchable list.</h1>
+    <p class="standfirst">Free. No account, no email.</p>
+    <p class="dateline">
+      Last checked Wed Aug 6, 7:04am ET ·
+      <span class="num">1,427</span> open ·
+      <span class="num">31</span> added this week ·
+      <span class="num">23</span> closed this week ·
+      hand-checked, never invented
+    </p>
+  </header>
+
+  <section aria-label="Eligibility filters">
+    <h2>Three taps, only yours</h2>
+    <div class="q">
+      <span class="qlabel" id="q-work">I can work in:</span>
+      <div class="pills" role="group" aria-labelledby="q-work" data-q="work">
+        <button class="pill" data-v="ca" aria-pressed="false">Canada</button>
+        <button class="pill" data-v="us" aria-pressed="false">US</button>
+        <button class="pill" data-v="both" aria-pressed="false">both</button>
+      </div>
+    </div>
+    <div class="q">
+      <span class="qlabel" id="q-term">Term:</span>
+      <div class="pills" role="group" aria-labelledby="q-term" data-q="term">
+        <button class="pill" data-v="s27" aria-pressed="false">Summer 2027</button>
+        <button class="pill" data-v="f26" aria-pressed="false">Fall 2026</button>
+        <button class="pill" data-v="w27" aria-pressed="false">Winter 2027</button>
+        <button class="pill" data-v="any" aria-pressed="false">any</button>
+      </div>
+    </div>
+    <div class="q">
+      <span class="qlabel" id="q-loc">Location:</span>
+      <div class="pills" role="group" aria-labelledby="q-loc" data-q="loc">
+        <button class="pill" data-v="remote" aria-pressed="false">remote ok</button>
+        <button class="pill" data-v="gta" aria-pressed="false">Toronto/GTA</button>
+        <button class="pill" data-v="van" aria-pressed="false">Vancouver</button>
+        <button class="pill" data-v="any" aria-pressed="false">anywhere</button>
+      </div>
+    </div>
+    <p class="eligline" id="eligResult" aria-live="polite"></p>
+    <p class="eligtools">
+      <span class="savednote" id="savedNote" hidden>Your filters, saved in this browser only. </span><button class="linkbtn" id="resetBtn" hidden>Reset</button>
+    </p>
+  </section>
+
+  <section aria-label="The index">
+    <h2>The index</h2>
+    <p class="alsoline">Also indexed: 11 fellowships · 7 scholarships · 3 competitions · 3 grants · 1 award</p>
+
+    <div class="row head" aria-hidden="true">
+      <span class="name">Role</span>
+      <span class="loc">Where · term</span>
+      <span class="pay">Pay</span>
+      <span class="closes">Closes</span>
+      <span class="added">Added</span>
+      <span class="act"></span>
+    </div>
+
+    <ul class="rows" id="rows">
+      <li class="row" data-country="ca" data-term="s27" data-loc="gta" data-remote="0">
+        <div class="name"><b>Developer Intern, Amplify</b>, RBC<span class="chip">NEW</span></div>
+        <div class="meta">
+          <span class="loc">Toronto · Summer 2027</span>
+          <span class="pay">$31/hr</span>
+          <span class="closes soon">closes in 4d</span>
+          <span class="added">added 1d</span>
+        </div>
+        <div class="act"><a class="apply" href="#">Apply</a></div>
+      </li>
+      <li class="row" data-country="ca" data-term="w27" data-loc="van" data-remote="0">
+        <div class="name"><b>Bioinformatics Co-op</b>, BC Cancer</div>
+        <div class="meta">
+          <span class="loc">Vancouver · Winter 2027</span>
+          <span class="pay">$22/hr</span>
+          <span class="closes soon">closes in 6d</span>
+          <span class="added">added 5d</span>
+        </div>
+        <div class="act"><a class="apply" href="#">Apply</a></div>
+      </li>
+      <li class="row" data-country="ca" data-term="s27" data-loc="gta" data-remote="1">
+        <div class="name"><b>Backend Developer Intern</b>, Shopify<span class="chip">NEW</span></div>
+        <div class="meta">
+          <span class="loc">Toronto or remote · Summer 2027</span>
+          <span class="pay">$34/hr</span>
+          <span class="closes">closes in 9d</span>
+          <span class="added">added today</span>
+        </div>
+        <div class="act"><a class="apply" href="#">Apply</a></div>
+      </li>
+      <li class="row" data-country="us" data-term="s27" data-loc="other" data-remote="0">
+        <div class="name"><b>Software Engineer Intern</b>, Databricks</div>
+        <div class="meta">
+          <span class="loc">San Francisco · Summer 2027</span>
+          <span class="pay">US$52/hr</span>
+          <span class="closes">closes in 10d</span>
+          <span class="added">added 1w</span>
+        </div>
+        <div class="act"><a class="apply" href="#">Apply</a></div>
+      </li>
+      <li class="row" data-country="ca" data-term="w27" data-loc="other" data-remote="1">
+        <div class="name"><b>Product Design Intern</b>, Vidyard</div>
+        <div class="meta">
+          <span class="loc">Kitchener or remote · Winter 2027</span>
+          <span class="pay">$26/hr</span>
+          <span class="closes">closes in 11d</span>
+          <span class="added">added 6d</span>
+        </div>
+        <div class="act"><a class="apply" href="#">Apply</a></div>
+      </li>
+      <li class="row" data-country="ca" data-term="s27" data-loc="gta" data-remote="0">
+        <div class="name"><b>Software Engineer Intern</b>, Stripe<span class="chip">NEW</span></div>
+        <div class="meta">
+          <span class="loc">Toronto · Summer 2027</span>
+          <span class="pay">$45/hr</span>
+          <span class="closes">closes in 13d</span>
+          <span class="added">added 2d</span>
+        </div>
+        <div class="act"><a class="apply" href="#">Apply</a></div>
+      </li>
+      <li class="row" data-country="us" data-term="s27" data-loc="other" data-remote="0">
+        <div class="name"><b>Trading Desk Intern</b>, Jane Street</div>
+        <div class="meta">
+          <span class="loc">New York · Summer 2027</span>
+          <span class="pay">US$65/hr</span>
+          <span class="closes">Sep 12</span>
+          <span class="added">added 4d</span>
+        </div>
+        <div class="act"><a class="apply" href="#">Apply</a></div>
+      </li>
+      <li class="row" data-country="ca" data-term="w27" data-loc="gta" data-remote="1">
+        <div class="name"><b>Data Science Intern</b>, Wealthsimple</div>
+        <div class="meta">
+          <span class="loc">Toronto or remote · Winter 2027</span>
+          <span class="pay">not listed</span>
+          <span class="closes">Sep 18</span>
+          <span class="added">added 4d</span>
+        </div>
+        <div class="act"><a class="apply" href="#">Apply</a></div>
+      </li>
+      <li class="row" data-country="ca" data-term="w27" data-loc="gta" data-remote="0">
+        <div class="name"><b>Software Tools Intern</b>, AMD</div>
+        <div class="meta">
+          <span class="loc">Markham · Winter 2027</span>
+          <span class="pay">$29/hr</span>
+          <span class="closes">Sep 30</span>
+          <span class="added">added 1w</span>
+        </div>
+        <div class="act"><a class="apply" href="#">Apply</a></div>
+      </li>
+      <li class="row" data-country="ca" data-term="w27" data-loc="gta" data-remote="0">
+        <div class="name"><b>Gameplay Programmer Intern</b>, Ubisoft Toronto</div>
+        <div class="meta">
+          <span class="loc">Toronto · Winter 2027</span>
+          <span class="pay">$24/hr</span>
+          <span class="closes">Oct 2</span>
+          <span class="added">added 6d</span>
+        </div>
+        <div class="act"><a class="apply" href="#">Apply</a></div>
+      </li>
+      <li class="row" data-country="ca" data-term="s27" data-loc="other" data-remote="0">
+        <div class="name"><b>STEP Intern</b>, Google</div>
+        <div class="meta">
+          <span class="loc">Waterloo · Summer 2027</span>
+          <span class="pay">$47/hr</span>
+          <span class="closes">Oct 16</span>
+          <span class="added">added 1w</span>
+        </div>
+        <div class="act"><a class="apply" href="#">Apply</a></div>
+      </li>
+      <li class="row" data-country="ca" data-term="f26" data-loc="van" data-remote="0">
+        <div class="name"><b>Frontend Developer Co-op</b>, Hootsuite</div>
+        <div class="meta">
+          <span class="loc">Vancouver · Fall 2026</span>
+          <span class="pay">$27/hr</span>
+          <span class="closes">no deadline listed</span>
+          <span class="added">added 2w+</span>
+        </div>
+        <div class="act"><a class="apply" href="#">Apply</a></div>
+      </li>
+      <li class="row closed" data-country="us" data-term="s27" data-loc="other" data-remote="0">
+        <div class="name"><b>Firmware Engineering Intern</b>, Tesla</div>
+        <div class="meta">
+          <span class="loc">Palo Alto · Summer 2027</span>
+          <span class="pay">US$40/hr</span>
+          <span class="closes">closed Aug 3</span>
+          <span class="added">added 3w</span>
+        </div>
+        <div class="act"><span class="closedlabel">Closed</span></div>
+      </li>
+      <li class="row closed" data-country="ca" data-term="f26" data-loc="van" data-remote="0">
+        <div class="name"><b>Data Analyst Co-op</b>, Telus</div>
+        <div class="meta">
+          <span class="loc">Vancouver · Fall 2026</span>
+          <span class="pay">$25/hr</span>
+          <span class="closes">closed Aug 1</span>
+          <span class="added">added 3w</span>
+        </div>
+        <div class="act"><span class="closedlabel">Closed</span></div>
+      </li>
+    </ul>
+
+    <div class="zero" id="zeroState" hidden>
+      <p><span class="num">0</span> of <span class="num">1,427</span> match all three, loosen one?
+      <button class="linkbtn" id="undoBtn">Undo last answer</button></p>
+    </div>
+  </section>
+
+  <section class="pitch" aria-label="The UGMI 10">
+    <span class="eyebrow">The paid list</span>
+    <h2>The UGMI 10</h2>
+    <p class="closingsline"><span class="num">23</span> internships closed in the last 7 days.</p>
+    <p>The weekly list exists so you hear about things before they join that number.</p>
+    <p>Every Monday: 10 picks matched to your filters, each with a named contact and one line on why. I read the 1,427 so you read 10.</p>
+    <div class="example">
+      <p class="exlabel">Example pick, from a real week</p>
+      <p class="pickrow">☐ 3. <b>PitchBook</b>, Toronto · <span class="pay">$38/hr</span> · <span class="closes soon">closes Fri</span> · DM Sarah Chen</p>
+      <p class="why">Why this one: they take 1st-years, posted 2d ago, and the recruiter replied to a student DM last month.</p>
+    </div>
+    <p class="pitchcta">$15/mo CAD. <a href="#checkout">Get my first list</a></p>
+  </section>
+
+  <section class="checkout" id="checkout" aria-label="Subscribe">
+    <div class="subcard">
+      <h2>What $15 buys</h2>
+      <p class="decomposed">$15/mo CAD = 4 Monday lists · ~10 matches each · your filters applied · a named contact per pick</p>
+      <div class="feegrid">
+        <div class="feerow"><span class="lbl">Monthly</span><span class="lead"></span><span class="val">$15 CAD, that's everything</span></div>
+        <div class="feerow"><span class="lbl">Sign-up fee</span><span class="lead"></span><span class="val">$0</span></div>
+        <div class="feerow"><span class="lbl">Cancellation</span><span class="lead"></span><span class="val">anytime, from the Stripe receipt email, no DM needed</span></div>
+        <div class="feerow"><span class="lbl">Your card</span><span class="lead"></span><span class="val">handled by Stripe, we never see it</span></div>
+      </div>
+      <p class="firewall">The full database stays free either way. $15 is for me doing your reading.</p>
+      <p class="onboard">To start: your resume plus three lines (work auth, term, location). First list within 48 hours.</p>
+      <p class="handoff">You'll be taken to Stripe to pay.</p>
+      <button class="cta" type="button">Get my first list</button>
+      <p class="blemish">I'm one Waterloo student, not a company. Checkout runs on Stripe; your card details go to Stripe, never to me.</p>
+    </div>
+  </section>
+
+  <section class="about" aria-label="About">
+    <h2>Who makes this</h2>
+    <p>One Waterloo student who got tired of keeping 40 tabs open. The database is checked by hand every morning before it goes up; the numbers in the dateline are computed from the builds, not typed.</p>
+    <p>The list stays free, with no account and no email. The $15 tier pays for the reading, not the access.</p>
+  </section>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <p><span class="fmark">UGMI</span> · ugmi.ca · @sleppyeric on Instagram</p>
+    <p>Dead link? Wrong deadline? DM @sleppyeric, fixed within a day.</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  var TOTAL = 1427;
+  var STORE_KEY = "ugmi-zine-filters";
+  var rows = Array.prototype.slice.call(document.querySelectorAll("#rows > li"));
+  var openRows = rows.filter(function (r) { return !r.classList.contains("closed"); });
+  var SAMPLE_OPEN = openRows.length;
+
+  var state = { work: null, term: null, loc: null };
+  var order = [];   // question keys in the order they were answered
+
+  var resultEl = document.getElementById("eligResult");
+  var zeroEl = document.getElementById("zeroState");
+  var resetBtn = document.getElementById("resetBtn");
+  var undoBtn = document.getElementById("undoBtn");
+  var savedNote = document.getElementById("savedNote");
+
+  function fmt(n) {
+    return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+
+  function rowMatches(r) {
+    var d = r.dataset;
+    if (state.work === "ca" && d.country !== "ca") return false;
+    if (state.work === "us" && d.country !== "us") return false;
+    if (state.term && state.term !== "any" && d.term !== state.term) return false;
+    if (state.loc && state.loc !== "any") {
+      var remote = d.remote === "1";
+      if (state.loc === "remote" && !remote) return false;
+      if (state.loc === "gta" && !(d.loc === "gta" || remote)) return false;
+      if (state.loc === "van" && !(d.loc === "van" || remote)) return false;
+    }
+    return true;
+  }
+
+  function anyActive() {
+    return !!(state.work || state.term || state.loc);
+  }
+
+  function apply() {
+    var matchedOpen = 0;
+    rows.forEach(function (r) {
+      var ok = rowMatches(r);
+      r.hidden = !ok;
+      if (ok && !r.classList.contains("closed")) matchedOpen++;
+    });
+
+    if (!anyActive()) {
+      resultEl.innerHTML = '<span class="num">' + fmt(TOTAL) + "</span> open listings. Three taps to see only yours.";
+      zeroEl.hidden = true;
+      resetBtn.hidden = true;
+      return;
+    }
+
+    // Mockup: scale the sample proportion up to the live total.
+    var scaled = Math.round(TOTAL * matchedOpen / SAMPLE_OPEN);
+    if (matchedOpen === 0) {
+      resultEl.innerHTML = '<span class="num">0</span> of <span class="num">' + fmt(TOTAL) + "</span> match all three, loosen one?";
+      zeroEl.hidden = false;
+    } else {
+      resultEl.innerHTML = "Showing <span class=\"num\">" + fmt(scaled) + '</span> of <span class="num">' + fmt(TOTAL) + "</span> you're actually eligible for.";
+      zeroEl.hidden = true;
+    }
+    resetBtn.hidden = false;
+  }
+
+  function paint() {
+    document.querySelectorAll(".pills").forEach(function (group) {
+      var q = group.dataset.q;
+      group.querySelectorAll(".pill").forEach(function (btn) {
+        btn.setAttribute("aria-pressed", state[q] === btn.dataset.v ? "true" : "false");
+      });
+    });
+  }
+
+  function save() {
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify({ state: state, order: order }));
+    } catch (e) { /* private mode etc. */ }
+  }
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORE_KEY);
+      if (!raw) return false;
+      var data = JSON.parse(raw);
+      if (data && data.state) {
+        state.work = data.state.work || null;
+        state.term = data.state.term || null;
+        state.loc = data.state.loc || null;
+        order = Array.isArray(data.order) ? data.order : [];
+        return anyActive();
+      }
+    } catch (e) { /* ignore */ }
+    return false;
+  }
+
+  document.querySelectorAll(".pills").forEach(function (group) {
+    var q = group.dataset.q;
+    group.addEventListener("click", function (ev) {
+      var btn = ev.target.closest(".pill");
+      if (!btn) return;
+      var v = btn.dataset.v;
+      if (state[q] === v) {
+        state[q] = null;                       // tap again to clear, always reversible
+        order = order.filter(function (k) { return k !== q; });
+      } else {
+        state[q] = v;
+        order = order.filter(function (k) { return k !== q; });
+        order.push(q);
+      }
+      savedNote.hidden = true;
+      paint(); apply(); save();
+    });
+  });
+
+  resetBtn.addEventListener("click", function () {
+    state = { work: null, term: null, loc: null };
+    order = [];
+    savedNote.hidden = true;
+    try { localStorage.removeItem(STORE_KEY); } catch (e) { /* ignore */ }
+    paint(); apply();
+  });
+
+  undoBtn.addEventListener("click", function () {
+    var last = order.pop();
+    if (last) state[last] = null;
+    paint(); apply(); save();
+  });
+
+  // Mockup only: apply links go nowhere.
+  document.querySelectorAll(".apply").forEach(function (a) {
+    a.addEventListener("click", function (ev) { ev.preventDefault(); });
+  });
+
+  var restored = load();
+  if (restored) savedNote.hidden = false;
+  paint();
+  apply();
+})();
+</script>
+</body>
+</html>
