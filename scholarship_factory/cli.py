@@ -32,6 +32,7 @@ from .profile import ApplicantProfile, ProfileStore, load_profile_file, save_pro
 from .refresh import refresh_opportunity
 from .relevance import RelevanceStore, refresh_summary_if_due, score
 from .seeds import load_seeds
+from .site import build_site, load_site_config
 from .store import OpportunityStore
 from .traverse import TRAVERSE_PAGE_CAP
 
@@ -304,6 +305,14 @@ def _cmd_requirements(store: OpportunityStore, opp_id: str) -> int:
     return 0
 
 
+def _cmd_site(store: OpportunityStore, out_dir: str) -> int:
+    """Export the public static site: one self-contained index.html."""
+    index = build_site(store, out_dir, config=load_site_config())
+    print(f"wrote {index} ({index.stat().st_size // 1024} KB, {len(store.list())} rows)")
+    print("deploy: drag the folder into Netlify/Vercel, or serve it anywhere static")
+    return 0
+
+
 def _cmd_serve(db_path: str, host: str, port: int) -> int:
     import uvicorn
 
@@ -390,6 +399,10 @@ def main(argv: list[str] | None = None) -> int:
     p_serve = sub.add_parser("serve", parents=[common], help="run the dashboard API")
     p_serve.add_argument("--host", default="127.0.0.1")
     p_serve.add_argument("--port", type=int, default=8000)
+    p_site = sub.add_parser(
+        "site", parents=[common], help="export the public static site (ugmi.com)"
+    )
+    p_site.add_argument("--out", default="site", help="output directory (default: site)")
 
     args = parser.parse_args(argv)
     if args.command == "serve":
@@ -414,6 +427,8 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_context_list(store, args.kind)
     if args.command == "requirements":
         return _cmd_requirements(store, args.id)
+    if args.command == "site":
+        return _cmd_site(store, args.out)
     if args.command == "digest":
         return _cmd_digest(store, args.since, args.mark)
     if args.command == "refresh":

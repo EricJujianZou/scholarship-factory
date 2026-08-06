@@ -8,3 +8,6 @@ __pycache__/
 # personal data - never commit
 context.toml
 .env
+
+# generated static site
+site/
