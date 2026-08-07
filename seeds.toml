@@ -6,6 +6,8 @@
 # type = "simplify" -> a SimplifyJobs listings.json URL, parsed deterministically
 #                      (no LLM calls, ~1,500 live intern rows; deadline stays empty
 #                      because Simplify does not publish one)
+# type = "vansh"    -> a vanshb03 listings.json URL (Simplify-style schema subset),
+#                      parsed deterministically, no LLM calls
 # type = "instagram" / "x" -> accepted but skipped (auth wall, not yet supported)
 #
 # Every fetched page costs one LLM call, and a listing page can traverse up to
@@ -17,10 +19,19 @@
 #   scholartree.ca                                 -> robots.txt disallow
 #   reddit.com/r/*/new.json                        -> robots.txt disallow
 
+# Verified 2026-08-07: SimplifyJobs renamed Summer2026-Internships to
+# Summer2027-Internships (GitHub 301s the old name; both raw URLs serve the
+# byte-identical listings.json). One seed on the canonical name — a second
+# seed on the old URL would just fetch the same 10.9 MB file twice.
 [[seeds]]
 type = "simplify"
-value = "https://raw.githubusercontent.com/SimplifyJobs/Summer2026-Internships/dev/.github/scripts/listings.json"
+value = "https://raw.githubusercontent.com/SimplifyJobs/Summer2027-Internships/dev/.github/scripts/listings.json"
 label = "Simplify internships (community board, all terms)"
+
+[[seeds]]
+type = "vansh"
+value = "https://raw.githubusercontent.com/vanshb03/Summer2027-Internships/dev/.github/scripts/listings.json"
+label = "Vansh Summer 2027 internships (community board)"
 
 [[seeds]]
 type = "url"
