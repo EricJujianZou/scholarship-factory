@@ -187,6 +187,17 @@ Owner watched the implemented page and redirected. All shipped locally:
   the nav.
 - Still local-only, not deployed.
 
+## Round 5 — owner feedback (2026-08-07, later same day)
+
+- Price de-emphasized: $19.29/mo at 1.8rem regular weight (was 2.6rem
+  extra-bold); pilot's $200 unchanged.
+- Tile copy rewritten by owner: "A personalized list of same-day jobs /
+  Applying on the same day puts you ahead of most applicants" (replaces
+  the personalization-contrast caption from the original redesign),
+  "A recruiter contact", "Coffee chat & Referral Playbook / What to do
+  before, during, and after the coffee chat", coach line now inline
+  semibold Apple / NVIDIA (brand pills gone).
+
 ## Round 4 — owner feedback (2026-08-07, later same day)
 
 - **Direction 2 (free contact trial) shipped**, in email form rather than
