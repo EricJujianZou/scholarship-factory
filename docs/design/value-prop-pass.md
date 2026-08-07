@@ -186,3 +186,21 @@ Owner watched the implemented page and redirected. All shipped locally:
   this round); Stripe checkout note removed; buy-column wordmark matches
   the nav.
 - Still local-only, not deployed.
+
+## Round 4 — owner feedback (2026-08-07, later same day)
+
+- **Direction 2 (free contact trial) shipped**, in email form rather than
+  DM: "Free Recruiter Contact" nav link (rightmost) plus an expandable
+  card at the page bottom reading "Contact eric@ugmi.ca to get a free
+  recruiter contact for a role." No credit infra, manual fulfillment, as
+  designed. (The on-file recommendation was DM-first; owner chose email.)
+- **Template content rework is no longer a later task**: owner supplied
+  the new copy live. Card renamed "Free Outreach Template" (hint line
+  removed); body is now a coffee-chat ask ("ATTN: Student Trying to
+  Learn from You" / "curious about {specific thing in their role}" /
+  two proposed times), replacing the referral-ask email.
+- **Quote carousel is now an auto-rotating loop**: arrows (round 3)
+  removed same day; card set cloned once for a seamless wrap, one card
+  every 4.5s, stops on interaction, pauses off-screen, disabled under
+  reduced motion. Drag retained.
+- Still local-only, not deployed.
