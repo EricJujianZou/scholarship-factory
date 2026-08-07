@@ -81,6 +81,24 @@ hiring HK-side), Kelly (employer-side pain, fake candidates — content
 angle at best), Alexander's game feedback section (about the benchmark
 game, not hiring).
 
+## SHIPPED 2026-08-07 (ugmi.ca commit e5edc2a)
+
+Five-card carousel in the offer section's left column, under the
+what's-included tiles, heading "What recruiters and hiring managers told
+us:". Lineup and shipped bylines (owner-provided, no names):
+
+1. Six seconds — Project Manager and Senior Engineer, WSP (Fred)
+2. 20% of a thousand — Senior Recruiter, Dover and Lyft (Alina; swapped
+   in for Harry on credential strength)
+3. Apply, then email — Campus Recruiter, EQ Bank (Muqdas)
+4. Referrals — Head of Product, Input Club (Jacob; owner gave Input
+   Club, NOT the Broadcom byline)
+5. Don't spray and pray — Cofounder and CTO, Elio (Kamil)
+
+Alina's quote reshaped to drop the em dash. Scroll-snap + dots,
+auto-advance 6s only while visible, stops on interaction, reduced-motion
+honored.
+
 ## Placement recommendation (owner to decide)
 
 The clutter purge rule stands: max 3–4 quotes on the page, as a thin
