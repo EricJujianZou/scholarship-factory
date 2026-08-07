@@ -131,3 +131,37 @@ removal, price.**
     byte-identical so the copy button copies exactly what it did before.
 - Sources for the stats: pinpointhq.com (7x, 4.5M applications),
   zippia.com/advice/employee-referral-statistics (2% → 11%).
+
+## Round 2 — owner live-feedback pass (2026-08-07, same day)
+
+Owner watched the implemented page and redirected. All shipped locally:
+
+- **Quotes reversed course**: out of the offer section entirely (including
+  Elio from the buy column), into a purple-themed scrollable card strip
+  between the hero and the search bar. Drag-scrub like the chip row, no
+  wheel hijack (it sits in page flow).
+- **Offer top**: h2 is now "Stop mass applying, start landing
+  referral-based interviews"; the light-purple 7x component sits directly
+  under it and carries "We'll save you more than $20 of applying." on its
+  own line (replaces the "save you 10 hours" sub).
+- **"It's the playbook I used myself" beat removed** (the 3/3 proof story
+  is off the page for now). Coach + Apple/NVIDIA chips went back to the
+  resume-review tile.
+- **⚠ Attribution removed from the 7x stat by owner instruction.** This
+  leaves the stat unattributed on the page, in tension with standing
+  rule 5 / the claim-boundary note ("external stats always attributed").
+  Flagged to the owner at implementation time; rule stands for future
+  copy, owner override recorded here.
+- **Card typography**: exactly three sizes (1.1rem org / .9rem title /
+  .8rem everything incl. buttons); org name de-bolded to 600, title 400;
+  site header de-bolded (brand 600, nav 500).
+- **Metadata unified into plain pills** (white bg, ink text, weight 400,
+  no color coding): term, location, degrees, sponsorship (amber dropped),
+  salary, "closes in Xd", "added Xd ago". The green "added" chip, the
+  red closes-in tags, and the green salary pill are gone.
+- **Salary display**: `fmtPay()` in index.html keeps only the first
+  currency variant and renders bare $number + period ("$3,850/week",
+  "$6K-$8K/month"). Underlying data untouched.
+- **Deadline strings**: parseable `deadline` dates now render as the same
+  "closes in Xd" pill as `due`; unparseable ones ("11:59pm PT on July
+  26") fall back to "closes <text>".
