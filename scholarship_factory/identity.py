@@ -23,24 +23,26 @@ def normalize_text(value: str | None) -> str | None:
     return folded or None
 
 
-def find_duplicate(store: "OpportunityStore", opportunity: Opportunity) -> Opportunity | None:
-    normalized_url = normalize_apply_url(opportunity.apply_url)
-    normalized_title = normalize_text(opportunity.title)
-    normalized_org = normalize_text(opportunity.organization)
+def title_org_key(title: str | None, organization: str | None) -> str | None:
+    """Folded title+org identity key, or None when either half is missing.
 
-    title_org_match = None
-    for row in store.list():
-        if normalize_apply_url(row.apply_url) == normalized_url:
-            return row
-        if (
-            title_org_match is None
-            and normalized_title is not None
-            and normalized_org is not None
-            and normalize_text(row.title) == normalized_title
-            and normalize_text(row.organization) == normalized_org
-        ):
-            title_org_match = row
-    return title_org_match
+    Stored in its own indexed column so `find_duplicate` is two index lookups
+    instead of a scan of the whole table per insert."""
+    folded_title = normalize_text(title)
+    folded_org = normalize_text(organization)
+    if folded_title is None or folded_org is None:
+        return None
+    return f"{folded_title}\x1f{folded_org}"
+
+
+def find_duplicate(store: "OpportunityStore", opportunity: Opportunity) -> Opportunity | None:
+    url_match = store.find_by_normalized_url(normalize_apply_url(opportunity.apply_url))
+    if url_match is not None:
+        return url_match
+    key = title_org_key(opportunity.title, opportunity.organization)
+    if key is None:
+        return None
+    return store.find_by_title_org_key(key)
 
 
 def merge_into(existing: Opportunity, incoming: Opportunity) -> Opportunity:

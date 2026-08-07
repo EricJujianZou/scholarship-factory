@@ -1,7 +1,7 @@
 import sqlite3
 from datetime import datetime, timezone
 
-from .identity import find_duplicate, merge_into
+from .identity import find_duplicate, merge_into, title_org_key
 from .models import Opportunity, Provenance
 from .urls import normalize_apply_url
 
@@ -29,6 +29,7 @@ _COLUMNS = [
     "first_seen",
     "last_seen",
     "normalized_apply_url",
+    "title_org_key",
 ]
 
 
@@ -65,15 +66,38 @@ class OpportunityStore:
                 status TEXT NOT NULL,
                 first_seen TEXT NOT NULL,
                 last_seen TEXT NOT NULL,
-                normalized_apply_url TEXT NOT NULL
+                normalized_apply_url TEXT NOT NULL,
+                title_org_key TEXT
             )
             """
         )
+        self._migrate_title_org_key()
         self._conn.execute(
             "CREATE UNIQUE INDEX IF NOT EXISTS idx_opportunities_normalized_apply_url "
             "ON opportunities(normalized_apply_url)"
         )
+        self._conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_opportunities_title_org_key "
+            "ON opportunities(title_org_key)"
+        )
         self._conn.commit()
+
+    def _migrate_title_org_key(self) -> None:
+        """Databases created before the dedup index carry no title_org_key
+        column: add it and backfill from the rows' title/organization."""
+        columns = {
+            row[1] for row in self._conn.execute("PRAGMA table_info(opportunities)")
+        }
+        if "title_org_key" in columns:
+            return
+        self._conn.execute("ALTER TABLE opportunities ADD COLUMN title_org_key TEXT")
+        rows = self._conn.execute(
+            "SELECT id, title, organization FROM opportunities"
+        ).fetchall()
+        self._conn.executemany(
+            "UPDATE opportunities SET title_org_key = ? WHERE id = ?",
+            [(title_org_key(r["title"], r["organization"]), r["id"]) for r in rows],
+        )
 
     def insert(self, opp: Opportunity) -> Opportunity:
         existing = find_duplicate(self, opp)
@@ -86,6 +110,7 @@ class OpportunityStore:
         row["first_seen"] = now
         row["last_seen"] = now
         row["normalized_apply_url"] = normalized
+        row["title_org_key"] = title_org_key(opp.title, opp.organization)
         row["deadline_provenance"] = Provenance(row["deadline_provenance"]).value
         row["reward_provenance"] = Provenance(row["reward_provenance"]).value
         row["cost_provenance"] = Provenance(row["cost_provenance"]).value
@@ -112,6 +137,23 @@ class OpportunityStore:
         row = cur.fetchone()
         return self._row_to_opp(row) if row else None
 
+    def find_by_normalized_url(self, normalized_url: str) -> Opportunity | None:
+        cur = self._conn.execute(
+            "SELECT * FROM opportunities WHERE normalized_apply_url = ?",
+            (normalized_url,),
+        )
+        row = cur.fetchone()
+        return self._row_to_opp(row) if row else None
+
+    def find_by_title_org_key(self, key: str) -> Opportunity | None:
+        cur = self._conn.execute(
+            "SELECT * FROM opportunities WHERE title_org_key = ? "
+            "ORDER BY first_seen LIMIT 1",
+            (key,),
+        )
+        row = cur.fetchone()
+        return self._row_to_opp(row) if row else None
+
     def list(self) -> list[Opportunity]:
         cur = self._conn.execute("SELECT * FROM opportunities ORDER BY first_seen")
         return [self._row_to_opp(row) for row in cur.fetchall()]
@@ -122,6 +164,7 @@ class OpportunityStore:
         row = opp.model_dump()
         row["last_seen"] = now
         row["normalized_apply_url"] = normalized
+        row["title_org_key"] = title_org_key(opp.title, opp.organization)
         row["deadline_provenance"] = Provenance(row["deadline_provenance"]).value
         row["reward_provenance"] = Provenance(row["reward_provenance"]).value
         row["cost_provenance"] = Provenance(row["cost_provenance"]).value
@@ -145,4 +188,5 @@ class OpportunityStore:
     def _row_to_opp(self, row: sqlite3.Row) -> Opportunity:
         data = dict(row)
         data.pop("normalized_apply_url", None)
+        data.pop("title_org_key", None)
         return Opportunity(**data)
