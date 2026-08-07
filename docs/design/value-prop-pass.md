@@ -165,3 +165,24 @@ Owner watched the implemented page and redirected. All shipped locally:
 - **Deadline strings**: parseable `deadline` dates now render as the same
   "closes in Xd" pill as `due`; unparseable ones ("11:59pm PT on July
   26") fall back to "closes <text>".
+
+## Round 3 — owner feedback (2026-08-07, later same day)
+
+- Quote strip: label is "Mass applying won't work. Referrals will.";
+  left/right arrow buttons rotate one card at a time (drag kept); quote
+  text weight 400, attributions italic.
+- CTA system converged on "Referral"/recruiter-contact language: search
+  chip renamed Personalize → "✦ Referral"; per-card button restyled to
+  the same purple gradient as the chip; Apply button light green; feed
+  offer card is "✦ referral / Get your recruiter's contact every week /
+  Increase your chances of an interview by 7x, and save yourself hours";
+  feed CTA and checkout CTA both "Get your Recruiter's Contact"
+  (replaces "Invest in Your Next Internship").
+- Offer: sparkle icon removed, h2 de-bolded to 600; stat copy now "…than
+  applicants who mass apply" + "We'll save you more than $20 of hours
+  applying."; "Nobody is reading the pile" beat removed; tiles heading is
+  now **"What we guarantee"** (owner call; note the tension with the
+  removed "we won't promise a recruiter replies" line, which was also cut
+  this round); Stripe checkout note removed; buy-column wordmark matches
+  the nav.
+- Still local-only, not deployed.
