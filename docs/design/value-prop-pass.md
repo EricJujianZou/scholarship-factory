@@ -101,6 +101,33 @@ removal, price.**
 
 ## Status
 
-- Mockup not started; owner has not said go yet.
+- **Implemented 2026-08-07** directly in `ugmi.ca/index.html` (local commit
+  only, NOT pushed — push = deploy; owner said "stay local for now"). No
+  separate mockup file: the owner's go came with the implement instruction,
+  so the local working copy is the review artifact.
+- Placement calls made in the build:
+  - All five quotes landed inline, so no leftover strip was needed: WSP +
+    Dover/Lyft under the pain claim, EQ Bank + Input Club under the
+    mechanism claim, and Elio's "Don't spray and pray" moved into the buy
+    column directly above the price, touching the CTA (symptom 5).
+  - The carousel and its JS/CSS are deleted.
+  - Referral pill (direction 1) shipped as "✦ Referral" — the ✦ is the
+    page's existing paid-feature glyph (Personalize chip), teal kept.
+    aria-label says "part of the paid plan."
+  - The odds message (direction 3) shipped in its safe form only: "7x more
+    likely to be hired," cited "Pinpoint, analysis of 4.5 million
+    applications."
+  - Free contact trial (direction 2) NOT shipped — count and positioning
+    still the owner's call.
+  - Proof beat is first person and now names the owner ("I'm Eric. I went
+    3 for 3 on return offers…"), which also serves the real-person trust
+    signal; the Apple/NVIDIA coach line sits in the same beat, so the
+    resume-review tile caption no longer repeats the brandchips.
+  - Refund moved above the checkout button; one line added beyond the doc:
+    "Checkout happens on Stripe. We never see your card." (Baymard:
+    security reassurance belongs adjacent to the payment action.)
+  - Free template restyled: body font on white, bold subject line,
+    `{placeholders}` highlighted as accent chips. Text content is
+    byte-identical so the copy button copies exactly what it did before.
 - Sources for the stats: pinpointhq.com (7x, 4.5M applications),
   zippia.com/advice/employee-referral-statistics (2% → 11%).
