@@ -208,6 +208,30 @@ def test_greenhouse_api_fills_pay_and_stated_deadline(tmp_path):
     assert "application_deadline" in fresh.deadline_source
 
 
+def test_zero_salaries_are_placeholders_not_pay(tmp_path):
+    # seen live on amd.com: JSON-LD baseSalary of 0 USD; Lever/Greenhouse
+    # zero ranges mean the same "not stated"
+    zero_jsonld = JOBPOSTING_HTML.replace(
+        '"minValue": 34, "maxValue": 41', '"minValue": 0, "maxValue": 0'
+    )
+    url = "https://careers.acme.example/job/zero"
+    store, [opp] = _store(tmp_path, _intern(url))
+    enrich_store(store, fetch_fn=CountingFetch({url: zero_jsonld}))
+    fresh = store.get(opp.id)
+    assert fresh.reward is None
+    assert fresh.reward_provenance == Provenance.NONE
+
+    lever = ats_ref("https://jobs.lever.co/waabi/aaaa/apply")
+    zero_range = json.dumps({"salaryRange": {"min": 0, "max": 0, "currency": "USD"}})
+    assert ats_facts(lever, zero_range).pay is None
+
+    gh = ats_ref("https://boards.greenhouse.io/x/jobs/1")
+    zero_cents = json.dumps(
+        {"pay_input_ranges": [{"min_cents": 0, "max_cents": 0, "currency_type": "USD"}]}
+    )
+    assert ats_facts(gh, zero_cents).pay is None
+
+
 # --- honesty: empty pages stay empty ----------------------------------------
 
 def test_page_with_nothing_leaves_row_null_and_valid(tmp_path):

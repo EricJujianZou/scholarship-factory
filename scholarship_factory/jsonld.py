@@ -136,6 +136,9 @@ def _format_number(value: Any) -> str | None:
     if isinstance(value, bool):
         return None
     if isinstance(value, (int, float)):
+        # a zero salary is a placeholder, not a stated wage
+        if float(value) == 0:
+            return None
         return f"{int(value):,}" if float(value).is_integer() else f"{value:,}"
     if isinstance(value, str) and value.strip():
         return value.strip()

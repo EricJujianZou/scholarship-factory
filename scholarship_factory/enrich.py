@@ -131,10 +131,11 @@ def _lever_facts(data: dict) -> AtsFacts:
         isinstance(salary_range, dict)
         and isinstance(salary_range.get("min"), (int, float))
         and isinstance(salary_range.get("max"), (int, float))
+        and salary_range["max"] > 0  # an all-zero range is a placeholder
     ):
         low, high = salary_range["min"], salary_range["max"]
         text = (
-            _fmt_amount(low) if low == high
+            _fmt_amount(high) if low == high or low <= 0
             else f"{_fmt_amount(low)}–{_fmt_amount(high)}"
         )
         currency = salary_range.get("currency")
@@ -204,6 +205,8 @@ def _greenhouse_facts(data: dict) -> AtsFacts:
             continue
         low, high = entry.get("min_cents"), entry.get("max_cents")
         if not isinstance(low, (int, float)) or not isinstance(high, (int, float)):
+            continue
+        if high <= 0:  # an all-zero range is a placeholder, not stated pay
             continue
         text = (
             f"${low / 100:,.2f}" if low == high
