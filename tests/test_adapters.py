@@ -55,6 +55,15 @@ def test_simplify_seed_passes_through():
     assert targets[0].seed_type == SeedType.SIMPLIFY
 
 
+def test_vansh_seed_passes_through():
+    url = "https://raw.githubusercontent.com/vanshb03/Summer2027-Internships/dev/.github/scripts/listings.json"
+    seed = Seed(type="vansh", value=url)
+    targets = targets_for(seed)
+    assert len(targets) == 1
+    assert targets[0].url == url
+    assert targets[0].seed_type == SeedType.VANSH
+
+
 @pytest.mark.parametrize("seed_type", ["instagram", "x"])
 def test_auth_walled_seeds_are_skipped(seed_type):
     seed = Seed(type=seed_type, value="somehandle")

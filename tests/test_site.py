@@ -2,6 +2,7 @@ from scholarship_factory.logos import OrgLogoStore
 from scholarship_factory.models import Opportunity, Provenance
 from scholarship_factory.site import (
     KNOWN_TYPES,
+    _source_name,
     build_site,
     load_site_config,
     splice_site_data,
@@ -30,6 +31,16 @@ def _store_with(tmp_path, *opps):
 def _opp(title, apply_url="https://example.com/a", **kwargs):
     kwargs.setdefault("source_url", "https://example.com")
     return Opportunity(title=title, apply_url=apply_url, **kwargs)
+
+
+def test_source_name_distinguishes_github_boards():
+    assert _source_name(
+        "https://raw.githubusercontent.com/SimplifyJobs/Summer2027-Internships/dev/.github/scripts/listings.json"
+    ) == "Simplify (github.com/SimplifyJobs)"
+    assert _source_name(
+        "https://raw.githubusercontent.com/vanshb03/Summer2027-Internships/dev/.github/scripts/listings.json"
+    ) == "Vansh (github.com/vanshb03)"
+    assert _source_name("https://www.example.com/page") == "example.com"
 
 
 def test_build_embeds_rows_and_is_self_contained(tmp_path):

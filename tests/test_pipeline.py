@@ -486,6 +486,59 @@ def test_simplify_seed_bypasses_extract_and_stores_deterministically(tmp_path):
     assert stored.type == "internship"
 
 
+def test_vansh_seed_bypasses_extract_and_stores_deterministically(tmp_path):
+    """A vansh target must never spend an LLM call or a traversal."""
+    store = OpportunityStore(str(tmp_path / "t.db"))
+    url = "https://raw.githubusercontent.com/vanshb03/x/dev/.github/scripts/listings.json"
+    body = """[
+        {"title": "SWE Intern", "url": "https://example.com/j/1",
+         "company_name": "Example Corp", "season": "Summer",
+         "locations": ["Toronto, ON"],
+         "active": true, "is_visible": true, "sponsorship": "Other"},
+        {"title": "Closed Intern", "url": "https://example.com/j/2",
+         "active": false, "is_visible": true}
+    ]"""
+    fetch_fn = FakeFetch({url: ok_result(url, body=body)})
+    jsonld_fn = RecordingJsonld({})
+    extract_fn = RecordingExtract({})
+
+    report = run_sourcing(
+        [Seed(type=SeedType.VANSH, value=url)],
+        store,
+        fetch_fn=fetch_fn,
+        extract_fn=extract_fn,
+        jsonld_fn=jsonld_fn,
+    )
+
+    assert extract_fn.calls == []
+    assert jsonld_fn.calls == []
+    assert report.opportunities_stored == 1
+    [stored] = store.list()
+    assert stored.title == "SWE Intern"
+    assert stored.organization == "Example Corp"
+    assert stored.type == "internship"
+    assert stored.description == "Term: Summer. Location: Toronto, ON"
+
+
+def test_vansh_parse_failure_is_recorded_not_raised(tmp_path):
+    store = OpportunityStore(str(tmp_path / "t.db"))
+    url = "https://raw.githubusercontent.com/vanshb03/x/dev/.github/scripts/listings.json"
+    fetch_fn = FakeFetch({url: ok_result(url, body="<html>not json</html>")})
+
+    report = run_sourcing(
+        [Seed(type=SeedType.VANSH, value=url)],
+        store,
+        extract_fn=RecordingExtract({}),
+        jsonld_fn=RecordingJsonld({}),
+        fetch_fn=fetch_fn,
+    )
+
+    [outcome] = report.outcomes
+    assert not outcome.ok
+    assert "vansh parse failed" in outcome.error
+    assert store.list() == []
+
+
 def test_simplify_parse_failure_is_recorded_not_raised(tmp_path):
     store = OpportunityStore(str(tmp_path / "t.db"))
     url = "https://raw.githubusercontent.com/SimplifyJobs/x/dev/.github/scripts/listings.json"

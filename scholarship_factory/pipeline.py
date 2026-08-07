@@ -10,7 +10,7 @@ from urllib.parse import urljoin
 
 from pydantic import BaseModel, computed_field
 
-from .adapters import SkippedSeed, targets_for_seeds
+from .adapters import FetchTarget, SkippedSeed, targets_for_seeds
 from .extract import ExtractionResult, PageKind, extract
 from .fetch import FetchResult, fetch_url
 from .identity import merge_into
@@ -20,6 +20,7 @@ from .paginate import DEFAULT_MAX_PAGES, next_page_url
 from .seeds import Seed, SeedType
 from .simplify import parse_simplify
 from .store import OpportunityStore
+from .vansh import parse_vansh
 from .traverse import TRAVERSE_PAGE_CAP, TraverseReport, TraverseResult, traverse
 from .urls import normalize_apply_url
 
@@ -112,8 +113,8 @@ def run_sourcing(
     outcomes: list[TargetOutcome] = []
 
     for target in plan.targets:
-        if target.seed_type == SeedType.SIMPLIFY:
-            outcomes.append(_process_simplify(target.url, store, fetch_fn=fetch_fn))
+        if target.seed_type in _BOARD_PARSERS:
+            outcomes.append(_process_board(target, store, fetch_fn=fetch_fn))
             continue
         page_url: str | None = target.url
         for _ in range(max(1, max_pages)):
@@ -132,12 +133,22 @@ def run_sourcing(
     return SourcingReport(outcomes=outcomes, skipped=plan.skipped)
 
 
-def _process_simplify(
-    url: str, store: OpportunityStore, *, fetch_fn: FetchFn
+#: deterministic listings.json boards: seed type -> parser (name doubles as
+#: the error label in the outcome)
+_BOARD_PARSERS = {
+    SeedType.SIMPLIFY: ("simplify", parse_simplify),
+    SeedType.VANSH: ("vansh", parse_vansh),
+}
+
+
+def _process_board(
+    target: FetchTarget, store: OpportunityStore, *, fetch_fn: FetchFn
 ) -> TargetOutcome:
-    """One deterministic pass over a Simplify listings.json target: fetch,
-    parse, store. No JSON-LD, no LLM extract, no traversal, no pagination —
-    the file already is the whole listing."""
+    """One deterministic pass over a listings.json board target (Simplify,
+    vanshb03): fetch, parse, store. No JSON-LD, no LLM extract, no traversal,
+    no pagination — the file already is the whole listing."""
+    label, parse_fn = _BOARD_PARSERS[target.seed_type]
+    url = target.url
     result = fetch_fn(url)
     if not result.ok:
         return TargetOutcome(
@@ -145,13 +156,13 @@ def _process_simplify(
         )
 
     try:
-        opportunities = parse_simplify(result.body, result.final_url)
+        opportunities = parse_fn(result.body, result.final_url)
     except Exception as exc:
         return TargetOutcome(
             url=url,
             ok=False,
             status_code=result.status_code,
-            error=f"simplify parse failed: {type(exc).__name__}: {exc}",
+            error=f"{label} parse failed: {type(exc).__name__}: {exc}",
         )
 
     for opportunity in opportunities:

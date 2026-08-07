@@ -26,6 +26,7 @@ from .refresh import FieldChange, RefreshOutcome, RefreshStatus, refresh_opportu
 from .seeds import Seed, SeedType, load_seeds
 from .simplify import parse_simplify
 from .store import OpportunityStore
+from .vansh import parse_vansh
 from .traverse import TRAVERSE_PAGE_CAP, LinkOutcome, TraverseReport, TraverseResult, traverse
 from .urls import normalize_apply_url
 
@@ -58,6 +59,7 @@ __all__ = [
     "SeedType",
     "load_seeds",
     "parse_simplify",
+    "parse_vansh",
     "FetchTarget",
     "AdapterPlan",
     "SkipReason",

@@ -90,6 +90,9 @@ def _source_name(source_url: str) -> str:
     if host.startswith("www."):
         host = host[4:]
     if host == "raw.githubusercontent.com":
+        owner = urlparse(source_url).path.lstrip("/").split("/", 1)[0].lower()
+        if owner == "vanshb03":
+            return "Vansh (github.com/vanshb03)"
         return "Simplify (github.com/SimplifyJobs)"
     return host
 
