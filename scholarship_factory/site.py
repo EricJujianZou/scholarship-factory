@@ -162,10 +162,28 @@ def _row(opp, logos: dict[str, str] | None = None) -> dict | None:
     }
 
 
-def export_rows(store: OpportunityStore) -> list[dict]:
-    """The site's row dicts, newest first, with `due`/`soon` computed."""
+def export_rows(
+    store: OpportunityStore, *, config: dict | None = None
+) -> list[dict]:
+    """The site's row dicts, newest first, with `due`/`soon` computed.
+
+    Sources listed in the config's `retired_sources` are excluded: the owner
+    retired them from the public page (2026-08-06) but their rows stay in
+    the DB, so every export has to re-apply the exclusion.
+    """
+    if config is None:
+        config = load_site_config()
+    retired = tuple(config.get("retired_sources", []))
     logos = OrgLogoStore(store.db_path).all()
-    rows = [r for r in (_row(o, logos) for o in store.list()) if r is not None]
+    rows = [
+        r
+        for r in (
+            _row(o, logos)
+            for o in store.list()
+            if not any(h in o.source_url for h in retired)
+        )
+        if r is not None
+    ]
     rows.sort(key=lambda r: r["seen"], reverse=True)
     today = datetime.now(timezone.utc).date()
 

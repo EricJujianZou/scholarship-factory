@@ -8,3 +8,7 @@ stripe_url = "https://buy.stripe.com/5kQ6oGbB6bzS8gt0O21gs00"
 
 # email capture stays off until a form backend exists:
 # email_form_action = "https://..."
+
+# sources the owner retired from the public page (2026-08-06); their rows
+# stay in the DB but never reach an export or splice
+retired_sources = ["opportunitydesk.org", "opportunitiesforyouth.org"]

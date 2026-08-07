@@ -327,3 +327,23 @@ def test_dm_path_uses_the_message_deep_link(tmp_path):
     assert "https://ig.me/m/sleppyeric" in html
     # the suggested opener ships with the link, not as an exercise for the reader
     assert "I want the weekly list" in html
+
+
+def test_retired_sources_never_reach_an_export(tmp_path):
+    from scholarship_factory.site import export_rows
+
+    store = _store_with(
+        tmp_path,
+        _opp("SWE Intern", type="internship"),
+        _opp(
+            "Old Regional Award",
+            apply_url="https://example.org/award",
+            source_url="https://opportunitydesk.org/2026/08/05/x/",
+        ),
+    )
+
+    rows = export_rows(
+        store, config={"retired_sources": ["opportunitydesk.org"]}
+    )
+
+    assert [r["title"] for r in rows] == ["SWE Intern"]
