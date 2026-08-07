@@ -89,6 +89,35 @@ generates without refusing.
 
 ---
 
+## Task 3 — posted dates + card descriptions (enrich v2 + expandable cards)
+
+**Why:** watch-session feedback (Aug 7). Users expect "posted X days ago"
+and a card that expands into a real description. The page currently says
+"added Xd ago" (accurate: `seen` is when WE found the row) and the `desc`
+field is boilerplate ("Software internship. Term: X.") that would make an
+expanded card embarrassingly empty.
+
+**Build on GH-53's `sf enrich`** (built + closed 2026-08-07: JSON-LD
+JobPosting + Lever/Ashby/Greenhouse APIs + capped LLM fallback, with
+`sf splice <index.html>` rewriting only the live page's data line):
+
+- Extract a `posted` date: JSON-LD `datePosted`; ATS fallbacks: Lever
+  `createdAt`, Ashby `publishedDate`, Greenhouse `first_published`.
+  Never infer it; absent stays absent.
+- Extract a `summary`, capped ~300 chars, from the posting description
+  (JSON-LD `description` first, since the fetch already happens).
+- Page side: prefer "posted Xd ago" when `posted` exists, else keep
+  "added Xd ago"; add an expand affordance on the card showing summary +
+  full requirements text.
+- Watch page weight: the embedded JSON is ~600KB raw; the 300-char cap
+  exists so the gzipped delta stays under ~150KB.
+- Note: ~1,300 of 1,364 rows are still unattempted by enrich; growing
+  coverage = re-run `sf enrich` + `sf splice` + push.
+
+**Done when:** coverage percentages reported (posted/summary), card
+expand live on phone width, gzipped page delta measured and under the
+cap.
+
 ## Explicit non-goals (do not build these now)
 
 - Reddit tooling — playbook says none until a paying customer comes from Reddit.
