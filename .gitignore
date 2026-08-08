@@ -11,3 +11,6 @@ context.toml
 
 # generated static site
 site/
+
+# daily dispatcher logs and its run lock
+observability/daily/

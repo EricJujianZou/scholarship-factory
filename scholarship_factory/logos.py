@@ -6,8 +6,42 @@ Hotlinks only — no downloading or re-hosting in v1. Logos are never derived
 from favicon services keyed on the apply_url host: most apply_urls are ATS
 domains, which would stamp the ATS logo on every card.
 """
+import re
 import sqlite3
 from datetime import datetime, timezone
+
+#: `og:image` URL substrings that are known to be the *employer's* logo rather
+#: than the ATS's own chrome or a careers banner. Both were confirmed live
+#: (2026-08-08) on real apply pages: Greenhouse serves each board's uploaded
+#: logo under `/logos/`, Lever serves its clients' from a dedicated bucket.
+#: This is an allowlist on purpose — a bare `og:image` is usually a photo or a
+#: social card, and a wrong logo puts another company's brand on the card.
+_LOGO_URL_MARKERS = (
+    "lever-client-logos",
+    "greenhouse_job_boards/logos/",
+)
+
+_OG_IMAGE = re.compile(
+    r"""<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']"""
+    r"""|<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']""",
+    re.IGNORECASE,
+)
+
+
+def logo_from_page(raw_html: str) -> str | None:
+    """The employer logo an apply page displays, or None.
+
+    Deterministic and deliberately narrow: only `og:image` URLs matching a
+    known employer-logo location count. Everything else — the ATS favicon, a
+    careers hero image — is not a logo and is left absent.
+    """
+    for match in _OG_IMAGE.finditer(raw_html):
+        url = (match.group(1) or match.group(2) or "").strip()
+        if url.lower().startswith(("http://", "https://")) and any(
+            marker in url.lower() for marker in _LOGO_URL_MARKERS
+        ):
+            return url
+    return None
 
 
 def normalize_org(name: str | None) -> str | None:

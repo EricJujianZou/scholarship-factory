@@ -156,6 +156,48 @@ def test_jsonld_page_fills_pay_deadline_and_logo(tmp_path):
     assert report.filled("logo") == 1
 
 
+def test_page_og_image_fills_the_logo_when_there_is_no_jsonld(tmp_path):
+    url = "https://job-boards.greenhouse.io/mcghealth/jobs/8350486002"
+    api = "https://boards-api.greenhouse.io/v1/boards/mcghealth/jobs/8350486002?pay_transparency=true"
+    logo = (
+        "https://s2-recruiting.cdn.greenhouse.io/external_greenhouse_job_boards"
+        "/logos/400/621/800/original/MCG-Logo.png"
+    )
+    page = f'<html><head><meta property="og:image" content="{logo}"/></head></html>'
+    store, [opp] = _store(tmp_path, _intern(url, org="MCG Health"))
+    fetch = CountingFetch({api: "{}", url: page})
+
+    report = enrich_store(store, fetch_fn=fetch)
+
+    assert OrgLogoStore(store.db_path).get("MCG Health") == logo
+    assert report.fills["page"] == {"logo": 1}
+    # the page states no pay or deadline, and none was invented
+    assert store.get(opp.id).reward is None
+
+
+def test_one_page_logo_covers_the_org_so_siblings_are_not_fetched(tmp_path):
+    logo = "https://lever-client-logos.s3.amazonaws.com/palantir.png"
+    page = f'<html><head><meta property="og:image" content="{logo}"/></head></html>'
+    first = "https://jobs.lever.co/palantir/aaaa"
+    second = "https://jobs.lever.co/palantir/bbbb"
+    store, _ = _store(
+        tmp_path,
+        _intern(first, org="Palantir", reward="$50/hr", reward_provenance=Provenance.QUOTED,
+                reward_source="$50/hr", deadline="2026-10-01",
+                deadline_provenance=Provenance.QUOTED, deadline_source="2026-10-01"),
+        _intern(second, org="Palantir", reward="$50/hr", reward_provenance=Provenance.QUOTED,
+                reward_source="$50/hr", deadline="2026-10-01",
+                deadline_provenance=Provenance.QUOTED, deadline_source="2026-10-01"),
+    )
+    fetch = CountingFetch({first: page, second: page})
+
+    report = enrich_store(store, fetch_fn=fetch)
+
+    assert report.filled("logo") == 1
+    # the second row's only gap was its org's logo, which the first row closed
+    assert fetch.urls == [first]
+
+
 # --- stage: ATS endpoints ----------------------------------------------------
 
 def test_lever_api_fills_pay(tmp_path):

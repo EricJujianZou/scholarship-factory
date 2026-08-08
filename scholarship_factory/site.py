@@ -85,15 +85,21 @@ def load_site_config(path: str | Path = SITE_CONFIG_FILE) -> dict:
     return tomllib.loads(p.read_text(encoding="utf-8"))
 
 
+#: community boards served off raw.githubusercontent.com, by repo owner;
+#: anything else there is Simplify, whose repo name changes every season
+_GITHUB_BOARDS = {
+    "vanshb03": "Vansh (github.com/vanshb03)",
+    "zshah101": "zshah101 (github.com/zshah101)",
+}
+
+
 def _source_name(source_url: str) -> str:
     host = urlparse(source_url).netloc.lower()
     if host.startswith("www."):
         host = host[4:]
     if host == "raw.githubusercontent.com":
         owner = urlparse(source_url).path.lstrip("/").split("/", 1)[0].lower()
-        if owner == "vanshb03":
-            return "Vansh (github.com/vanshb03)"
-        return "Simplify (github.com/SimplifyJobs)"
+        return _GITHUB_BOARDS.get(owner, "Simplify (github.com/SimplifyJobs)")
     return host
 
 

@@ -8,6 +8,8 @@
 #                      because Simplify does not publish one)
 # type = "vansh"    -> a vanshb03 listings.json URL (Simplify-style schema subset),
 #                      parsed deterministically, no LLM calls
+# type = "zshah"    -> a zshah101 docs/api/jobs.json URL (crawler board; the only
+#                      one of the three that publishes pay), deterministic, no LLM
 # type = "instagram" / "x" -> accepted but skipped (auth wall, not yet supported)
 #
 # Every fetched page costs one LLM call, and a listing page can traverse up to
@@ -32,6 +34,17 @@ label = "Simplify internships (community board, all terms)"
 type = "vansh"
 value = "https://raw.githubusercontent.com/vanshb03/Summer2027-Internships/dev/.github/scripts/listings.json"
 label = "Vansh Summer 2027 internships (community board)"
+
+# Verified 2026-08-08: 161 open roles, 37 of them with a stated salary — the
+# only community board of the three that publishes pay. Its own GitHub Actions
+# re-crawl the underlying ATS boards through the day, so polling it daily is
+# what makes the store grow without us crawling those boards ourselves.
+# `docs/api/jobs.json` is the open roles; `data/jobs.json` is the closed archive
+# too — don't switch to it.
+[[seeds]]
+type = "zshah"
+value = "https://raw.githubusercontent.com/zshah101/Automated-List-Of-Summer-2027-and-Fall-2026-Tech-Internships/main/docs/api/jobs.json"
+label = "zshah101 automated internship crawler (Summer 2027 / Fall 2026)"
 
 [[seeds]]
 type = "url"

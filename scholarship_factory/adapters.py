@@ -46,7 +46,13 @@ def targets_for(seed: Seed) -> list[FetchTarget]:
     if not seed.enabled or seed.type in (SeedType.INSTAGRAM, SeedType.X):
         return []
 
-    if seed.type in (SeedType.URL, SeedType.DEVPOST, SeedType.SIMPLIFY, SeedType.VANSH):
+    if seed.type in (
+        SeedType.URL,
+        SeedType.DEVPOST,
+        SeedType.SIMPLIFY,
+        SeedType.VANSH,
+        SeedType.ZSHAH,
+    ):
         return [FetchTarget(url=seed.value, seed_type=seed.type, label=seed.label)]
 
     if seed.type == SeedType.REDDIT:

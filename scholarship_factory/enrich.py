@@ -13,7 +13,11 @@ ladder:
    (quoted, span = the JSON text), `validThrough` -> deadline (**derived** —
    a posting expiry is not a stated application deadline),
    `hiringOrganization.logo` -> org logo.
-3. **LLM page extract** (the GH-5 contract) only for rows the deterministic
+3. **The apply page's own `og:image`**, when it points at a known employer-logo
+   location (Greenhouse's `/logos/` uploads, Lever's client-logo bucket). Most
+   ATS pages publish no JSON-LD but do display the employer's logo; this reads
+   it off the body already fetched in stage 2, at no extra request.
+4. **LLM page extract** (the GH-5 contract) only for rows the deterministic
    stages left empty, hard-capped per run, skipped gracefully when no
    provider is configured.
 
@@ -37,7 +41,7 @@ from pydantic import BaseModel
 
 from .fetch import FetchResult
 from .jsonld import extract_jobposting_facts
-from .logos import OrgLogoStore, normalize_org
+from .logos import OrgLogoStore, logo_from_page, normalize_org
 from .models import Opportunity, Provenance
 from .store import OpportunityStore
 
@@ -462,6 +466,16 @@ def enrich_store(
                             _fill("logo", "jsonld")
             elif result is not None:
                 fetch_failed = True
+
+        # stage: the employer logo the apply page displays, for the many ATS
+        # pages that carry one without publishing JSON-LD (deterministic, and
+        # free — the page body is already in hand)
+        if need["logo"] and page_body is not None:
+            page_logo = logo_from_page(page_body)
+            if page_logo and logos.set(
+                opp.organization, page_logo, source=opp.apply_url
+            ):
+                _fill("logo", "page")
 
         # stage: LLM page extract, only for rows the ladder left empty
         if (

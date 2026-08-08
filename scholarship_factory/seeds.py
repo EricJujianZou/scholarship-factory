@@ -21,6 +21,7 @@ class SeedType(str, Enum):
     DEVPOST = "devpost"
     SIMPLIFY = "simplify"  # SimplifyJobs listings.json — deterministic, no LLM
     VANSH = "vansh"  # vanshb03 listings.json (Simplify-style schema subset) — deterministic, no LLM
+    ZSHAH = "zshah"  # zshah101 jobs.json (crawler board, carries pay) — deterministic, no LLM
     INSTAGRAM = "instagram"  # auth-walled — deferred to its own session
     X = "x"  # auth-walled — deferred to its own session
 

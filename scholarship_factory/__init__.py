@@ -13,7 +13,7 @@ from .feedback import Decision, DecisionStore, DecisionVerdict, PreferenceStore
 from .fetch import FetchResult, fetch_url
 from .identity import find_duplicate, merge_into
 from .jsonld import JobPostingFacts, extract_jobposting_facts, extract_jsonld
-from .logos import OrgLogoStore, normalize_org
+from .logos import OrgLogoStore, logo_from_page, normalize_org
 from .models import Opportunity, Provenance
 from .paginate import DEFAULT_MAX_PAGES, next_page_url
 from .parse_dates import parse_deadline_dates, typed_deadlines
@@ -27,6 +27,7 @@ from .seeds import Seed, SeedType, load_seeds
 from .simplify import parse_simplify
 from .store import OpportunityStore
 from .vansh import parse_vansh
+from .zshah import parse_zshah
 from .traverse import TRAVERSE_PAGE_CAP, LinkOutcome, TraverseReport, TraverseResult, traverse
 from .urls import normalize_apply_url
 
@@ -60,6 +61,7 @@ __all__ = [
     "load_seeds",
     "parse_simplify",
     "parse_vansh",
+    "parse_zshah",
     "FetchTarget",
     "AdapterPlan",
     "SkipReason",
@@ -112,4 +114,5 @@ __all__ = [
     "extract_jobposting_facts",
     "OrgLogoStore",
     "normalize_org",
+    "logo_from_page",
 ]

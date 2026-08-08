@@ -317,3 +317,56 @@ with the explanation next to the button. What that settled into:
 Still true: the UI never writes a fact about an opportunity. It writes the
 owner's own input (profile, decisions) and it starts commands. Facts come only
 from extraction.
+
+## Settled design — the daily dispatcher (owner decision, 2026-08-08)
+
+The owner asked for a backend that widens and then *keeps growing on its own*,
+with pay and logos reaching the public cards. `sf poll` already existed as one
+unattended pass; what was missing was anything to run it, and anything to carry
+the result to the site.
+
+**Locked decisions:**
+
+- **The dispatcher is Windows Task Scheduler, not a service or a cloud job.**
+  It runs under the owner's account, which is what gives it the `.env` key, the
+  local SQLite file, and the SSH agent needed to push. The alternative —
+  GitHub Actions — was rejected because it would mean committing the database
+  to a repo and making the provider key a repo secret, a much larger change to
+  where state lives, for a machine that is on most days anyway.
+  `-StartWhenAvailable` covers the days it isn't: a missed run happens at the
+  next wake rather than being skipped.
+- **The daily run ends in a deploy.** `scripts/daily.ps1` is
+  poll → enrich → splice → `git push`. Auto-push was the owner's call: a chain
+  that stops before the push only updates the site on days the owner remembers,
+  which is the thing the dispatcher exists to fix. The blast radius is bounded
+  by the splice contract — only the embedded data line of `index.html` changes.
+  A failed splice stops before the push, so a bad run leaves yesterday's page
+  standing rather than replacing it with a broken one.
+- **The dispatcher composes CLI commands and defines nothing.** Same principle
+  as the dashboard: a scheduled task is a label on commands that already exist
+  and are already tested. No behaviour lives in PowerShell.
+- **Growth comes from boards that crawl for us.** Genuinely scouring the open
+  web for new postings every day is the expensive path — every fetched page is
+  an LLM call. Three community boards (Simplify, vanshb03, **zshah101**) already
+  crawl ATS boards continuously and publish JSON; re-fetching them is one
+  request each and zero LLM calls. The agentic crawl stays for the sources no
+  board covers (scholarships, fellowships), where judgment is the point.
+- **zshah101 was added because it carries facts the other boards don't** — a
+  stated `salary` on ~23% of its rows, and a machine-read `posted_at`. Since a
+  dedup hit *merges* rather than discards, its salaries backfill rows that
+  arrived earlier from Simplify and vansh. Its `docs/api/jobs.json` (open roles)
+  is the file read, not `data/jobs.json` (which includes the closed archive).
+- **A logo is read, never guessed.** Deriving one from the company name, or
+  from a favicon service keyed on the apply host, would stamp a wrong brand on
+  a card — the visual equivalent of a fabricated deadline. So the logo stage is
+  an allowlist: JSON-LD `hiringOrganization.logo`, plus `og:image` on the two
+  hosts confirmed to serve the *employer's* logo (Greenhouse's `/logos/`
+  uploads, Lever's client-logo bucket). A careers banner or an ATS favicon is
+  not a logo and is left absent. Logos are keyed by company, so one page fills
+  every card for that company; nothing is re-hosted, the site hotlinks.
+
+**Known open:** two of the three LLM-crawled URL seeds
+(`opportunitydesk.org`, `opportunitiesforyouth.org`) are in `site.toml`'s
+`retired_sources`, so the daily run spends LLM calls crawling pages that never
+reach the public site. Either re-enable them on the site or disable the seeds;
+paying for both is the one thing that makes no sense.

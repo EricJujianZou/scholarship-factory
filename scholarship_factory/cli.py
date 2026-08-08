@@ -340,7 +340,7 @@ def _cmd_enrich(
     for outcome in ("filled", "no_fact", "unreachable"):
         if report.outcomes.get(outcome):
             print(f"  {outcome}: {report.outcomes[outcome]}")
-    for stage in ("ats", "jsonld", "llm"):
+    for stage in ("ats", "jsonld", "page", "llm"):
         fills = report.fills.get(stage)
         if fills:
             facts = ", ".join(f"{fact}={n}" for fact, n in sorted(fills.items()))

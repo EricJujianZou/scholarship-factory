@@ -21,6 +21,7 @@ from .seeds import Seed, SeedType
 from .simplify import parse_simplify
 from .store import OpportunityStore
 from .vansh import parse_vansh
+from .zshah import parse_zshah
 from .traverse import TRAVERSE_PAGE_CAP, TraverseReport, TraverseResult, traverse
 from .urls import normalize_apply_url
 
@@ -138,6 +139,7 @@ def run_sourcing(
 _BOARD_PARSERS = {
     SeedType.SIMPLIFY: ("simplify", parse_simplify),
     SeedType.VANSH: ("vansh", parse_vansh),
+    SeedType.ZSHAH: ("zshah", parse_zshah),
 }
 
 
