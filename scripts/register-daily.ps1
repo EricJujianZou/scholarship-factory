@@ -20,8 +20,15 @@ param(
 $script = Join-Path $PSScriptRoot "daily.ps1"
 if (-not (Test-Path $script)) { throw "daily.ps1 not found next to this script" }
 
+# Prefer the WindowsApps launcher over `(Get-Command pwsh).Source`: on an MSIX
+# install the latter resolves to a version-stamped path
+# (…Microsoft.PowerShell_7.6.4.0_x64…) that stops existing at the next
+# PowerShell update, silently breaking the task. The launcher is stable.
+$launcher = Join-Path $env:LOCALAPPDATA "Microsoft\WindowsApps\pwsh.exe"
+if (-not (Test-Path $launcher)) { $launcher = (Get-Command pwsh).Source }
+
 $action = New-ScheduledTaskAction `
-    -Execute (Get-Command pwsh).Source `
+    -Execute $launcher `
     -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$script`"" `
     -WorkingDirectory (Split-Path -Parent $PSScriptRoot)
 
